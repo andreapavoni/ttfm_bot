@@ -1,10 +1,10 @@
-# TTFM Bot
+# TTFM Bot
 
 A bot to bring some fun and utils on [turntable.fm](https://turntable.fm) rooms.
 
 It's based on [alaingilbert/ttapi](https://github.com/alaingilbert/ttapi), a Golang library to build bots for Turntable.fm.
 
-## Installation and setup
+## Installation and setup
 
 **IMPORTANT: Requires Go >= 1.18beta1**
 
@@ -78,6 +78,6 @@ Bot can obey to moderators commands, however it depends by the kind of command i
 
 ### Rooms
 
-- [Disco Clubbin](https://turntable.fm/disco_clubbing) (here you can find this bot running)
+- [Disco Clubbing](https://turntable.fm/disco_clubbing) (here you can find this bot running)
 - [Aunt Jackie](https://turntable.fm/aunt_jackie)
 - [I ❤️ The 80's](https://turntable.fm/i_the_80s)
