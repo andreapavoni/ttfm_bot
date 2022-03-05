@@ -72,7 +72,7 @@ func onNewSong(b Bot, e ttapi.NewSongEvt) {
 		"up":     b.room.song.up,
 		"down":   b.room.song.down,
 		"snag":   b.room.song.snag,
-	}).Info("ROOM:NEW_SONG last song stats")
+	}).Info("ROOM:LAST_SONG_STATS")
 
 	b.room.UpdateModerators(e.Room.Metadata.ModeratorID)
 	song := e.Room.Metadata.CurrentSong
@@ -84,7 +84,7 @@ func onNewSong(b Bot, e ttapi.NewSongEvt) {
 		"song":   song.Metadata.Song,
 		"artist": song.Metadata.Artist,
 		"length": song.Metadata.Length,
-	}).Info("ROOM:NEW_SONG new song")
+	}).Info("ROOM:NEW_SONG")
 
 	utils.ExecuteDelayedRandom(20, b.Bop)
 

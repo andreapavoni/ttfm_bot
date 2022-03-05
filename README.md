@@ -8,11 +8,11 @@ It's based on [alaingilbert/ttapi](https://github.com/alaingilbert/ttapi), a Gol
 
 **IMPORTANT: Requires Go >= 1.18beta1**
 
-- Install the package with `go get https://github.com/andreapavoni/ttfm_bot/`
-- Set environment varables (see below)
-- Run with `ttfm_bot`
+- Install the package with `go install https://github.com/andreapavoni/ttfm_bot/`
+- Set environment variables (see below) on the host you want to run the bot
+- Run with `$GOPATH/bin/ttfm_bot`
 
-### Configuration
+### Configuration settings
 
 #### Mandatory
 
@@ -20,7 +20,7 @@ It's based on [alaingilbert/ttapi](https://github.com/alaingilbert/ttapi), a Gol
 - `TTFM_API_USER_ID`: User ID for the user
 - `TTFM_API_ROOM_ID`: ID of the room to join
 
-#### Optional
+#### Optional (with defaults)
 
 - `TTFM_ADMINS` (default: empty): a list of comma-separated usernames
 - `TTFM_AUTO_SNAG` (default: false): wether the bot should snag every song played by others
@@ -58,20 +58,20 @@ Users are the lowest role, basically are listeners or want to DJ
 
 Admins are users which were previously configured on the bot to run commands on it.
 
-- `!autodj` if autodj is enabled, it tells the bot to jump on the stage and starts playing songs
-- `!autodj+` and - `!autodj-` respectively enables/disables autodj mode
+- `!dj` tells the bot to jump on the stage and starts playing songs
+- `!autodj+` and `!autodj-` respectively enables/disables autodj mode
 - `!snag` tells the bot to snag the current playing song
-- `!autosnag+` and - `!autosnag-` respectively enables/disables automatic snag
+- `!autosnag+` and `!autosnag-` respectively enables/disables automatic snag
 - `!bop` tells the bot to bop for the current playing song
-- `!autobop+` and - `!autobop-` respectively enables/disables automatic bop
-- `!fan username` and - `!unfan username` respectively fan/unfan the specified `username`
+- `!autobop+` and `!autobop-` respectively enables/disables automatic bop
+- `!fan username` and `!unfan username` respectively fan/unfan the specified `username`
 
 ### Moderators
 
 Bot can obey to moderators commands, however it depends by the kind of command issued and by the bot's role in the current room.
 
-- `!skip` bot to skip the current playing song (_Coming soon_)
-- `!escort username` tells the bot to escort the specified `username` off the stage (_Coming soon_)
+- `!skip` tells the bot to skip the current playing song
+- `!escort username` tells the bot to escort the specified `username` off the stage
 - `!kick username` tells the bot to kick the specified `username` off the room (_Coming soon_)
 
 ## Credits

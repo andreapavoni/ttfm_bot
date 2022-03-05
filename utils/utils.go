@@ -93,3 +93,12 @@ func ExecuteDelayedRandom(max int, f func()) {
 	logrus.WithField("waitTime", waitTime).Debug("Scheduling delayed action")
 	time.AfterFunc(waitTime, f)
 }
+
+// Time formatting
+func FormatSecondsToMinutes(secs int) string {
+	var minutes = secs / 60
+	var seconds = secs - minutes*60
+
+	return fmt.Sprintf("%02d:%02d", minutes, seconds)
+
+}

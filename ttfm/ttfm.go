@@ -171,6 +171,10 @@ func (b *Bot) Bop() {
 	}
 }
 
+func (b *Bot) SkipSong() {
+	b.api.Skip()
+}
+
 func (b *Bot) ToggleAutoBop() bool {
 	b.config.AutoBop = !b.config.AutoBop
 	return b.config.AutoBop
