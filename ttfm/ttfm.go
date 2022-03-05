@@ -166,7 +166,7 @@ func (b *Bot) ToggleAutoSnag() bool {
 }
 
 func (b *Bot) Bop() {
-	if !b.config.AutoBop && b.room.song.djId != b.config.UserId {
+	if b.room.song.djId != b.config.UserId {
 		b.api.Bop()
 	}
 }

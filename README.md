@@ -14,22 +14,26 @@ It's based on [alaingilbert/ttapi](https://github.com/alaingilbert/ttapi), a Gol
 
 ### Configuration
 
-`TTFM_API_AUTH`: the API key to connect to Turntables.fm
-`TTFM_API_USER_ID`: User ID for the user
-`TTFM_API_ROOM_ID`: lorem ipsum dolor sit
+#### Mandatory
 
-`TTFM_ADMINS` (default: empty): a list of comma-separated usernames
-`TTFM_AUTO_SNAG` (default: false): wether the bot should snag every song played by others
-`TTFM_AUTO_BOP` (default: true): wether the bot should bop every song played by others
-`TTFM_AUTO_DJ` (default: false): if none is playing, then the bot will automatically jump on the stage
-`TTFM_AUTO_QUEUE` (default: false): joins queues managed by others
-`TTFM_AUTO_QUEUE_MSG` (default: empty): react when mentioned to join the stage (works with AutoDJ)
-`TTFM_AUTO_SHOW_SONG_STATS` (default: ): communicate to the room the stats of the last song played
-`TTFM_AUTO_WELCOME` (default: false): welcomes every user that joins the room
-`TTFM_MOD_QUEUE` (default: false): enables queueing when the room is crowded with aspiring DJs
-`TTFM_MOD_SONGS_MAX_DURATION` (default: 0): duration limit of the song in minutes (0 means disabled)
-`TTFM_DEFAULT_PLAYLIST` (default: "default"): which playlist should use the bot (for snag or DJ)
-`TTFM_SET_BOT` (default: false): tells the server that this is a bot
+- `TTFM_API_AUTH`: the API key to connect to Turntables.fm
+- `TTFM_API_USER_ID`: User ID for the user
+- `TTFM_API_ROOM_ID`: ID of the room to join
+
+#### Optional
+
+- `TTFM_ADMINS` (default: empty): a list of comma-separated usernames
+- `TTFM_AUTO_SNAG` (default: false): wether the bot should snag every song played by others
+- `TTFM_AUTO_BOP` (default: true): wether the bot should bop every song played by others
+- `TTFM_AUTO_DJ` (default: false): if none is playing, then the bot will automatically jump on the stage
+- `TTFM_AUTO_QUEUE` (default: false): joins queues managed by others
+- `TTFM_AUTO_QUEUE_MSG` (default: empty): react when mentioned to join the stage (works with AutoDJ)
+- `TTFM_AUTO_SHOW_SONG_STATS` (default: ): communicate to the room the stats of the last song played
+- `TTFM_AUTO_WELCOME` (default: false): welcomes every user that joins the room
+- `TTFM_MOD_QUEUE` (default: false): enables queueing when the room is crowded with aspiring DJs
+- `TTFM_MOD_SONGS_MAX_DURATION` (default: 0): duration limit of the song in minutes (0 means disabled)
+- `TTFM_DEFAULT_PLAYLIST` (default: "default"): which playlist should use the bot (for snag or DJ)
+- `TTFM_SET_BOT` (default: false): tells the server that this is a bot
 
 ## Commands
 

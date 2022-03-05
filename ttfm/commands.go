@@ -204,7 +204,7 @@ var commands = map[string]CommandHandler{
 }
 
 func parseCommand(msg string) (string, []string, error) {
-	re := regexp.MustCompile(`(?P<cmd>![a-zA-Z!?]+)(?P<args>\s?(.*)?)`)
+	re := regexp.MustCompile(`(?P<cmd>![a-zA-Z+\-!?]+)(?P<args>\s?(.*)?)`)
 	matches := re.FindStringSubmatch(msg)
 
 	if cmdIndex := re.SubexpIndex("cmd"); cmdIndex >= 0 && len(matches) > cmdIndex {
@@ -271,7 +271,7 @@ func handleCommandPm(b Bot, e ttapi.PmmedEvt) {
 			"args":     args,
 			"userId":   e.SenderID,
 			"userName": userName,
-		}).Info("MSG:ROOM:CMD")
+		}).Info("MSG:PM:CMD")
 
 		msg, user, err := handler(&b, e.SenderID, args...)
 
