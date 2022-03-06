@@ -10,8 +10,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type CommandHandlerSpeak func(*Bot, ttapi.SpeakEvt, ...string)
-type CommandHandlerPm func(*Bot, ttapi.PmmedEvt, ...string)
 type CommandHandler func(*Bot, string, ...string) (string, *User, error)
 
 var commands = map[string]CommandHandler{
@@ -22,8 +20,12 @@ var commands = map[string]CommandHandler{
 			return "", user, err
 		}
 
+		if err := requireBotModerator(b, userId); err != nil {
+			return "", user, err
+		}
+
 		if len(args) < 1 {
-			return "", user, errors.New("You must specify the username ofr the user you want to escort")
+			return "", user, errors.New("You must specify the username of the user you want to escort")
 		}
 
 		escortedUserName := strings.Join(args, " ")
@@ -33,7 +35,7 @@ var commands = map[string]CommandHandler{
 			return "", user, errors.New("I can't find the user you want to escort: @" + escortedUserName)
 		}
 
-		if err := b.api.BecomeFan(escortedUserId); err == nil {
+		if err := b.EscortDj(escortedUserId); err != nil {
 			return "", user, errors.New("I failed to escort @" + escortedUserName)
 		}
 
@@ -46,6 +48,8 @@ var commands = map[string]CommandHandler{
 		if err := requireBotModerator(b, userId); err != nil {
 			return "", user, err
 		}
+
+		b.AddDjEscorting(userId)
 		return "I'm going to escort you after your next song has been played", user, nil
 	},
 	"!dj": func(b *Bot, userId string, args ...string) (string, *User, error) {
@@ -127,7 +131,6 @@ var commands = map[string]CommandHandler{
 		if err := requireAdmin(b, userId); err != nil {
 			return "", user, err
 		}
-
 		b.Bop()
 		return "", user, nil
 	},
@@ -178,6 +181,10 @@ var commands = map[string]CommandHandler{
 		userName := b.room.UserNameFromId(userId)
 		user := &User{Id: userId, Name: userName}
 		if err := requireAdmin(b, userId); err != nil {
+			return "", user, err
+		}
+
+		if err := requireBotModerator(b, userId); err != nil {
 			return "", user, err
 		}
 
@@ -264,13 +271,21 @@ func parseCommand(msg string) (string, []string, error) {
 	}
 }
 
-func handleCommandSpeak(b Bot, e ttapi.SpeakEvt) {
+func handleCommandSpeak(b *Bot, e ttapi.SpeakEvt) {
 	if cmd, args, err := parseCommand(e.Text); err == nil {
 		handler, err := b.recognizeCommand(cmd)
 
 		if err != nil {
 			userName := b.room.UserNameFromId(e.UserID)
 			b.RoomMessage("@" + userName + " " + err.Error())
+			logrus.WithFields(logrus.Fields{
+				"text":     e.Text,
+				"cmd":      cmd,
+				"args":     args,
+				"userId":   e.UserID,
+				"userName": e.Name,
+			}).Info("MSG:ROOM:CMD:ERR")
+			return
 		}
 
 		logrus.WithFields(logrus.Fields{
@@ -281,7 +296,7 @@ func handleCommandSpeak(b Bot, e ttapi.SpeakEvt) {
 			"userName": e.Name,
 		}).Info("MSG:ROOM:CMD")
 
-		msg, user, err := handler(&b, e.UserID, args...)
+		msg, user, err := handler(b, e.UserID, args...)
 
 		if msg != "" && err == nil {
 			b.RoomMessage("@" + user.Name + " " + msg)
@@ -297,14 +312,22 @@ func handleCommandSpeak(b Bot, e ttapi.SpeakEvt) {
 	logrus.WithFields(logrus.Fields{"text": e.Text, "userId": e.UserID, "userName": e.Name}).Info("MSG:ROOM")
 }
 
-func handleCommandPm(b Bot, e ttapi.PmmedEvt) {
+func handleCommandPm(b *Bot, e ttapi.PmmedEvt) {
 	userName := b.room.UserNameFromId(e.SenderID)
 
 	if cmd, args, err := parseCommand(e.Text); err == nil {
 		handler, err := b.recognizeCommand(cmd)
 
 		if err != nil {
-			b.PrivateMessage(userName, err.Error())
+			b.PrivateMessage(e.SenderID, err.Error())
+			logrus.WithFields(logrus.Fields{
+				"text":     e.Text,
+				"cmd":      cmd,
+				"args":     args,
+				"userId":   e.SenderID,
+				"userName": userName,
+			}).Info("MSG:PM:CMD:ERR")
+			return
 		}
 
 		logrus.WithFields(logrus.Fields{
@@ -315,14 +338,14 @@ func handleCommandPm(b Bot, e ttapi.PmmedEvt) {
 			"userName": userName,
 		}).Info("MSG:PM:CMD")
 
-		msg, user, err := handler(&b, e.SenderID, args...)
+		msg, _, err := handler(b, e.SenderID, args...)
 
 		if msg != "" && err == nil {
-			b.PrivateMessage(user.Id, msg)
+			b.PrivateMessage(e.SenderID, msg)
 		}
 
 		if err != nil {
-			b.PrivateMessage(user.Id, err.Error())
+			b.PrivateMessage(e.SenderID, err.Error())
 		}
 
 		return

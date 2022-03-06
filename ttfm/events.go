@@ -8,7 +8,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func onReady(b Bot) {
+func onReady(b *Bot) {
 	logrus.Info("BOT:READY")
 
 	if roomInfo, err := b.GetRoomInfo(); err == nil {
@@ -22,7 +22,7 @@ func onReady(b Bot) {
 	}
 }
 
-func onRoomChanged(b Bot, e ttapi.RoomInfoRes) {
+func onRoomChanged(b *Bot, e ttapi.RoomInfoRes) {
 	logrus.WithFields(logrus.Fields{
 		"room":       e.Room.Name,
 		"moderators": e.Room.Metadata.ModeratorID,
@@ -49,14 +49,14 @@ func onRoomChanged(b Bot, e ttapi.RoomInfoRes) {
 	}
 }
 
-func onNewSong(b Bot, e ttapi.NewSongEvt) {
+func onNewSong(b *Bot, e ttapi.NewSongEvt) {
 	if b.config.AutoShowSongStats {
 		b.ShowSongStats()
 	}
 
 	if b.escorting.HasElement(b.room.song.djId) {
-		b.RemoveDjEscorting(b.room.song.djId)
 		b.EscortDj(b.room.song.djId)
+		b.RemoveDjEscorting(b.room.song.djId)
 	}
 
 	if b.room.song.djId == b.config.UserId {
@@ -95,7 +95,7 @@ func onNewSong(b Bot, e ttapi.NewSongEvt) {
 	}
 }
 
-func onUpdateVotes(b Bot, e ttapi.UpdateVotesEvt) {
+func onUpdateVotes(b *Bot, e ttapi.UpdateVotesEvt) {
 	b.room.song.UpdateStats(e.Room.Metadata.Upvotes, e.Room.Metadata.Downvotes, b.room.song.snag)
 	userId, vote := b.room.song.UnpackVotelog(e.Room.Metadata.Votelog)
 
@@ -109,7 +109,7 @@ func onUpdateVotes(b Bot, e ttapi.UpdateVotesEvt) {
 	}).Info("SONG:VOTE")
 }
 
-func onSnagged(b Bot, e ttapi.SnaggedEvt) {
+func onSnagged(b *Bot, e ttapi.SnaggedEvt) {
 	b.room.song.UpdateStats(b.room.song.up, b.room.song.down, b.room.song.snag+1)
 
 	logrus.WithFields(logrus.Fields{
@@ -119,7 +119,7 @@ func onSnagged(b Bot, e ttapi.SnaggedEvt) {
 	}).Info("SONG:SNAG")
 }
 
-func onRegistered(b Bot, e ttapi.RegisteredEvt) {
+func onRegistered(b *Bot, e ttapi.RegisteredEvt) {
 	u := e.User[0]
 	if u.ID == b.config.UserId {
 		return
@@ -142,15 +142,13 @@ func onRegistered(b Bot, e ttapi.RegisteredEvt) {
 	}).Info("ROOM:USER_JOINED")
 }
 
-func onDeregistered(b Bot, e ttapi.DeregisteredEvt) {
+func onDeregistered(b *Bot, e ttapi.DeregisteredEvt) {
 	u := e.User[0]
 	if u.ID == b.config.UserId {
 		return
 	}
 
-	if b.room.djs.HasElement(u.ID) {
-		b.room.RemoveDj(u.ID)
-	}
+	b.room.RemoveDj(u.ID)
 	b.room.RemoveUser(u.ID)
 	b.RemoveDjEscorting(b.room.song.djId)
 
@@ -162,7 +160,7 @@ func onDeregistered(b Bot, e ttapi.DeregisteredEvt) {
 	}).Info("ROOM:USER_LEFT")
 }
 
-func onAddDj(b Bot, e ttapi.AddDJEvt) {
+func onAddDj(b *Bot, e ttapi.AddDJEvt) {
 	u := e.User[0]
 	b.room.AddDj(u.Userid)
 
@@ -172,13 +170,13 @@ func onAddDj(b Bot, e ttapi.AddDJEvt) {
 	}).Info("STAGE:DJ_JOINED")
 }
 
-func onRemDj(b Bot, e ttapi.RemDJEvt) {
+func onRemDj(b *Bot, e ttapi.RemDJEvt) {
 	u := e.User[0]
 	b.room.RemoveDj(u.Userid)
 	b.RemoveDjEscorting(u.Userid)
 
 	if b.config.AutoDj && u.Userid == b.config.UserId && e.Modid != "" {
-		b.config.AutoDj = false
+		b.ToggleAutoDj()
 		return
 	}
 

@@ -54,21 +54,21 @@ func Start(c Config) {
 	}
 
 	// Commands
-	bot.api.OnSpeak(func(e ttapi.SpeakEvt) { handleCommandSpeak(bot, e) })
-	bot.api.OnPmmed(func(e ttapi.PmmedEvt) { handleCommandPm(bot, e) })
+	bot.api.OnSpeak(func(e ttapi.SpeakEvt) { handleCommandSpeak(&bot, e) })
+	bot.api.OnPmmed(func(e ttapi.PmmedEvt) { handleCommandPm(&bot, e) })
 
 	// Room events
-	bot.api.OnReady(func() { onReady(bot) })
-	bot.api.OnRoomChanged(func(e ttapi.RoomInfoRes) { onRoomChanged(bot, e) })
-	bot.api.OnRegistered(func(e ttapi.RegisteredEvt) { onRegistered(bot, e) })
-	bot.api.OnDeregistered(func(e ttapi.DeregisteredEvt) { onDeregistered(bot, e) })
-	bot.api.OnUpdateVotes(func(e ttapi.UpdateVotesEvt) { onUpdateVotes(bot, e) })
-	bot.api.OnSnagged(func(e ttapi.SnaggedEvt) { onSnagged(bot, e) })
+	bot.api.OnReady(func() { onReady(&bot) })
+	bot.api.OnRoomChanged(func(e ttapi.RoomInfoRes) { onRoomChanged(&bot, e) })
+	bot.api.OnRegistered(func(e ttapi.RegisteredEvt) { onRegistered(&bot, e) })
+	bot.api.OnDeregistered(func(e ttapi.DeregisteredEvt) { onDeregistered(&bot, e) })
+	bot.api.OnUpdateVotes(func(e ttapi.UpdateVotesEvt) { onUpdateVotes(&bot, e) })
+	bot.api.OnSnagged(func(e ttapi.SnaggedEvt) { onSnagged(&bot, e) })
 
 	// DJing
-	bot.api.OnRemDJ(func(e ttapi.RemDJEvt) { onRemDj(bot, e) })
-	bot.api.OnAddDJ(func(e ttapi.AddDJEvt) { onAddDj(bot, e) })
-	bot.api.OnNewSong(func(e ttapi.NewSongEvt) { onNewSong(bot, e) })
+	bot.api.OnRemDJ(func(e ttapi.RemDJEvt) { onRemDj(&bot, e) })
+	bot.api.OnAddDJ(func(e ttapi.AddDJEvt) { onAddDj(&bot, e) })
+	bot.api.OnNewSong(func(e ttapi.NewSongEvt) { onNewSong(&bot, e) })
 	bot.api.Start()
 }
 
