@@ -253,7 +253,7 @@ var commands = map[string]CommandHandler{
 }
 
 func parseCommand(msg string) (string, []string, error) {
-	re := regexp.MustCompile(`(?P<cmd>![a-zA-Z+\-!?]+)(?P<args>\s?(.*)?)`)
+	re := regexp.MustCompile(`(?P<cmd>^![a-zA-Z+\-!?]+)(?P<args>\s?(.*)?)`)
 	matches := re.FindStringSubmatch(msg)
 
 	if cmdIndex := re.SubexpIndex("cmd"); cmdIndex >= 0 && len(matches) > cmdIndex {
