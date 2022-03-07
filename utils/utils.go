@@ -11,18 +11,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// Yeah generics!
-func IndexOf[T comparable](value T, collection []T) int {
-	for idx, element := range collection {
-		if element == value {
-			return idx
-		}
-	}
-	return -1
-}
-
 // String helpers
-
 func StringToSlice(str string, separator string) (list []string) {
 	for _, v := range strings.Split(str, separator) {
 		list = append(list, strings.Trim(v, " "))

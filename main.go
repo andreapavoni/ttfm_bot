@@ -21,7 +21,7 @@ func main() {
 		ModQueue:            utils.GetEnvBoolOrDefault("TTFM_MOD_QUEUE", false),
 		ModSongsMaxDuration: utils.GetEnvIntOrDefault("TTFM_MOD_SONGS_MAX_DURATION", 10),
 		ModSongsMaxPerDj:    utils.GetEnvIntOrDefault("TTFM_MOD_SONGS_MAX_DURATION", 0),
-		DefaultPlaylist:     utils.GetEnvOrDefault("TTFM_DEFAULT_PLAYLIST", "default"),
+		CurrentPlaylist:     utils.GetEnvOrDefault("TTFM_DEFAULT_PLAYLIST", "default"),
 		SetBot:              utils.GetEnvBoolOrDefault("TTFM_SET_BOT", false),
 	})
 }

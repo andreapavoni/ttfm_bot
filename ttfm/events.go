@@ -11,15 +11,19 @@ import (
 func onReady(b *Bot) {
 	logrus.Info("BOT:READY")
 
-	if roomInfo, err := b.GetRoomInfo(); err == nil {
-		b.room.Update(roomInfo)
-
-		if b.config.SetBot {
-			utils.ExecuteDelayedRandom(30, func() { b.api.SetBot() })
-		}
-	} else {
-		logrus.WithError(err).Error("BOT:READY Unable to get RoomInfo")
+	roomInfo, err := b.GetRoomInfo()
+	if err != nil {
+		logrus.WithError(err).Error("BOT:READY:ERR")
 	}
+
+	b.room.Update(roomInfo)
+
+	if b.config.SetBot {
+		utils.ExecuteDelayedRandom(30, func() { b.api.SetBot() })
+	}
+
+	b.LoadPlaylists()
+	b.SwitchPlaylist(b.config.CurrentPlaylist)
 }
 
 func onRoomChanged(b *Bot, e ttapi.RoomInfoRes) {
@@ -60,7 +64,7 @@ func onNewSong(b *Bot, e ttapi.NewSongEvt) {
 	}
 
 	if b.room.song.djId == b.config.UserId {
-		b.PushSongBottom()
+		b.PushSongBottomPlaylist()
 	}
 
 	logrus.WithFields(logrus.Fields{
@@ -98,6 +102,7 @@ func onNewSong(b *Bot, e ttapi.NewSongEvt) {
 func onUpdateVotes(b *Bot, e ttapi.UpdateVotesEvt) {
 	b.room.song.UpdateStats(e.Room.Metadata.Upvotes, e.Room.Metadata.Downvotes, b.room.song.snag)
 	userId, vote := b.room.song.UnpackVotelog(e.Room.Metadata.Votelog)
+	user, _ := b.UserFromId(userId)
 
 	logrus.WithFields(logrus.Fields{
 		"up":        e.Room.Metadata.Upvotes,
@@ -105,16 +110,17 @@ func onUpdateVotes(b *Bot, e ttapi.UpdateVotesEvt) {
 		"listeners": e.Room.Metadata.Listeners,
 		"userID":    userId,
 		"vote":      vote,
-		"name":      b.room.UserNameFromId(userId),
+		"name":      user.Name,
 	}).Info("SONG:VOTE")
 }
 
 func onSnagged(b *Bot, e ttapi.SnaggedEvt) {
 	b.room.song.UpdateStats(b.room.song.up, b.room.song.down, b.room.song.snag+1)
+	user, _ := b.UserFromId(e.UserID)
 
 	logrus.WithFields(logrus.Fields{
 		"userID": e.UserID,
-		"name":   b.room.UserNameFromId(e.UserID),
+		"name":   user.Name,
 		"roomID": e.RoomID,
 	}).Info("SONG:SNAG")
 }
@@ -127,8 +133,11 @@ func onRegistered(b *Bot, e ttapi.RegisteredEvt) {
 
 	b.room.AddUser(u.ID, u.Name)
 
-	if b.config.ModAutoWelcome && b.room.UserIsModerator(b.config.UserId) {
-		msg := fmt.Sprintf("Hey @%s, welcome :)", b.room.UserNameFromId(u.ID))
+	user, _ := b.UserFromId(u.ID)
+	botUser, _ := b.UserFromId(b.config.UserId)
+
+	if b.config.ModAutoWelcome && b.UserIsModerator(botUser) {
+		msg := fmt.Sprintf("Hey @%s, welcome :)", user.Name)
 		b.RoomMessage(msg)
 	}
 

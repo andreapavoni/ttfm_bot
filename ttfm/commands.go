@@ -14,13 +14,12 @@ type CommandHandler func(*Bot, string, ...string) (string, *User, error)
 
 var commands = map[string]CommandHandler{
 	"!escort": func(b *Bot, userId string, args ...string) (string, *User, error) {
-		userName := b.room.UserNameFromId(userId)
-		user := &User{Id: userId, Name: userName}
-		if err := requireAdmin(b, userId); err != nil {
+		user, _ := b.UserFromId(userId)
+		if err := requireAdmin(b, user); err != nil {
 			return "", user, err
 		}
 
-		if err := requireBotModerator(b, userId); err != nil {
+		if err := requireBotModerator(b, user); err != nil {
 			return "", user, err
 		}
 
@@ -29,23 +28,22 @@ var commands = map[string]CommandHandler{
 		}
 
 		escortedUserName := strings.Join(args, " ")
-		escortedUserId, err := b.api.GetUserID(escortedUserName)
+		escortedUser, err := b.UserFromName(escortedUserName)
 
 		if err != nil {
 			return "", user, errors.New("I can't find the user you want to escort: @" + escortedUserName)
 		}
 
-		if err := b.EscortDj(escortedUserId); err != nil {
+		if err := b.EscortDj(escortedUser.Name); err != nil {
 			return "", user, errors.New("I failed to escort @" + escortedUserName)
 		}
 
 		return "", user, nil
 	},
 	"!escortme": func(b *Bot, userId string, args ...string) (string, *User, error) {
-		userName := b.room.UserNameFromId(userId)
-		user := &User{Id: userId, Name: userName}
+		user, _ := b.UserFromId(userId)
 
-		if err := requireBotModerator(b, userId); err != nil {
+		if err := requireBotModerator(b, user); err != nil {
 			return "", user, err
 		}
 
@@ -53,10 +51,9 @@ var commands = map[string]CommandHandler{
 		return "I'm going to escort you after your next song has been played", user, nil
 	},
 	"!dj": func(b *Bot, userId string, args ...string) (string, *User, error) {
-		userName := b.room.UserNameFromId(userId)
-		user := &User{Id: userId, Name: userName}
+		user, _ := b.UserFromId(userId)
 
-		if err := requireAdmin(b, userId); err != nil {
+		if err := requireAdmin(b, user); err != nil {
 			return "", user, err
 		}
 
@@ -64,10 +61,9 @@ var commands = map[string]CommandHandler{
 		return "Ok, I'm going to spin some tracks on stage!", user, nil
 	},
 	"!autodj+": func(b *Bot, userId string, args ...string) (string, *User, error) {
-		userName := b.room.UserNameFromId(userId)
-		user := &User{Id: userId, Name: userName}
+		user, _ := b.UserFromId(userId)
 
-		if err := requireAdmin(b, userId); err != nil {
+		if err := requireAdmin(b, user); err != nil {
 			return "", user, err
 		}
 
@@ -80,9 +76,8 @@ var commands = map[string]CommandHandler{
 		}
 	},
 	"!autodj-": func(b *Bot, userId string, args ...string) (string, *User, error) {
-		userName := b.room.UserNameFromId(userId)
-		user := &User{Id: userId, Name: userName}
-		if err := requireAdmin(b, userId); err != nil {
+		user, _ := b.UserFromId(userId)
+		if err := requireAdmin(b, user); err != nil {
 			return "", user, err
 		}
 
@@ -95,9 +90,8 @@ var commands = map[string]CommandHandler{
 		}
 	},
 	"!autobop+": func(b *Bot, userId string, args ...string) (string, *User, error) {
-		userName := b.room.UserNameFromId(userId)
-		user := &User{Id: userId, Name: userName}
-		if err := requireAdmin(b, userId); err != nil {
+		user, _ := b.UserFromId(userId)
+		if err := requireAdmin(b, user); err != nil {
 			return "", user, err
 		}
 
@@ -111,9 +105,8 @@ var commands = map[string]CommandHandler{
 
 	},
 	"!autobop-": func(b *Bot, userId string, args ...string) (string, *User, error) {
-		userName := b.room.UserNameFromId(userId)
-		user := &User{Id: userId, Name: userName}
-		if err := requireAdmin(b, userId); err != nil {
+		user, _ := b.UserFromId(userId)
+		if err := requireAdmin(b, user); err != nil {
 			return "", user, err
 		}
 
@@ -126,18 +119,16 @@ var commands = map[string]CommandHandler{
 		}
 	},
 	"!bop": func(b *Bot, userId string, args ...string) (string, *User, error) {
-		userName := b.room.UserNameFromId(userId)
-		user := &User{Id: userId, Name: userName}
-		if err := requireAdmin(b, userId); err != nil {
+		user, _ := b.UserFromId(userId)
+		if err := requireAdmin(b, user); err != nil {
 			return "", user, err
 		}
 		b.Bop()
 		return "", user, nil
 	},
 	"!autosnag+": func(b *Bot, userId string, args ...string) (string, *User, error) {
-		userName := b.room.UserNameFromId(userId)
-		user := &User{Id: userId, Name: userName}
-		if err := requireAdmin(b, userId); err != nil {
+		user, _ := b.UserFromId(userId)
+		if err := requireAdmin(b, user); err != nil {
 			return "", user, err
 		}
 
@@ -146,13 +137,12 @@ var commands = map[string]CommandHandler{
 			msg := "I'm going to snag songs from now on"
 			return msg, user, nil
 		} else {
-			return "I already snag songs", user, nil
+			return "I'm already snagging songs", user, nil
 		}
 	},
 	"!autosnag-": func(b *Bot, userId string, args ...string) (string, *User, error) {
-		userName := b.room.UserNameFromId(userId)
-		user := &User{Id: userId, Name: userName}
-		if err := requireAdmin(b, userId); err != nil {
+		user, _ := b.UserFromId(userId)
+		if err := requireAdmin(b, user); err != nil {
 			return "", user, err
 		}
 
@@ -161,30 +151,28 @@ var commands = map[string]CommandHandler{
 			msg := "I won't snag songs anymore"
 			return msg, user, nil
 		} else {
-			return "I already don't snag songs", user, nil
+			return "I'm already not snagging songs", user, nil
 		}
 	},
 	"!snag": func(b *Bot, userId string, args ...string) (string, *User, error) {
-		userName := b.room.UserNameFromId(userId)
-		user := &User{Id: userId, Name: userName}
-		if err := requireAdmin(b, userId); err != nil {
+		user, _ := b.UserFromId(userId)
+		if err := requireAdmin(b, user); err != nil {
 			return "", user, err
 		}
 
 		if err := b.Snag(b.room.song.id); err == nil {
-			return "I did snag this song!", user, nil
+			return "I snagged this song!", user, nil
 		}
 
 		return "", user, errors.New("I've failed to snag this song")
 	},
 	"!skip": func(b *Bot, userId string, args ...string) (string, *User, error) {
-		userName := b.room.UserNameFromId(userId)
-		user := &User{Id: userId, Name: userName}
-		if err := requireAdmin(b, userId); err != nil {
+		user, _ := b.UserFromId(userId)
+		if err := requireAdmin(b, user); err != nil {
 			return "", user, err
 		}
 
-		if err := requireBotModerator(b, userId); err != nil {
+		if err := requireBotModerator(b, user); err != nil {
 			return "", user, err
 		}
 
@@ -193,9 +181,8 @@ var commands = map[string]CommandHandler{
 		return "", user, nil
 	},
 	"!fan": func(b *Bot, userId string, args ...string) (string, *User, error) {
-		userName := b.room.UserNameFromId(userId)
-		user := &User{Id: userId, Name: userName}
-		if err := requireAdmin(b, userId); err != nil {
+		user, _ := b.UserFromId(userId)
+		if err := requireAdmin(b, user); err != nil {
 			return "", user, err
 		}
 
@@ -204,13 +191,13 @@ var commands = map[string]CommandHandler{
 		}
 
 		fannedUserName := strings.Join(args, " ")
-		fannedUserId, err := b.api.GetUserID(fannedUserName)
+		fannedUser, err := b.UserFromName(fannedUserName)
 
 		if err != nil {
 			return "", user, errors.New("I can't find the user you want to fan: @" + fannedUserName)
 		}
 
-		if err := b.api.BecomeFan(fannedUserId); err == nil {
+		if err := b.Fan(fannedUser.Id); err == nil {
 			return "", user, errors.New("I failed to fan @" + fannedUserName)
 		}
 
@@ -218,9 +205,8 @@ var commands = map[string]CommandHandler{
 		return msg, user, nil
 	},
 	"!unfan": func(b *Bot, userId string, args ...string) (string, *User, error) {
-		userName := b.room.UserNameFromId(userId)
-		user := &User{Id: userId, Name: userName}
-		if err := requireAdmin(b, userId); err != nil {
+		user, _ := b.UserFromId(userId)
+		if err := requireAdmin(b, user); err != nil {
 			return "", user, err
 		}
 
@@ -228,23 +214,22 @@ var commands = map[string]CommandHandler{
 			return "", user, errors.New("You must specify the username ofr the user you want to become a fan")
 		}
 
-		fannedUserName := strings.Join(args, " ")
-		fannedUserId, err := b.api.GetUserID(fannedUserName)
+		unfannedUserName := strings.Join(args, " ")
+		unfannedUser, err := b.UserFromName(unfannedUserName)
 
 		if err != nil {
 			return "", user, errors.New("I can't find the user you want to unfan")
 		}
 
-		if err := b.api.RemoveFan(fannedUserId); err != nil {
-			return "", user, errors.New("I failed to unfan @" + fannedUserName)
+		if err := b.Unfan(unfannedUser.Id); err != nil {
+			return "", user, errors.New("I failed to unfan @" + unfannedUserName)
 		}
 
-		msg := fmt.Sprintf("I'm not a fan of @%s anymore", fannedUserName)
+		msg := fmt.Sprintf("I'm not a fan of @%s anymore", unfannedUserName)
 		return msg, user, nil
 	},
 	"!props": func(b *Bot, userId string, args ...string) (string, *User, error) {
-		userName := b.room.UserNameFromId(userId)
-		user := &User{Id: userId, Name: userName}
+		user, _ := b.UserFromId(userId)
 
 		msg := fmt.Sprintf("🔥 Hey @%s! @%s is giving you props on the song you're playing! 💣", b.room.song.djName, user.Name)
 
@@ -276,8 +261,8 @@ func handleCommandSpeak(b *Bot, e ttapi.SpeakEvt) {
 		handler, err := b.recognizeCommand(cmd)
 
 		if err != nil {
-			userName := b.room.UserNameFromId(e.UserID)
-			b.RoomMessage("@" + userName + " " + err.Error())
+			user, _ := b.UserFromId(e.UserID)
+			b.RoomMessage("@" + user.Name + " " + err.Error())
 			logrus.WithFields(logrus.Fields{
 				"text":     e.Text,
 				"cmd":      cmd,
@@ -313,7 +298,7 @@ func handleCommandSpeak(b *Bot, e ttapi.SpeakEvt) {
 }
 
 func handleCommandPm(b *Bot, e ttapi.PmmedEvt) {
-	userName := b.room.UserNameFromId(e.SenderID)
+	user, _ := b.UserFromId(e.SenderID)
 
 	if cmd, args, err := parseCommand(e.Text); err == nil {
 		handler, err := b.recognizeCommand(cmd)
@@ -325,7 +310,7 @@ func handleCommandPm(b *Bot, e ttapi.PmmedEvt) {
 				"cmd":      cmd,
 				"args":     args,
 				"userId":   e.SenderID,
-				"userName": userName,
+				"userName": user.Name,
 			}).Info("MSG:PM:CMD:ERR")
 			return
 		}
@@ -335,7 +320,7 @@ func handleCommandPm(b *Bot, e ttapi.PmmedEvt) {
 			"cmd":      cmd,
 			"args":     args,
 			"userId":   e.SenderID,
-			"userName": userName,
+			"userName": user.Name,
 		}).Info("MSG:PM:CMD")
 
 		msg, _, err := handler(b, e.SenderID, args...)
@@ -351,7 +336,7 @@ func handleCommandPm(b *Bot, e ttapi.PmmedEvt) {
 		return
 	}
 
-	logrus.WithFields(logrus.Fields{"text": e.Text, "userId": e.SenderID, "userName": userName}).Info("MSG:ROOM")
+	logrus.WithFields(logrus.Fields{"text": e.Text, "userId": e.SenderID, "userName": user.Name}).Info("MSG:ROOM")
 }
 
 func (b *Bot) recognizeCommand(cmd string) (CommandHandler, error) {
@@ -362,16 +347,16 @@ func (b *Bot) recognizeCommand(cmd string) (CommandHandler, error) {
 	return nil, errors.New("Command not recognized")
 }
 
-func requireAdmin(b *Bot, userId string) error {
-	if !b.UserIsAdmin(userId) {
+func requireAdmin(b *Bot, user *User) error {
+	if !b.UserIsAdmin(user) {
 		return errors.New("I won't obey you because you aren't one of my admins")
 	}
 
 	return nil
 }
 
-func requireBotModerator(b *Bot, userId string) error {
-	if !b.room.UserIsModerator(b.config.UserId) {
+func requireBotModerator(b *Bot, user *User) error {
+	if !b.UserIsModerator(user) {
 		return errors.New("Sorry, I can't proceed because I'm not a moderator in this room")
 	}
 

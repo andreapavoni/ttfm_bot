@@ -1,15 +1,18 @@
 package ttfm
 
-import "github.com/alaingilbert/ttapi"
+import (
+	"github.com/alaingilbert/ttapi"
+	"github.com/andreapavoni/ttfm_bot/utils/collections"
+)
 
 type Room struct {
 	name       string
 	id         string
 	shortcut   string
-	users      *SmartMap
-	admins     *SmartList
-	moderators *SmartList
-	djs        *SmartList
+	users      *collections.SmartMap[string]
+	admins     *collections.SmartList[string]
+	moderators *collections.SmartList[string]
+	djs        *collections.SmartList[string]
 	song       *Song
 }
 
@@ -37,7 +40,7 @@ func (r *Room) Update(ri ttapi.RoomInfoRes) error {
 }
 
 func (r *Room) UpdateUsers(users []User) {
-	r.users = NewSmartMap()
+	r.users = collections.NewSmartMap[string]()
 	for _, u := range users {
 		r.AddUser(u.Id, u.Name)
 	}
@@ -60,16 +63,5 @@ func (r *Room) RemoveDj(id string) {
 }
 
 func (r *Room) UpdateModerators(moderators []string) {
-	r.moderators = NewSmartListFromSlice(moderators)
-}
-
-func (r *Room) UserIsModerator(userId string) bool {
-	return r.moderators.HasElement(userId)
-}
-
-func (r *Room) UserNameFromId(id string) string {
-	if userName, ok := r.users.Get(id); ok {
-		return userName.(string)
-	}
-	return ""
+	r.moderators = collections.NewSmartListFromSlice(moderators)
 }
