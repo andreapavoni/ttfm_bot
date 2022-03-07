@@ -187,7 +187,7 @@ var commands = map[string]CommandHandler{
 		}
 
 		if len(args) < 1 {
-			return "", user, errors.New("You must specify the username ofr the user you want to become a fan")
+			return "", user, errors.New("You must specify the username of the user you want to become a fan")
 		}
 
 		fannedUserName := strings.Join(args, " ")
@@ -211,7 +211,7 @@ var commands = map[string]CommandHandler{
 		}
 
 		if len(args) < 1 {
-			return "", user, errors.New("You must specify the username ofr the user you want to become a fan")
+			return "", user, errors.New("You must specify the username of the user you want to unfan")
 		}
 
 		unfannedUserName := strings.Join(args, " ")
