@@ -39,7 +39,8 @@ func handleCommandSpeak(b *Bot, userId string, message string) {
 		msg, _, err := handler(b, userId, args)
 
 		if msg != "" && err == nil {
-			b.RoomMessage("@" + user.Name + " " + msg)
+			// b.RoomMessage("@" + user.Name + " " + msg)
+			b.RoomMessage(msg)
 		}
 
 		if err != nil {

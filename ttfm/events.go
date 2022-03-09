@@ -30,12 +30,10 @@ func onRoomChanged(b *Bot, e ttapi.RoomInfoRes) {
 	logrus.WithFields(logrus.Fields{
 		"room":       e.Room.Name,
 		"moderators": e.Room.Metadata.ModeratorID,
-		"downvotes":  e.Room.Metadata.Downvotes,
-		"upvotes":    e.Room.Metadata.Upvotes,
 		"maxdjs":     e.Room.Metadata.MaxDjs,
-		"djcount":    e.Room.Metadata.Djcount,
+		"djsCount":   e.Room.Metadata.Djcount,
 		"djs":        e.Room.Metadata.Djs,
-	}).Info("BOT:ROOM_CHANGED")
+	}).Info("BOT:ROOM:CHANGED")
 
 	b.Room.Update(e)
 	utils.ExecuteDelayedRandom(15, b.Bop)
@@ -50,7 +48,7 @@ func onRoomChanged(b *Bot, e ttapi.RoomInfoRes) {
 		"shortcut":  b.Room.shortcut,
 		"djs":       b.Room.djs.Size(),
 		"listeners": e.Room.Metadata.Listeners,
-	}).Info("BOT:ROOM_CHANGED updated room data")
+	}).Info("BOT:ROOM:UPDATED")
 }
 
 func onNewSong(b *Bot, e ttapi.NewSongEvt) {
@@ -68,9 +66,9 @@ func onNewSong(b *Bot, e ttapi.NewSongEvt) {
 	}
 
 	logrus.WithFields(logrus.Fields{
-		"dj":     b.Room.Song.DjName,
-		"djID":   b.Room.Song.djId,
-		"song":   b.Room.Song.Title,
+		"djName": b.Room.Song.DjName,
+		"djId":   b.Room.Song.djId,
+		"title":  b.Room.Song.Title,
 		"artist": b.Room.Song.Artist,
 		"length": b.Room.Song.Length,
 		"up":     b.Room.Song.up,
@@ -84,9 +82,9 @@ func onNewSong(b *Bot, e ttapi.NewSongEvt) {
 	b.Room.Song.Reset(song.ID, song.Metadata.Song, song.Metadata.Artist, song.Metadata.Length, song.Djname, song.Djid)
 
 	logrus.WithFields(logrus.Fields{
-		"dj":     song.Djname,
+		"djName": song.Djname,
 		"djId":   song.Djid,
-		"song":   song.Metadata.Song,
+		"title":  song.Metadata.Song,
 		"artist": song.Metadata.Artist,
 		"length": song.Metadata.Length,
 	}).Info("ROOM:NEW_SONG")
@@ -109,9 +107,9 @@ func onUpdateVotes(b *Bot, e ttapi.UpdateVotesEvt) {
 		"up":        e.Room.Metadata.Upvotes,
 		"down":      e.Room.Metadata.Downvotes,
 		"listeners": e.Room.Metadata.Listeners,
-		"userID":    userId,
+		"userId":    userId,
 		"vote":      vote,
-		"name":      user.Name,
+		"userName":  user.Name,
 	}).Info("SONG:VOTE")
 }
 
@@ -120,9 +118,9 @@ func onSnagged(b *Bot, e ttapi.SnaggedEvt) {
 	user, _ := b.UserFromId(e.UserID)
 
 	logrus.WithFields(logrus.Fields{
-		"userID": e.UserID,
-		"name":   user.Name,
-		"roomID": e.RoomID,
+		"userId":   e.UserID,
+		"userName": user.Name,
+		"roomId":   e.RoomID,
 	}).Info("SONG:SNAG")
 }
 
@@ -138,17 +136,15 @@ func onRegistered(b *Bot, e ttapi.RegisteredEvt) {
 	botUser, _ := b.UserFromId(b.Config.UserId)
 
 	if b.Config.ModAutoWelcome && b.UserIsModerator(botUser) {
-		msg := fmt.Sprintf("Hey @%s, welcome :)", user.Name)
+		msg := fmt.Sprintf("Hey @%s, welcome! :)", user.Name)
 		b.RoomMessage(msg)
 	}
 
 	logrus.WithFields(logrus.Fields{
-		"userID": u.ID,
-		"name":   u.Name,
-		"laptop": u.Laptop,
-		"fans":   u.Fans,
-		"points": u.Points,
-		"avatar": u.Avatarid,
+		"userId":   u.ID,
+		"userName": u.Name,
+		"fans":     u.Fans,
+		"points":   u.Points,
 	}).Info("ROOM:USER_JOINED")
 }
 
@@ -163,10 +159,10 @@ func onDeregistered(b *Bot, e ttapi.DeregisteredEvt) {
 	b.RemoveDjEscorting(b.Room.Song.djId)
 
 	logrus.WithFields(logrus.Fields{
-		"userID": u.ID,
-		"name":   u.Name,
-		"fans":   u.Fans,
-		"points": u.Points,
+		"userId":   u.ID,
+		"userName": u.Name,
+		"fans":     u.Fans,
+		"points":   u.Points,
 	}).Info("ROOM:USER_LEFT")
 }
 
@@ -175,8 +171,10 @@ func onAddDj(b *Bot, e ttapi.AddDJEvt) {
 	b.Room.AddDj(u.Userid)
 
 	logrus.WithFields(logrus.Fields{
-		"userID": u.Userid,
-		"name":   u.Name,
+		"userId":   u.Userid,
+		"userName": u.Name,
+		"fans":     u.Fans,
+		"points":   u.Points,
 	}).Info("STAGE:DJ_JOINED")
 }
 
@@ -195,8 +193,8 @@ func onRemDj(b *Bot, e ttapi.RemDJEvt) {
 	}
 
 	logrus.WithFields(logrus.Fields{
-		"userID":    u.Userid,
-		"name":      u.Name,
+		"userId":    u.Userid,
+		"userName":  u.Name,
 		"moderator": e.Modid,
 	}).Info("STAGE:DJ_LEFT")
 }

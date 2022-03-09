@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/alaingilbert/ttapi"
+	"github.com/sirupsen/logrus"
 
 	"github.com/andreapavoni/ttfm_bot/utils"
 	"github.com/andreapavoni/ttfm_bot/utils/collections"
@@ -44,24 +45,26 @@ type Config struct {
 
 // BOOT
 func New() *Bot {
+	logrus.SetFormatter(&LogFormatter{})
+
 	c := loadConfig()
 
 	b := Bot{
-		api:    ttapi.NewBot(c.ApiAuth, c.UserId, c.RoomId),
-		queue:  collections.NewSmartList[string](),
-		admins: collections.NewSmartListFromSlice(c.Admins),
 		Config: c,
-		playlist: &Playlist{
-			Name:  c.CurrentPlaylist,
-			songs: collections.NewSmartList[SongItem](),
-		},
-		playlists: collections.NewSmartList[string](),
 		Room: &Room{
 			users:      collections.NewSmartMap[string](),
 			moderators: collections.NewSmartList[string](),
 			djs:        collections.NewSmartList[string](),
 			Song:       &Song{},
 		},
+		api:    ttapi.NewBot(c.ApiAuth, c.UserId, c.RoomId),
+		queue:  collections.NewSmartList[string](),
+		admins: collections.NewSmartListFromSlice(c.Admins),
+		playlist: &Playlist{
+			Name:  c.CurrentPlaylist,
+			songs: collections.NewSmartList[SongItem](),
+		},
+		playlists: collections.NewSmartList[string](),
 		escorting: collections.NewSmartList[string](),
 		commands:  collections.NewSmartMap[CommandHandler](),
 	}
@@ -161,7 +164,6 @@ func (b *Bot) ShowSongStats() {
 	b.RoomMessage(msg)
 
 	msg = fmt.Sprintf("👍 %d | 👎 %d | ❤️ %d", song.up, song.down, song.snag)
-
 	delay := time.Duration(10) * time.Millisecond
 	utils.ExecuteDelayed(delay, func() {
 		b.RoomMessage(msg)
