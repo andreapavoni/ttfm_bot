@@ -16,14 +16,14 @@ func onReady(b *Bot) {
 		logrus.WithError(err).Error("BOT:READY:ERR")
 	}
 
-	b.room.Update(roomInfo)
+	b.Room.Update(roomInfo)
 
-	if b.config.SetBot {
+	if b.Config.SetBot {
 		utils.ExecuteDelayedRandom(30, func() { b.api.SetBot() })
 	}
 
 	b.LoadPlaylists()
-	b.SwitchPlaylist(b.config.CurrentPlaylist)
+	b.SwitchPlaylist(b.Config.CurrentPlaylist)
 }
 
 func onRoomChanged(b *Bot, e ttapi.RoomInfoRes) {
@@ -37,50 +37,51 @@ func onRoomChanged(b *Bot, e ttapi.RoomInfoRes) {
 		"djs":        e.Room.Metadata.Djs,
 	}).Info("BOT:ROOM_CHANGED")
 
-	b.room.Update(e)
+	b.Room.Update(e)
 	utils.ExecuteDelayedRandom(15, b.Bop)
 
-	logrus.WithFields(logrus.Fields{
-		"room":      b.room.name,
-		"roomId":    b.room.id,
-		"shortcut":  b.room.shortcut,
-		"djs":       b.room.djs.Size(),
-		"listeners": e.Room.Metadata.Listeners,
-	}).Info("BOT:ROOM_CHANGED updated room data")
-
-	if b.config.AutoDj && e.Room.Metadata.Djcount == 0 {
+	if b.Config.AutoDj && e.Room.Metadata.Djcount == 0 {
 		b.AutoDj()
 	}
+
+	logrus.WithFields(logrus.Fields{
+		"room":      b.Room.name,
+		"roomId":    b.Room.id,
+		"shortcut":  b.Room.shortcut,
+		"djs":       b.Room.djs.Size(),
+		"listeners": e.Room.Metadata.Listeners,
+	}).Info("BOT:ROOM_CHANGED updated room data")
 }
 
 func onNewSong(b *Bot, e ttapi.NewSongEvt) {
-	if b.config.AutoShowSongStats {
+	if b.Config.AutoShowSongStats {
 		b.ShowSongStats()
 	}
 
-	if b.escorting.HasElement(b.room.song.djId) {
-		b.EscortDj(b.room.song.djId)
-		b.RemoveDjEscorting(b.room.song.djId)
+	if b.escorting.HasElement(b.Room.Song.djId) {
+		b.EscortDj(b.Room.Song.djId)
+		b.RemoveDjEscorting(b.Room.Song.djId)
 	}
 
-	if b.room.song.djId == b.config.UserId {
+	if b.Room.Song.djId == b.Config.UserId {
 		b.PushSongBottomPlaylist()
 	}
 
 	logrus.WithFields(logrus.Fields{
-		"dj":     b.room.song.djName,
-		"djID":   b.room.song.djId,
-		"song":   b.room.song.title,
-		"artist": b.room.song.artist,
-		"length": b.room.song.length,
-		"up":     b.room.song.up,
-		"down":   b.room.song.down,
-		"snag":   b.room.song.snag,
+		"dj":     b.Room.Song.DjName,
+		"djID":   b.Room.Song.djId,
+		"song":   b.Room.Song.Title,
+		"artist": b.Room.Song.Artist,
+		"length": b.Room.Song.Length,
+		"up":     b.Room.Song.up,
+		"down":   b.Room.Song.down,
+		"snag":   b.Room.Song.snag,
 	}).Info("ROOM:LAST_SONG_STATS")
 
-	b.room.UpdateModerators(e.Room.Metadata.ModeratorID)
+	b.Room.UpdateModerators(e.Room.Metadata.ModeratorID)
+	b.Room.UpdateDjs(e.Room.Metadata.Djs)
 	song := e.Room.Metadata.CurrentSong
-	b.room.song.Reset(song.ID, song.Metadata.Song, song.Metadata.Artist, song.Metadata.Length, song.Djname, song.Djid)
+	b.Room.Song.Reset(song.ID, song.Metadata.Song, song.Metadata.Artist, song.Metadata.Length, song.Djname, song.Djid)
 
 	logrus.WithFields(logrus.Fields{
 		"dj":     song.Djname,
@@ -90,18 +91,18 @@ func onNewSong(b *Bot, e ttapi.NewSongEvt) {
 		"length": song.Metadata.Length,
 	}).Info("ROOM:NEW_SONG")
 
-	utils.ExecuteDelayedRandom(20, b.Bop)
+	utils.ExecuteDelayedRandom(30, b.Bop)
 
-	if b.config.AutoSnag {
-		utils.ExecuteDelayedRandom(10, func() {
-			b.Snag(b.room.song.id)
+	if b.Config.AutoSnag {
+		utils.ExecuteDelayedRandom(30, func() {
+			b.Snag(b.Room.Song.Id)
 		})
 	}
 }
 
 func onUpdateVotes(b *Bot, e ttapi.UpdateVotesEvt) {
-	b.room.song.UpdateStats(e.Room.Metadata.Upvotes, e.Room.Metadata.Downvotes, b.room.song.snag)
-	userId, vote := b.room.song.UnpackVotelog(e.Room.Metadata.Votelog)
+	b.Room.Song.UpdateStats(e.Room.Metadata.Upvotes, e.Room.Metadata.Downvotes, b.Room.Song.snag)
+	userId, vote := b.Room.Song.UnpackVotelog(e.Room.Metadata.Votelog)
 	user, _ := b.UserFromId(userId)
 
 	logrus.WithFields(logrus.Fields{
@@ -115,7 +116,7 @@ func onUpdateVotes(b *Bot, e ttapi.UpdateVotesEvt) {
 }
 
 func onSnagged(b *Bot, e ttapi.SnaggedEvt) {
-	b.room.song.UpdateStats(b.room.song.up, b.room.song.down, b.room.song.snag+1)
+	b.Room.Song.UpdateStats(b.Room.Song.up, b.Room.Song.down, b.Room.Song.snag+1)
 	user, _ := b.UserFromId(e.UserID)
 
 	logrus.WithFields(logrus.Fields{
@@ -127,16 +128,16 @@ func onSnagged(b *Bot, e ttapi.SnaggedEvt) {
 
 func onRegistered(b *Bot, e ttapi.RegisteredEvt) {
 	u := e.User[0]
-	if u.ID == b.config.UserId {
+	if u.ID == b.Config.UserId {
 		return
 	}
 
-	b.room.AddUser(u.ID, u.Name)
+	b.Room.AddUser(u.ID, u.Name)
 
 	user, _ := b.UserFromId(u.ID)
-	botUser, _ := b.UserFromId(b.config.UserId)
+	botUser, _ := b.UserFromId(b.Config.UserId)
 
-	if b.config.ModAutoWelcome && b.UserIsModerator(botUser) {
+	if b.Config.ModAutoWelcome && b.UserIsModerator(botUser) {
 		msg := fmt.Sprintf("Hey @%s, welcome :)", user.Name)
 		b.RoomMessage(msg)
 	}
@@ -153,13 +154,13 @@ func onRegistered(b *Bot, e ttapi.RegisteredEvt) {
 
 func onDeregistered(b *Bot, e ttapi.DeregisteredEvt) {
 	u := e.User[0]
-	if u.ID == b.config.UserId {
+	if u.ID == b.Config.UserId {
 		return
 	}
 
-	b.room.RemoveDj(u.ID)
-	b.room.RemoveUser(u.ID)
-	b.RemoveDjEscorting(b.room.song.djId)
+	b.Room.RemoveDj(u.ID)
+	b.Room.RemoveUser(u.ID)
+	b.RemoveDjEscorting(b.Room.Song.djId)
 
 	logrus.WithFields(logrus.Fields{
 		"userID": u.ID,
@@ -171,7 +172,7 @@ func onDeregistered(b *Bot, e ttapi.DeregisteredEvt) {
 
 func onAddDj(b *Bot, e ttapi.AddDJEvt) {
 	u := e.User[0]
-	b.room.AddDj(u.Userid)
+	b.Room.AddDj(u.Userid)
 
 	logrus.WithFields(logrus.Fields{
 		"userID": u.Userid,
@@ -181,15 +182,15 @@ func onAddDj(b *Bot, e ttapi.AddDJEvt) {
 
 func onRemDj(b *Bot, e ttapi.RemDJEvt) {
 	u := e.User[0]
-	b.room.RemoveDj(u.Userid)
+	b.Room.RemoveDj(u.Userid)
 	b.RemoveDjEscorting(u.Userid)
 
-	if b.config.AutoDj && u.Userid == b.config.UserId && e.Modid != "" {
+	if b.Config.AutoDj && u.Userid == b.Config.UserId && e.Modid != "" {
 		b.ToggleAutoDj()
 		return
 	}
 
-	if b.config.AutoDj && b.room.djs.Size() == 0 {
+	if b.Config.AutoDj && b.Room.djs.Size() == 0 {
 		b.AutoDj()
 	}
 

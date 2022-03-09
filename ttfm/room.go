@@ -13,7 +13,7 @@ type Room struct {
 	admins     *collections.SmartList[string]
 	moderators *collections.SmartList[string]
 	djs        *collections.SmartList[string]
-	song       *Song
+	Song       *Song
 }
 
 type User struct {
@@ -27,7 +27,7 @@ func (r *Room) Update(ri ttapi.RoomInfoRes) error {
 	r.shortcut = ri.Room.Shortcut
 
 	song := ri.Room.Metadata.CurrentSong
-	r.song.Reset(song.ID, song.Metadata.Song, song.Metadata.Artist, song.Metadata.Length, song.Djname, song.Djid)
+	r.Song.Reset(song.ID, song.Metadata.Song, song.Metadata.Artist, song.Metadata.Length, song.Djname, song.Djid)
 	r.UpdateModerators(ri.Room.Metadata.ModeratorID)
 
 	users := []User{}
@@ -35,6 +35,8 @@ func (r *Room) Update(ri ttapi.RoomInfoRes) error {
 		users = append(users, User{Id: u.ID, Name: u.Name})
 	}
 	r.UpdateUsers(users)
+
+	r.UpdateDjs(ri.Room.Metadata.Djs)
 
 	return nil
 }
@@ -60,6 +62,10 @@ func (r *Room) AddDj(id string) {
 
 func (r *Room) RemoveDj(id string) {
 	r.djs.Remove(id)
+}
+
+func (r *Room) UpdateDjs(djs []string) {
+	r.djs = collections.NewSmartListFromSlice(djs)
 }
 
 func (r *Room) UpdateModerators(moderators []string) {

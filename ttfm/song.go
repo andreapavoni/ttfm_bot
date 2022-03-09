@@ -5,12 +5,12 @@ import (
 )
 
 type Song struct {
-	id     string
-	djName string
+	Id     string
+	DjName string
 	djId   string
-	title  string
-	artist string
-	length int
+	Title  string
+	Artist string
+	Length int
 	up     int
 	down   int
 	snag   int
@@ -23,12 +23,12 @@ func (s *Song) UpdateStats(up, down, snag int) {
 }
 
 func (s *Song) Reset(id, title, artist string, length int, djName, djId string) {
-	s.id = id
-	s.djName = djName
+	s.Id = id
+	s.DjName = djName
 	s.djId = djId
-	s.title = title
-	s.artist = artist
-	s.length = length
+	s.Title = title
+	s.Artist = artist
+	s.Length = length
 	s.up = 0
 	s.down = 0
 	s.snag = 0
