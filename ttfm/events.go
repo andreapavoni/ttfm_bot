@@ -2,6 +2,7 @@ package ttfm
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/alaingilbert/ttapi"
 	"github.com/andreapavoni/ttfm_bot/utils"
@@ -52,15 +53,24 @@ func onRoomChanged(b *Bot, e ttapi.RoomInfoRes) {
 }
 
 func onNewSong(b *Bot, e ttapi.NewSongEvt) {
+	// show song stats
 	if b.Config.AutoShowSongStats {
-		b.ShowSongStats()
+		header, data := b.ShowSongStats()
+
+		b.RoomMessage(header)
+		delay := time.Duration(10) * time.Millisecond
+		utils.ExecuteDelayed(delay, func() {
+			b.RoomMessage(data)
+		})
 	}
 
+	// escort people off the stage
 	if b.escorting.HasElement(b.Room.Song.djId) {
 		b.EscortDj(b.Room.Song.djId)
 		b.RemoveDjEscorting(b.Room.Song.djId)
 	}
 
+	// when bot is djing, push the last song to bottom of its playlist
 	if b.Room.Song.djId == b.Config.UserId {
 		b.PushSongBottomPlaylist()
 	}
@@ -76,6 +86,7 @@ func onNewSong(b *Bot, e ttapi.NewSongEvt) {
 		"snag":   b.Room.Song.snag,
 	}).Info("ROOM:LAST_SONG_STATS")
 
+	// update room with new data
 	b.Room.UpdateModerators(e.Room.Metadata.ModeratorID)
 	b.Room.UpdateDjs(e.Room.Metadata.Djs)
 	song := e.Room.Metadata.CurrentSong
@@ -89,12 +100,14 @@ func onNewSong(b *Bot, e ttapi.NewSongEvt) {
 		"length": song.Metadata.Length,
 	}).Info("ROOM:NEW_SONG")
 
-	utils.ExecuteDelayedRandom(30, b.Bop)
+	// auto bop
+	if b.Config.AutoBop {
+		utils.ExecuteDelayedRandom(30, b.Bop)
+	}
 
+	// auto snag
 	if b.Config.AutoSnag {
-		utils.ExecuteDelayedRandom(30, func() {
-			b.Snag(b.Room.Song.Id)
-		})
+		utils.ExecuteDelayedRandom(30, func() { b.Snag() })
 	}
 }
 

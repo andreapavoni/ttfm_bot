@@ -13,7 +13,7 @@ func SnagCommandHandler(b *ttfm.Bot, userId string, args []string) (string, *ttf
 		return "", user, err
 	}
 
-	if err := b.Snag(b.Room.Song.Id); err == nil {
+	if err := b.Snag(); err == nil {
 		return "I snagged this song!", user, nil
 	}
 

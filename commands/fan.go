@@ -27,7 +27,7 @@ func FanCommandHandler(b *ttfm.Bot, userId string, args []string) (string, *ttfm
 	}
 
 	if err := b.Fan(fannedUser.Id); err != nil {
-		return "", user, errors.New("I failed to fan @" + fannedUserName)
+		return "", user, errors.New("I was unable to fan @" + fannedUserName)
 	}
 
 	msg := fmt.Sprintf("I became a fan of @%s", fannedUserName)

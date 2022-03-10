@@ -3,7 +3,6 @@ package ttfm
 import (
 	"errors"
 	"fmt"
-	"time"
 
 	"github.com/alaingilbert/ttapi"
 	"github.com/sirupsen/logrus"
@@ -13,13 +12,13 @@ import (
 )
 
 type Bot struct {
+	Config    *Config
+	Playlists *collections.SmartList[string]
+	Room      *Room
 	api       *ttapi.Bot
 	queue     *collections.SmartList[string]
 	admins    *collections.SmartList[string]
-	Config    *Config
-	Room      *Room
 	playlist  *Playlist
-	playlists *collections.SmartList[string]
 	escorting *collections.SmartList[string]
 	commands  *collections.SmartMap[CommandHandler]
 }
@@ -46,6 +45,8 @@ type Config struct {
 // BOOT
 func New() *Bot {
 	logrus.SetFormatter(&LogFormatter{})
+	// f, _ := os.OpenFile("log.txt", os.O_CREATE|os.O_WRONLY, 0777)
+	// logrus.SetOutput(f)
 
 	c := loadConfig()
 
@@ -64,7 +65,7 @@ func New() *Bot {
 			Name:  c.CurrentPlaylist,
 			songs: collections.NewSmartList[SongItem](),
 		},
-		playlists: collections.NewSmartList[string](),
+		Playlists: collections.NewSmartList[string](),
 		escorting: collections.NewSmartList[string](),
 		commands:  collections.NewSmartMap[CommandHandler](),
 	}
@@ -158,16 +159,12 @@ func (b *Bot) ToggleAutoBop() bool {
 	b.Config.AutoBop = !b.Config.AutoBop
 	return b.Config.AutoBop
 }
-func (b *Bot) ShowSongStats() {
+func (b *Bot) ShowSongStats() (header, data string) {
 	song := b.Room.Song
-	msg := fmt.Sprintf("Stats for `%s` by `%s` played by @%s:", song.Title, song.Artist, song.DjName)
-	b.RoomMessage(msg)
+	header = fmt.Sprintf("Stats for `%s` by `%s` played by @%s:", song.Title, song.Artist, song.DjName)
+	data = fmt.Sprintf("👍 %d | 👎 %d | ❤️ %d", song.up, song.down, song.snag)
 
-	msg = fmt.Sprintf("👍 %d | 👎 %d | ❤️ %d", song.up, song.down, song.snag)
-	delay := time.Duration(10) * time.Millisecond
-	utils.ExecuteDelayed(delay, func() {
-		b.RoomMessage(msg)
-	})
+	return header, data
 }
 
 // AUTO DJ
@@ -183,7 +180,7 @@ func (b *Bot) ToggleAutoDj() bool {
 }
 
 // PLAYLISTS
-func (b *Bot) Snag(songId string) error {
+func (b *Bot) Snag() error {
 	if b.Room.Song.djId == b.Config.UserId {
 		return errors.New("I'm the current DJ and I already have this song in my playlist...")
 	}
@@ -191,10 +188,11 @@ func (b *Bot) Snag(songId string) error {
 	playlist, err := b.api.PlaylistAll(b.Config.CurrentPlaylist)
 
 	if err != nil {
+		return err
 	}
 
 	b.api.Snag()
-	if err = b.api.PlaylistAdd(songId, b.Config.CurrentPlaylist, len(playlist.List)); err != nil {
+	if err = b.api.PlaylistAdd(b.Room.Song.Id, b.Config.CurrentPlaylist, len(playlist.List)); err != nil {
 		return nil
 	}
 
@@ -235,34 +233,34 @@ func (b *Bot) LoadPlaylists() error {
 	}
 
 	for _, pl := range playlists.List {
-		b.playlists.Push(pl.Name)
+		b.Playlists.Push(pl.Name)
 	}
 	return nil
 }
 func (b *Bot) AddPlaylist(playlistName string) error {
-	if !b.playlists.HasElement(playlistName) {
+	if !b.Playlists.HasElement(playlistName) {
 		if err := b.api.PlaylistCreate(playlistName); err != nil {
 			return err
 		}
-		b.playlists.Push(playlistName)
+		b.Playlists.Push(playlistName)
 		return nil
 	}
 
 	return errors.New("Playlist not found")
 }
 func (b *Bot) RemovePlaylist(playlistName string) error {
-	if b.playlists.HasElement(playlistName) {
+	if b.Playlists.HasElement(playlistName) {
 		if err := b.api.PlaylistDelete(playlistName); err != nil {
 			return err
 		}
-		b.playlists.Remove(playlistName)
+		b.Playlists.Remove(playlistName)
 		return nil
 	}
 
 	return errors.New("Playlist not found")
 }
 func (b *Bot) SwitchPlaylist(playlistName string) error {
-	if b.playlists.HasElement(playlistName) {
+	if b.Playlists.HasElement(playlistName) {
 		if err := b.api.PlaylistSwitch(playlistName); err != nil {
 			return err
 		}
@@ -281,18 +279,18 @@ func (b *Bot) PushSongBottomPlaylist() error {
 		return err
 	}
 }
-func (b *Bot) RemoveSongFromPlaylist(s *SongItem) error {
-	idx := b.playlist.songs.IndexOf(*s)
+func (b *Bot) RemoveSongFromPlaylist(songId string) error {
+	song, idx, err := b.playlist.GetSongById(songId)
 
-	if idx < 0 {
-		return errors.New("Song not found in current playlist")
+	if err != nil {
+		return err
 	}
 
 	if err := b.api.PlaylistRemove(b.Config.CurrentPlaylist, idx); err != nil {
 		return err
 	}
 
-	b.playlist.RemoveSong(s)
+	b.playlist.RemoveSong(song)
 	return nil
 }
 
@@ -305,6 +303,10 @@ func (b *Bot) RoomMessage(msg string) {
 }
 
 // USERS & AUTHORIZATION
+func (b *Bot) BootUser(userId, reason string) error {
+	return b.api.BootUser(userId, reason)
+}
+
 func (b *Bot) Fan(userId string) error {
 	return b.api.BecomeFan(userId)
 }

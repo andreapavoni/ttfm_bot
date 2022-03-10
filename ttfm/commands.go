@@ -92,7 +92,7 @@ func handleCommandPm(b *Bot, userId string, message string) {
 		return
 	}
 
-	logrus.WithFields(logrus.Fields{"text": message, "userId": userId, "userName": user.Name}).Info("MSG:ROOM")
+	logrus.WithFields(logrus.Fields{"text": message, "userId": userId, "userName": user.Name}).Info("MSG:PM")
 }
 
 func (b *Bot) recognizeCommand(cmd string) (CommandHandler, error) {

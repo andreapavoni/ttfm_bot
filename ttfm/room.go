@@ -10,9 +10,9 @@ type Room struct {
 	id         string
 	shortcut   string
 	users      *collections.SmartMap[string]
-	admins     *collections.SmartList[string]
 	moderators *collections.SmartList[string]
 	djs        *collections.SmartList[string]
+	maxDjs     int
 	Song       *Song
 }
 
@@ -25,17 +25,18 @@ func (r *Room) Update(ri ttapi.RoomInfoRes) error {
 	r.name = ri.Room.Name
 	r.id = ri.Room.Roomid
 	r.shortcut = ri.Room.Shortcut
+	r.maxDjs = ri.Room.Metadata.MaxDjs
 
 	song := ri.Room.Metadata.CurrentSong
 	r.Song.Reset(song.ID, song.Metadata.Song, song.Metadata.Artist, song.Metadata.Length, song.Djname, song.Djid)
-	r.UpdateModerators(ri.Room.Metadata.ModeratorID)
 
 	users := []User{}
 	for _, u := range ri.Users {
 		users = append(users, User{Id: u.ID, Name: u.Name})
 	}
-	r.UpdateUsers(users)
 
+	r.UpdateUsers(users)
+	r.UpdateModerators(ri.Room.Metadata.ModeratorID)
 	r.UpdateDjs(ri.Room.Metadata.Djs)
 
 	return nil

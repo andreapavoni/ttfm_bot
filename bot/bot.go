@@ -29,6 +29,12 @@ func (b *Bot) Start() {
 	b.Bot.AddCommand("!unfan", commands.UnfanCommandHandler)
 	b.Bot.AddCommand("!props", commands.PropsCommandHandler)
 	b.Bot.AddCommand("!skip", commands.SkipCommandHandler)
+	b.Bot.AddCommand("!boot", commands.BootCommandHandler)
+	b.Bot.AddCommand("!pladd", commands.PlaylistCreateCommandHandler)
+	b.Bot.AddCommand("!pldel", commands.PlaylistDeleteCommandHandler)
+	b.Bot.AddCommand("!plls", commands.PlaylistListCommandHandler)
+	b.Bot.AddCommand("!plsongdel", commands.PlaylistRemoveSongCommandHandler)
+	b.Bot.AddCommand("!plchange", commands.PlaylistSwitchCommandHandler)
 
 	b.Bot.Start()
 }

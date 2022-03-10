@@ -59,8 +59,21 @@ func (l *SmartList[T]) HasElement(value T) bool {
 	return indexOf(value, l.list) >= 0
 }
 
+func (l *SmartList[T]) List() []T {
+	return l.list
+}
+
 func (l *SmartList[T]) IndexOf(value T) int {
 	return indexOf(value, l.list)
+}
+
+func (l *SmartList[T]) Find(f func(*T) bool) (*T, int) {
+	for idx, item := range l.list {
+		if f(&item) {
+			return &item, idx
+		}
+	}
+	return (new(T)), -1
 }
 
 func (l *SmartList[T]) Size() int {

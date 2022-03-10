@@ -27,7 +27,7 @@ func UnfanCommandHandler(b *ttfm.Bot, userId string, args []string) (string, *tt
 	}
 
 	if err := b.Unfan(unfannedUser.Id); err != nil {
-		return "", user, errors.New("I failed to unfan @" + unfannedUserName)
+		return "", user, errors.New("I was unable to unfan @" + unfannedUserName)
 	}
 
 	msg := fmt.Sprintf("I'm not a fan of @%s anymore", unfannedUserName)

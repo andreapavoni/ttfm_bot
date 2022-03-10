@@ -30,7 +30,7 @@ func EscortCommandHandler(b *ttfm.Bot, userId string, args []string) (string, *t
 	}
 
 	if err := b.EscortDj(escortedUser.Id); err != nil {
-		return "", user, errors.New("I failed to escort @" + escortedUserName)
+		return "", user, errors.New("I was unable to escort @" + escortedUserName)
 	}
 
 	return "", user, nil
