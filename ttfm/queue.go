@@ -57,6 +57,11 @@ func (q *Queue) Remove(djId string) error {
 	return nil
 }
 
+func (q *Queue) Reset() {
+	q.resetReservation()
+	q.SmartList.Empty()
+}
+
 func (q *Queue) CheckReservation(djId string) bool {
 	return q.reservationDjId == djId && time.Now().Unix() <= q.reservationExpiresAt.Unix()
 }

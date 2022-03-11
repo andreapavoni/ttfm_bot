@@ -4,25 +4,24 @@ import (
 	"github.com/andreapavoni/ttfm_bot/ttfm"
 )
 
-func AutoSnagCommandHandler(b *ttfm.Bot, userId string, args []string) (string, *ttfm.User, error) {
-
+func AutoSnagCommandHandler(b *ttfm.Bot, userId string, args []string) *ttfm.CommandOutput {
 	user, _ := b.UserFromId(userId)
 
 	if err := requireAdmin(b, user); err != nil {
-		return "", user, err
+		return &ttfm.CommandOutput{Msg: "", User: user, ReplyWith: "room", Err: err}
 	}
 
 	if len(args) == 0 {
-		return currentAutoSnagStatusMsg(b.Config.AutoSnag), user, nil
+		return &ttfm.CommandOutput{Msg: currentAutoSnagStatusMsg(b.Config.AutoSnag), User: user, ReplyWith: "room", Err: nil}
 	}
 
 	switch args[0] {
 	case "on":
-		return enableAutoSnag(b), user, nil
+		return &ttfm.CommandOutput{Msg: enableAutoSnag(b), User: user, ReplyWith: "action", Err: nil}
 	case "off":
-		return disableAutoSnag(b), user, nil
+		return &ttfm.CommandOutput{Msg: disableAutoSnag(b), User: user, ReplyWith: "action", Err: nil}
 	default:
-		return currentAutoSnagStatusMsg(b.Config.AutoSnag), user, nil
+		return &ttfm.CommandOutput{Msg: currentAutoSnagStatusMsg(b.Config.AutoSnag), User: user, ReplyWith: "room", Err: nil}
 	}
 }
 
@@ -38,9 +37,9 @@ func enableAutoSnag(b *ttfm.Bot) string {
 	if !b.Config.AutoSnag {
 		b.ToggleAutoSnag()
 
-		return "I'm going to snag songs from now on"
+		return "/me enabled auto snag mode"
 	}
-	return "I'm already snagging songs"
+	return "/me has already enabled auto snag mode"
 
 }
 
@@ -48,7 +47,7 @@ func disableAutoSnag(b *ttfm.Bot) string {
 	if b.Config.AutoSnag {
 		b.ToggleAutoSnag()
 
-		return "I won't snag songs anymore"
+		return "/me disabled auto snag mode"
 	}
-	return "I'm already not snagging songs"
+	return "/me has already disabled auto snag mode"
 }

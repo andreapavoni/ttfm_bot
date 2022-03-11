@@ -4,24 +4,28 @@ import (
 	"github.com/andreapavoni/ttfm_bot/ttfm"
 )
 
-func QueueCommandHandler(b *ttfm.Bot, userId string, args []string) (string, *ttfm.User, error) {
+func QueueCommandHandler(b *ttfm.Bot, userId string, args []string) *ttfm.CommandOutput {
 	user, _ := b.UserFromId(userId)
 
 	if err := requireAdmin(b, user); err != nil {
-		return "", user, err
+		return &ttfm.CommandOutput{Msg: "", User: user, ReplyWith: "pm", Err: err}
 	}
 
 	if err := requireBotModerator(b, user); err != nil {
-		return "", user, err
+		return &ttfm.CommandOutput{Msg: "", User: user, ReplyWith: "pm", Err: err}
+	}
+
+	if len(args) == 0 {
+		return &ttfm.CommandOutput{Msg: currentQueueStatusMsg(b.Config.ModQueue), User: user, ReplyWith: "room", Err: nil}
 	}
 
 	switch args[0] {
 	case "on":
-		return enableQueue(b), user, nil
+		return &ttfm.CommandOutput{Msg: enableQueue(b), User: user, ReplyWith: "pm", Err: nil}
 	case "off":
-		return disableQueue(b), user, nil
+		return &ttfm.CommandOutput{Msg: disableQueue(b), User: user, ReplyWith: "pm", Err: nil}
 	default:
-		return currentQueueStatusMsg(b.Config.ModQueue), user, nil
+		return &ttfm.CommandOutput{Msg: currentQueueStatusMsg(b.Config.ModQueue), User: user, ReplyWith: "room", Err: nil}
 	}
 }
 

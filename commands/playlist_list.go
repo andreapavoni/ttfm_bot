@@ -6,11 +6,11 @@ import (
 	"github.com/andreapavoni/ttfm_bot/ttfm"
 )
 
-func PlaylistListCommandHandler(b *ttfm.Bot, userId string, args []string) (string, *ttfm.User, error) {
+func PlaylistListCommandHandler(b *ttfm.Bot, userId string, args []string) *ttfm.CommandOutput {
 	user, _ := b.UserFromId(userId)
 
 	if err := requireAdmin(b, user); err != nil {
-		return "", user, err
+		return &ttfm.CommandOutput{Msg: "", User: user, ReplyWith: "pm", Err: err}
 	}
 
 	pls := []string{}
@@ -23,6 +23,5 @@ func PlaylistListCommandHandler(b *ttfm.Bot, userId string, args []string) (stri
 	}
 
 	msg := "Available playists (the current one is prefixed with a *): " + strings.Join(pls, ", ")
-
-	return msg, user, nil
+	return &ttfm.CommandOutput{Msg: msg, User: user, ReplyWith: "pm", Err: nil}
 }

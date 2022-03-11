@@ -80,6 +80,10 @@ func (l *SmartList[T]) Size() int {
 	return len(l.list)
 }
 
+func (l *SmartList[T]) Empty() {
+	l.list = make([]T, 0)
+}
+
 func indexOf[T comparable](value T, collection []T) int {
 	for idx, element := range collection {
 		if element == value {

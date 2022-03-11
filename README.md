@@ -6,7 +6,7 @@ It's based on [alaingilbert/ttapi](https://github.com/alaingilbert/ttapi), a Gol
 
 ## Installation and setup
 
-**IMPORTANT: Requires Go >= 1.18beta1**
+**IMPORTANT: Requires Go >= 1.18beta1 because it uses generics!**
 
 - Install the package with `go install https://github.com/andreapavoni/ttfm_bot/`
 - Set environment variables (see below) on the host you want to run the bot
@@ -99,11 +99,16 @@ Bot can obey to moderators commands, however it depends by the kind of command i
 
 - [x] DJ queues
 - [ ] use a struct for command input and output (ex. CommandInput and CommandOutput)
-- [ ] room handling (join, list faves, leave)
-- [ ] set song max duration
+- [ ] add cmds: say, pm, action
+- [ ] song max duration
+  - [x] enforce on new song
+  - [ ] update value at runtime
+- [ ] put help in bot's profile description, then !help cmd will reply with link to https://turntable.fm/profile/BOT_USER_ID
+- [ ] multiple config source (env, toml) and load before init bot
 - [ ] set max songs per dj
 - [ ] cmd for room stats
 - [ ] use command-output struct to determine if message should be sent privately, in room, not at all, or in "/me" form
+- [ ] refactor User to standalone
 - [ ] group all string messages into a struct/file
 - [ ] add docs for functions
 - [ ] shell for commands

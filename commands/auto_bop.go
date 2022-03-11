@@ -4,25 +4,25 @@ import (
 	"github.com/andreapavoni/ttfm_bot/ttfm"
 )
 
-func AutoBopCommandHandler(b *ttfm.Bot, userId string, args []string) (string, *ttfm.User, error) {
+func AutoBopCommandHandler(b *ttfm.Bot, userId string, args []string) *ttfm.CommandOutput {
 
 	user, _ := b.UserFromId(userId)
 
 	if err := requireAdmin(b, user); err != nil {
-		return "", user, err
+		return &ttfm.CommandOutput{Msg: "", User: user, ReplyWith: "pm", Err: err}
 	}
 
 	if len(args) == 0 {
-		return currentAutoBopStatusMsg(b.Config.AutoBop), user, nil
+		return &ttfm.CommandOutput{Msg: currentAutoBopStatusMsg(b.Config.AutoBop), User: user, ReplyWith: "room", Err: nil}
 	}
 
 	switch args[0] {
 	case "on":
-		return enableAutoBop(b), user, nil
+		return &ttfm.CommandOutput{Msg: enableAutoBop(b), User: user, ReplyWith: "action", Err: nil}
 	case "off":
-		return disableAutoBop(b), user, nil
+		return &ttfm.CommandOutput{Msg: disableAutoBop(b), User: user, ReplyWith: "action", Err: nil}
 	default:
-		return currentAutoBopStatusMsg(b.Config.AutoBop), user, nil
+		return &ttfm.CommandOutput{Msg: currentAutoBopStatusMsg(b.Config.AutoBop), User: user, ReplyWith: "room", Err: nil}
 	}
 }
 
@@ -37,9 +37,9 @@ func currentAutoBopStatusMsg(status bool) string {
 func enableAutoBop(b *ttfm.Bot) string {
 	if !b.Config.AutoBop {
 		b.ToggleAutoBop()
-		return "I'm going to bop every song played from now on"
+		return "/me enabled auto bop mode"
 	}
-	return "I'm already doing bop for every song played"
+	return "/me has already enabled auto bop mode"
 
 }
 
@@ -47,8 +47,7 @@ func disableAutoBop(b *ttfm.Bot) string {
 	if b.Config.AutoBop {
 		b.ToggleAutoBop()
 
-		return "I won't bop songs played from now on"
+		return "/me disabled auto bop mode"
 	}
-	return "I'm already not doing bop songs played"
-
+	return "/me has already disabled auto bop mode"
 }

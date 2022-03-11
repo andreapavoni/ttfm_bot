@@ -8,7 +8,16 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type CommandHandler func(*Bot, string, []string) (string, *User, error)
+// type CommandHandler func(*Bot, string, []string) (string, *User, error)
+type CommandHandler func(*Bot, string, []string) *CommandOutput
+
+type CommandOutput struct {
+	// msgs []string
+	Msg       string
+	User      *User
+	ReplyWith string // room, pm, action, none
+	Err       error
+}
 
 func handleCommandSpeak(b *Bot, userId string, message string) {
 	user, _ := b.UserFromId(userId)
@@ -36,11 +45,11 @@ func handleCommandSpeak(b *Bot, userId string, message string) {
 			"userName": user.Name,
 		}).Info("MSG:ROOM:CMD")
 
-		msg, _, err := handler(b, userId, args)
+		out := handler(b, userId, args)
 
-		if msg != "" && err == nil {
-			// b.RoomMessage("@" + user.Name + " " + msg)
-			b.RoomMessage(msg)
+		if out.Msg != "" && out.Err == nil {
+			// b.RoomMessage("@" + user.Name + " " + out.Msg)
+			b.RoomMessage(out.Msg)
 		}
 
 		if err != nil {
@@ -79,14 +88,14 @@ func handleCommandPm(b *Bot, userId string, message string) {
 			"userName": user.Name,
 		}).Info("MSG:PM:CMD")
 
-		msg, _, err := handler(b, userId, args)
+		out := handler(b, userId, args)
 
-		if msg != "" && err == nil {
-			b.PrivateMessage(userId, msg)
+		if out.Msg != "" && out.Err == nil {
+			b.PrivateMessage(userId, out.Msg)
 		}
 
-		if err != nil {
-			b.PrivateMessage(userId, err.Error())
+		if out.Err != nil {
+			b.PrivateMessage(userId, out.Err.Error())
 		}
 
 		return

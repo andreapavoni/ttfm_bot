@@ -99,7 +99,7 @@ func loadConfig() *Config {
 		ModQueue:               utils.GetEnvBoolOrDefault("TTFM_MOD_QUEUE", false),
 		ModQueueInviteDuration: utils.GetEnvIntOrDefault("TTFM_MOD_QUEUE_INVITE_DURATION", 1),
 		ModSongsMaxDuration:    utils.GetEnvIntOrDefault("TTFM_MOD_SONGS_MAX_DURATION", 10),
-		ModSongsMaxPerDj:       utils.GetEnvIntOrDefault("TTFM_MOD_SONGS_MAX_DURATION", 0),
+		ModSongsMaxPerDj:       utils.GetEnvIntOrDefault("TTFM_MOD_SONGS_MAX_PER_DJ", 0),
 		ModDjRestDuration:      utils.GetEnvIntOrDefault("TTFM_MOD_DJ_REST_DURATION", 0),
 		CurrentPlaylist:        utils.GetEnvOrDefault("TTFM_DEFAULT_PLAYLIST", "default"),
 		SetBot:                 utils.GetEnvBoolOrDefault("TTFM_SET_BOT", false),
@@ -115,13 +115,11 @@ func (b *Bot) Start() {
 // QUEUE
 func (b *Bot) ToggleModQueue() bool {
 	b.Config.ModQueue = !b.Config.ModQueue
+	b.Queue.Empty()
+
 	return b.Config.ModQueue
 }
 
-// ROOM
-func (b *Bot) GetRoomInfo() (ttapi.RoomInfoRes, error) {
-	return b.api.RoomInfo()
-}
 func (b *Bot) AddDjEscorting(userId string) error {
 	if !b.UserIsDj(userId) {
 		if userId == b.Config.UserId {

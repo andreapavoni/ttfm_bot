@@ -4,24 +4,24 @@ import (
 	"github.com/andreapavoni/ttfm_bot/ttfm"
 )
 
-func AutoDjCommandHandler(b *ttfm.Bot, userId string, args []string) (string, *ttfm.User, error) {
+func AutoDjCommandHandler(b *ttfm.Bot, userId string, args []string) *ttfm.CommandOutput {
 	user, _ := b.UserFromId(userId)
 
 	if err := requireAdmin(b, user); err != nil {
-		return "", user, err
+		return &ttfm.CommandOutput{Msg: disableAutoDj(b), User: user, ReplyWith: "pm", Err: err}
 	}
 
 	if len(args) == 0 {
-		return currentAutoDjStatusMsg(b.Config.AutoDj), user, nil
+		return &ttfm.CommandOutput{Msg: currentAutoDjStatusMsg(b.Config.AutoDj), User: user, ReplyWith: "room", Err: nil}
 	}
 
 	switch args[0] {
 	case "on":
-		return enableAutoDj(b), user, nil
+		return &ttfm.CommandOutput{Msg: enableAutoDj(b), User: user, ReplyWith: "action", Err: nil}
 	case "off":
-		return disableAutoDj(b), user, nil
+		return &ttfm.CommandOutput{Msg: disableAutoDj(b), User: user, ReplyWith: "action", Err: nil}
 	default:
-		return currentAutoDjStatusMsg(b.Config.AutoDj), user, nil
+		return &ttfm.CommandOutput{Msg: currentAutoDjStatusMsg(b.Config.AutoDj), User: user, ReplyWith: "room", Err: nil}
 	}
 }
 
@@ -36,17 +36,17 @@ func currentAutoDjStatusMsg(status bool) string {
 func enableAutoDj(b *ttfm.Bot) string {
 	if !b.Config.AutoDj {
 		b.ToggleAutoDj()
-		return "I'll jump on stage when possible"
+		return "/me enabled auto dj mode"
 	}
-	return "I've already enabled auto DJ mode"
+	return "/me has already enabled auto dj mode"
 }
 
 func disableAutoDj(b *ttfm.Bot) string {
 	if b.Config.AutoDj {
 		b.ToggleAutoDj()
 
-		return "I've disabled auto DJ mode"
+		return "/me disabled auto dj mode"
 	}
-	return "I've already disabled auto DJ mode"
+	return "/me has already disabled auto dj mode"
 
 }

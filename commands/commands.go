@@ -8,7 +8,7 @@ import (
 
 func requireAdmin(b *ttfm.Bot, u *ttfm.User) error {
 	if !b.UserIsAdmin(u) {
-		return errors.New("I won't obey you because you aren't one of my admins")
+		return errors.New("I won't obey you because you aren't one of my admins or we aren't in the same room")
 	}
 
 	return nil
