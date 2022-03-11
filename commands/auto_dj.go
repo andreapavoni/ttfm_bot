@@ -5,7 +5,6 @@ import (
 )
 
 func AutoDjCommandHandler(b *ttfm.Bot, userId string, args []string) (string, *ttfm.User, error) {
-
 	user, _ := b.UserFromId(userId)
 
 	if err := requireAdmin(b, user); err != nil {

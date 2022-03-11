@@ -13,7 +13,16 @@ func PlaylistListCommandHandler(b *ttfm.Bot, userId string, args []string) (stri
 		return "", user, err
 	}
 
-	msg := "Available playists: " + strings.Join(b.Playlists.List(), ", ")
+	pls := []string{}
+
+	for _, pl := range b.Playlists.List() {
+		if pl == b.Config.CurrentPlaylist {
+			pl = "*" + pl
+		}
+		pls = append(pls, pl)
+	}
+
+	msg := "Available playists (the current one is prefixed with a *): " + strings.Join(pls, ", ")
 
 	return msg, user, nil
 }

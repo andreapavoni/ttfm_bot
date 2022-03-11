@@ -20,7 +20,7 @@ func PlaylistCreateCommandHandler(b *ttfm.Bot, userId string, args []string) (st
 
 	playlistName := strings.Join(args, " ")
 
-	if err := b.RemovePlaylist(playlistName); err != nil {
+	if err := b.AddPlaylist(playlistName); err != nil {
 		return "", user, errors.New("I was unable to add the new playlist: " + err.Error())
 	}
 

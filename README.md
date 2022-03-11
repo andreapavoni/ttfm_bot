@@ -41,13 +41,17 @@ It's based on [alaingilbert/ttapi](https://github.com/alaingilbert/ttapi), a Gol
 
 - Each command can be either issued on the chat room or by private message.
 - A command might require a certain user role to execute a command.
+- commands which accept `on` or `off` to enable/disable some feature, can be called without arguments to get the current status
 
 ### Users
 
 Users are the lowest role, basically are listeners or want to DJ
 
+- `!props` let the current DJ know you're appreciating the song
 - `!help` shows the list of commands available for the role of the user that issued the command (_Coming soon_)
-- `!q+` and `!q-`respectively adds/removes user from the DJ queue (_Coming soon_)
+- `!q on|off` shows the current queue status
+- `!qadd` adds user into queue
+- `!qrm` removes user from queue
 - `!r reaction` posts a giphy `reaction` in the chat room (_Coming soon_)
 
 ### DJs
@@ -58,13 +62,18 @@ Users are the lowest role, basically are listeners or want to DJ
 
 Admins are users which were previously configured on the bot to run commands on it.
 
-- `!dj` tells the bot to jump on the stage and starts playing songs
-- `!autodj+` and `!autodj-` respectively enables/disables autodj mode
+- `!dj` tells the bot to jump on the stage and starts playing songs, or jump off if it's already djing
+- `!autodj on|off` enables/disables autodj mode
 - `!snag` tells the bot to snag the current playing song
-- `!autosnag+` and `!autosnag-` respectively enables/disables automatic snag
+- `!autosnag on|off` enables/disables automatic snag
 - `!bop` tells the bot to bop for the current playing song
-- `!autobop+` and `!autobop-` respectively enables/disables automatic bop
+- `!autobop on|off` enables/disables automatic bop
 - `!fan username` and `!unfan username` respectively fan/unfan the specified `username`
+- `!padd name` creates a new playlist
+- `!pdel name` deletes a playlist
+- `!pls` lists available playlists
+- `!prm` removes the current playing song from the current playlist
+- `!pc name` switch playlist
 
 ### Moderators
 
@@ -72,7 +81,7 @@ Bot can obey to moderators commands, however it depends by the kind of command i
 
 - `!skip` tells the bot to skip the current playing song
 - `!escort username` tells the bot to escort the specified `username` off the stage
-- `!kick username` tells the bot to kick the specified `username` off the room (_Coming soon_)
+- `!boot username` tells the bot to kick the specified `username` off the room (_Coming soon_)
 
 ## Credits
 
@@ -85,3 +94,16 @@ Bot can obey to moderators commands, however it depends by the kind of command i
 - [Disco Clubbing](https://turntable.fm/disco_clubbing) (here you can find this bot running)
 - [Aunt Jackie](https://turntable.fm/aunt_jackie)
 - [I ❤️ The 80's](https://turntable.fm/i_the_80s)
+
+## TODO (as of march 10th 2022)
+
+- [x] DJ queues
+- [ ] use a struct for command input and output (ex. CommandInput and CommandOutput)
+- [ ] room handling (join, list faves, leave)
+- [ ] set song max duration
+- [ ] set max songs per dj
+- [ ] cmd for room stats
+- [ ] use command-output struct to determine if message should be sent privately, in room, not at all, or in "/me" form
+- [ ] group all string messages into a struct/file
+- [ ] add docs for functions
+- [ ] shell for commands

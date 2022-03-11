@@ -15,8 +15,8 @@ type Bot struct {
 	Config    *Config
 	Playlists *collections.SmartList[string]
 	Room      *Room
+	Queue     *Queue
 	api       *ttapi.Bot
-	queue     *collections.SmartList[string]
 	admins    *collections.SmartList[string]
 	playlist  *Playlist
 	escorting *collections.SmartList[string]
@@ -24,22 +24,24 @@ type Bot struct {
 }
 
 type Config struct {
-	ApiAuth             string
-	UserId              string
-	RoomId              string
-	Admins              []string
-	AutoSnag            bool
-	AutoBop             bool
-	AutoDj              bool
-	AutoQueue           bool
-	AutoQueueMsg        string
-	AutoShowSongStats   bool
-	ModAutoWelcome      bool
-	ModQueue            bool
-	ModSongsMaxDuration int64
-	ModSongsMaxPerDj    int64
-	CurrentPlaylist     string
-	SetBot              bool
+	ApiAuth                string
+	UserId                 string
+	RoomId                 string
+	Admins                 []string
+	AutoSnag               bool
+	AutoBop                bool
+	AutoDj                 bool
+	AutoQueue              bool
+	AutoQueueMsg           string
+	AutoShowSongStats      bool
+	ModAutoWelcome         bool
+	ModQueue               bool
+	ModQueueInviteDuration int64
+	ModSongsMaxDuration    int64
+	ModSongsMaxPerDj       int64
+	ModDjRestDuration      int64
+	CurrentPlaylist        string
+	SetBot                 bool
 }
 
 // BOOT
@@ -51,20 +53,12 @@ func New() *Bot {
 	c := loadConfig()
 
 	b := Bot{
-		Config: c,
-		Room: &Room{
-			users:      collections.NewSmartMap[string](),
-			moderators: collections.NewSmartList[string](),
-			djs:        collections.NewSmartList[string](),
-			Song:       &Song{},
-		},
-		api:    ttapi.NewBot(c.ApiAuth, c.UserId, c.RoomId),
-		queue:  collections.NewSmartList[string](),
-		admins: collections.NewSmartListFromSlice(c.Admins),
-		playlist: &Playlist{
-			Name:  c.CurrentPlaylist,
-			songs: collections.NewSmartList[SongItem](),
-		},
+		Config:    c,
+		Room:      NewRoom(),
+		Queue:     NewQueue(),
+		api:       ttapi.NewBot(c.ApiAuth, c.UserId, c.RoomId),
+		admins:    collections.NewSmartListFromSlice(c.Admins),
+		playlist:  NewPlaylist(c.CurrentPlaylist),
 		Playlists: collections.NewSmartList[string](),
 		escorting: collections.NewSmartList[string](),
 		commands:  collections.NewSmartMap[CommandHandler](),
@@ -91,22 +85,24 @@ func New() *Bot {
 }
 func loadConfig() *Config {
 	return &Config{
-		ApiAuth:             utils.GetEnvOrPanic("TTFM_API_AUTH"),
-		UserId:              utils.GetEnvOrPanic("TTFM_API_USER_ID"),
-		Admins:              utils.StringToSlice(utils.GetEnvOrDefault("TTFM_ADMINS", "pavonz"), ","),
-		RoomId:              utils.GetEnvOrPanic("TTFM_API_ROOM_ID"),
-		AutoSnag:            utils.GetEnvBoolOrDefault("TTFM_AUTO_SNAG", true),
-		AutoBop:             utils.GetEnvBoolOrDefault("TTFM_AUTO_BOP", true),
-		AutoDj:              utils.GetEnvBoolOrDefault("TTFM_AUTO_DJ", false),
-		AutoQueue:           utils.GetEnvBoolOrDefault("TTFM_AUTO_QUEUE", false),
-		AutoQueueMsg:        utils.GetEnvOrDefault("TTFM_AUTO_QUEUE_MSG", "Next in line is: @JumpingMonkey. Time to claim your spot!"),
-		AutoShowSongStats:   utils.GetEnvBoolOrDefault("TTFM_AUTO_SHOW_SONG_STATS", false),
-		ModAutoWelcome:      utils.GetEnvBoolOrDefault("TTFM_AUTO_WELCOME", false),
-		ModQueue:            utils.GetEnvBoolOrDefault("TTFM_MOD_QUEUE", false),
-		ModSongsMaxDuration: utils.GetEnvIntOrDefault("TTFM_MOD_SONGS_MAX_DURATION", 10),
-		ModSongsMaxPerDj:    utils.GetEnvIntOrDefault("TTFM_MOD_SONGS_MAX_DURATION", 0),
-		CurrentPlaylist:     utils.GetEnvOrDefault("TTFM_DEFAULT_PLAYLIST", "default"),
-		SetBot:              utils.GetEnvBoolOrDefault("TTFM_SET_BOT", false),
+		ApiAuth:                utils.GetEnvOrPanic("TTFM_API_AUTH"),
+		UserId:                 utils.GetEnvOrPanic("TTFM_API_USER_ID"),
+		Admins:                 utils.StringToSlice(utils.GetEnvOrDefault("TTFM_ADMINS", "pavonz"), ","),
+		RoomId:                 utils.GetEnvOrPanic("TTFM_API_ROOM_ID"),
+		AutoSnag:               utils.GetEnvBoolOrDefault("TTFM_AUTO_SNAG", true),
+		AutoBop:                utils.GetEnvBoolOrDefault("TTFM_AUTO_BOP", true),
+		AutoDj:                 utils.GetEnvBoolOrDefault("TTFM_AUTO_DJ", false),
+		AutoQueue:              utils.GetEnvBoolOrDefault("TTFM_AUTO_QUEUE", false),
+		AutoQueueMsg:           utils.GetEnvOrDefault("TTFM_AUTO_QUEUE_MSG", "Next in line is: @JumpingMonkey. Time to claim your spot!"),
+		AutoShowSongStats:      utils.GetEnvBoolOrDefault("TTFM_AUTO_SHOW_SONG_STATS", false),
+		ModAutoWelcome:         utils.GetEnvBoolOrDefault("TTFM_AUTO_WELCOME", false),
+		ModQueue:               utils.GetEnvBoolOrDefault("TTFM_MOD_QUEUE", false),
+		ModQueueInviteDuration: utils.GetEnvIntOrDefault("TTFM_MOD_QUEUE_INVITE_DURATION", 1),
+		ModSongsMaxDuration:    utils.GetEnvIntOrDefault("TTFM_MOD_SONGS_MAX_DURATION", 10),
+		ModSongsMaxPerDj:       utils.GetEnvIntOrDefault("TTFM_MOD_SONGS_MAX_DURATION", 0),
+		ModDjRestDuration:      utils.GetEnvIntOrDefault("TTFM_MOD_DJ_REST_DURATION", 0),
+		CurrentPlaylist:        utils.GetEnvOrDefault("TTFM_DEFAULT_PLAYLIST", "default"),
+		SetBot:                 utils.GetEnvBoolOrDefault("TTFM_SET_BOT", false),
 	}
 }
 func (b *Bot) AddCommand(trigger string, h CommandHandler) {
@@ -114,6 +110,12 @@ func (b *Bot) AddCommand(trigger string, h CommandHandler) {
 }
 func (b *Bot) Start() {
 	b.api.Start()
+}
+
+// QUEUE
+func (b *Bot) ToggleModQueue() bool {
+	b.Config.ModQueue = !b.Config.ModQueue
+	return b.Config.ModQueue
 }
 
 // ROOM
@@ -335,6 +337,6 @@ func (b *Bot) UserIsDj(userId string) bool {
 func (b *Bot) UserIsCurrentDj(userId string) bool {
 	return b.Room.Song.djId == userId
 }
-func (b *Bot) UserIsModerator(user *User) bool {
-	return b.Room.moderators.HasElement(user.Id)
+func (b *Bot) UserIsModerator(userId string) bool {
+	return b.Room.moderators.HasElement(userId)
 }

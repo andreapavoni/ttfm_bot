@@ -54,7 +54,7 @@ func onRoomChanged(b *Bot, e ttapi.RoomInfoRes) {
 
 func onNewSong(b *Bot, e ttapi.NewSongEvt) {
 	// show song stats
-	if b.Config.AutoShowSongStats {
+	if b.UserIsModerator(b.Config.UserId) && b.Config.AutoShowSongStats {
 		header, data := b.ShowSongStats()
 
 		b.RoomMessage(header)
@@ -65,9 +65,24 @@ func onNewSong(b *Bot, e ttapi.NewSongEvt) {
 	}
 
 	// escort people off the stage
-	if b.escorting.HasElement(b.Room.Song.djId) {
+	if b.UserIsModerator(b.Config.UserId) && b.escorting.HasElement(b.Room.Song.djId) {
 		b.EscortDj(b.Room.Song.djId)
 		b.RemoveDjEscorting(b.Room.Song.djId)
+	}
+
+	// forward queue
+	if b.UserIsModerator(b.Config.UserId) && b.Config.ModQueue {
+		if err := b.EscortDj(b.Room.Song.djId); err == nil {
+			b.Queue.Push(b.Room.Song.djId)
+			b.PrivateMessage(b.Room.Song.djId, "Thank you for your awesome set. You've been temporarily removed from the stage and automatically added to the queue. I'll let you know when it'll be your turn again. If you want to opt-out, just type !q- and you'll be removed.")
+		}
+
+		if newDjId, err := b.Queue.Shift(int(b.Config.ModQueueInviteDuration)); err == nil {
+			newDj, _ := b.UserFromId(newDjId)
+
+			msg := fmt.Sprintf("Hey %s! you can now jump on stage :) Your reserved slot will last %d minute(s) from now, grab it till you can!", newDj.Name, b.Config.ModQueueInviteDuration)
+			b.RoomMessage(msg)
+		}
 	}
 
 	// when bot is djing, push the last song to bottom of its playlist
@@ -144,11 +159,9 @@ func onRegistered(b *Bot, e ttapi.RegisteredEvt) {
 	}
 
 	b.Room.AddUser(u.ID, u.Name)
-
 	user, _ := b.UserFromId(u.ID)
-	botUser, _ := b.UserFromId(b.Config.UserId)
 
-	if b.Config.ModAutoWelcome && b.UserIsModerator(botUser) {
+	if b.Config.ModAutoWelcome && b.UserIsModerator(b.Config.UserId) {
 		msg := fmt.Sprintf("Hey @%s, welcome! :)", user.Name)
 		b.RoomMessage(msg)
 	}
@@ -171,6 +184,14 @@ func onDeregistered(b *Bot, e ttapi.DeregisteredEvt) {
 	b.Room.RemoveUser(u.ID)
 	b.RemoveDjEscorting(b.Room.Song.djId)
 
+	if b.UserIsModerator(b.Config.UserId) && b.Config.ModQueue {
+		b.Queue.Remove(u.ID)
+	}
+
+	if b.Config.AutoDj && b.Room.djs.Size() == 0 {
+		b.AutoDj()
+	}
+
 	logrus.WithFields(logrus.Fields{
 		"userId":   u.ID,
 		"userName": u.Name,
@@ -181,6 +202,14 @@ func onDeregistered(b *Bot, e ttapi.DeregisteredEvt) {
 
 func onAddDj(b *Bot, e ttapi.AddDJEvt) {
 	u := e.User[0]
+
+	if b.UserIsModerator(b.Config.UserId) && b.Config.ModQueue && !b.Queue.CheckReservation(u.ID) {
+		b.EscortDj(u.ID)
+		msg := fmt.Sprintf("Sorry to remove you, @%s. But queue is active and the available slot is reserved. You can join the queue by typing !q+", u.Name)
+		b.RoomMessage(msg)
+		return
+	}
+
 	b.Room.AddDj(u.Userid)
 
 	logrus.WithFields(logrus.Fields{

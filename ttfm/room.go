@@ -21,6 +21,15 @@ type User struct {
 	Name string
 }
 
+func NewRoom() *Room {
+	return &Room{
+		users:      collections.NewSmartMap[string](),
+		moderators: collections.NewSmartList[string](),
+		djs:        collections.NewSmartList[string](),
+		Song:       &Song{},
+	}
+}
+
 func (r *Room) Update(ri ttapi.RoomInfoRes) error {
 	r.name = ri.Room.Name
 	r.id = ri.Room.Roomid

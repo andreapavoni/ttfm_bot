@@ -15,7 +15,7 @@ func requireAdmin(b *ttfm.Bot, u *ttfm.User) error {
 }
 
 func requireBotModerator(b *ttfm.Bot, u *ttfm.User) error {
-	if !b.UserIsModerator(u) {
+	if !b.UserIsModerator(u.Id) {
 		return errors.New("Sorry, I can't proceed because I'm not a moderator in this room")
 	}
 

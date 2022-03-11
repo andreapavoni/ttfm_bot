@@ -18,16 +18,19 @@ type Playlist struct {
 	songs *collections.SmartList[SongItem]
 }
 
+func NewPlaylist(playlistName string) *Playlist {
+	return &Playlist{
+		Name:  playlistName,
+		songs: collections.NewSmartList[SongItem](),
+	}
+}
+
 func (p *Playlist) GetSongById(songId string) (*SongItem, int, error) {
 	s, idx := p.songs.Find(func(song *SongItem) bool { return songId == song.id })
 	if idx >= 0 {
 		return s, idx, nil
 	}
 	return s, idx, errors.New("I can't find the song in the current plalist")
-}
-
-func (p *Playlist) List() *[]Playlist {
-	return &[]Playlist{}
 }
 
 func (p *Playlist) AddSong(s *SongItem) {
