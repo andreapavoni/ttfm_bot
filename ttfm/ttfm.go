@@ -11,7 +11,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"gopkg.in/natefinch/lumberjack.v2"
 
-	"github.com/andreapavoni/ttfm_bot/utils"
 	"github.com/andreapavoni/ttfm_bot/utils/collections"
 )
 
@@ -24,27 +23,6 @@ type Bot struct {
 	admins    *collections.SmartList[string]
 	playlist  *Playlist
 	commands  *collections.SmartMap[CommandHandler]
-}
-
-type Config struct {
-	ApiAuth                string
-	UserId                 string
-	RoomId                 string
-	Admins                 []string
-	AutoSnag               bool
-	AutoBop                bool
-	AutoDj                 bool
-	AutoQueue              bool
-	AutoQueueMsg           string
-	AutoShowSongStats      bool
-	ModAutoWelcome         bool
-	ModQueue               bool
-	ModQueueInviteDuration int64
-	ModSongsMaxDuration    int64
-	ModSongsMaxPerDj       int64
-	ModDjRestDuration      int64
-	CurrentPlaylist        string
-	SetBot                 bool
 }
 
 // BOOT
@@ -62,15 +40,15 @@ func New() *Bot {
 	logrus.SetFormatter(&LogFormatter{})
 	logrus.SetOutput(multiWriter)
 
-	c := loadConfig()
+	cfg := LoadConfigFromEnvs()
 
 	b := Bot{
-		Config:    c,
+		Config:    cfg,
 		Room:      NewRoom(),
 		Queue:     NewQueue(),
-		api:       ttapi.NewBot(c.ApiAuth, c.UserId, c.RoomId),
-		admins:    collections.NewSmartListFromSlice(c.Admins),
-		playlist:  NewPlaylist(c.CurrentPlaylist),
+		api:       ttapi.NewBot(cfg.ApiAuth, cfg.UserId, cfg.RoomId),
+		admins:    collections.NewSmartListFromSlice(cfg.Admins),
+		playlist:  NewPlaylist(cfg.CurrentPlaylist),
 		Playlists: collections.NewSmartList[string](),
 		commands:  collections.NewSmartMap[CommandHandler](),
 	}
@@ -97,29 +75,6 @@ func New() *Bot {
 	b.api.OnNewSong(func(e ttapi.NewSongEvt) { onNewSong(&b, e) })
 
 	return &b
-}
-
-func loadConfig() *Config {
-	return &Config{
-		ApiAuth:                utils.GetEnvOrPanic("TTFM_API_AUTH"),
-		UserId:                 utils.GetEnvOrPanic("TTFM_API_USER_ID"),
-		Admins:                 utils.StringToSlice(utils.GetEnvOrDefault("TTFM_ADMINS", "pavonz"), ","),
-		RoomId:                 utils.GetEnvOrPanic("TTFM_API_ROOM_ID"),
-		AutoSnag:               utils.GetEnvBoolOrDefault("TTFM_AUTO_SNAG", true),
-		AutoBop:                utils.GetEnvBoolOrDefault("TTFM_AUTO_BOP", true),
-		AutoDj:                 utils.GetEnvBoolOrDefault("TTFM_AUTO_DJ", false),
-		AutoQueue:              utils.GetEnvBoolOrDefault("TTFM_AUTO_QUEUE", false),
-		AutoQueueMsg:           utils.GetEnvOrDefault("TTFM_AUTO_QUEUE_MSG", "Next in line is: @JumpingMonkey. Time to claim your spot!"),
-		AutoShowSongStats:      utils.GetEnvBoolOrDefault("TTFM_AUTO_SHOW_SONG_STATS", false),
-		ModAutoWelcome:         utils.GetEnvBoolOrDefault("TTFM_AUTO_WELCOME", false),
-		ModQueue:               utils.GetEnvBoolOrDefault("TTFM_MOD_QUEUE", false),
-		ModQueueInviteDuration: utils.GetEnvIntOrDefault("TTFM_MOD_QUEUE_INVITE_DURATION", 1),
-		ModSongsMaxDuration:    utils.GetEnvIntOrDefault("TTFM_MOD_SONGS_MAX_DURATION", 10),
-		ModSongsMaxPerDj:       utils.GetEnvIntOrDefault("TTFM_MOD_SONGS_MAX_PER_DJ", 0),
-		ModDjRestDuration:      utils.GetEnvIntOrDefault("TTFM_MOD_DJ_REST_DURATION", 0),
-		CurrentPlaylist:        utils.GetEnvOrDefault("TTFM_DEFAULT_PLAYLIST", "default"),
-		SetBot:                 utils.GetEnvBoolOrDefault("TTFM_SET_BOT", false),
-	}
 }
 
 func (b *Bot) AddCommand(trigger string, h CommandHandler) {
