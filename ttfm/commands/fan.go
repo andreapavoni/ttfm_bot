@@ -16,7 +16,7 @@ func FanCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandOutput 
 	}
 
 	if len(cmd.Args) < 1 {
-		return &ttfm.CommandOutput{User: user, ReplyType: ttfm.MessageTypePm, Err: errors.New("You must specify the username of the user you want to become a fan")}
+		return &ttfm.CommandOutput{User: user, ReplyType: cmd.Source, Err: errors.New("You must specify the username of the user you want to become a fan")}
 	}
 
 	fannedUser, err := b.UserFromName(strings.Join(cmd.Args, " "))

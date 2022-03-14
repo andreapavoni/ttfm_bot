@@ -16,7 +16,7 @@ func PlaylistCreateCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.Com
 	}
 
 	if len(cmd.Args) < 1 {
-		return &ttfm.CommandOutput{User: user, ReplyType: ttfm.MessageTypePm, Err: errors.New("You must specify a name of the new playlist")}
+		return &ttfm.CommandOutput{User: user, ReplyType: cmd.Source, Err: errors.New("You must specify a name of the new playlist")}
 	}
 
 	playlistName := strings.Join(cmd.Args, " ")

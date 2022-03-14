@@ -16,7 +16,7 @@ func PlaylistSwitchCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.Com
 	}
 
 	if len(cmd.Args) < 1 {
-		return &ttfm.CommandOutput{User: user, ReplyType: ttfm.MessageTypePm, Err: errors.New("You must specify a name of the playlist you want to switch to")}
+		return &ttfm.CommandOutput{User: user, ReplyType: cmd.Source, Err: errors.New("You must specify a name of the playlist you want to switch to")}
 	}
 
 	playlistName := strings.Join(cmd.Args, " ")

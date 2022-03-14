@@ -19,7 +19,7 @@ func EscortCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandOutp
 	}
 
 	if len(cmd.Args) < 1 {
-		return &ttfm.CommandOutput{User: user, ReplyType: ttfm.MessageTypePm, Err: errors.New("You must specify the username of the user you want to escort")}
+		return &ttfm.CommandOutput{User: user, ReplyType: cmd.Source, Err: errors.New("You must specify the username of the user you want to escort")}
 	}
 
 	escortedUser, err := b.UserFromName(strings.Join(cmd.Args, " "))
