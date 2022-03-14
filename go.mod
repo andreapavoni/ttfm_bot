@@ -8,4 +8,5 @@ require (
 	github.com/sirupsen/logrus v1.8.1
 	golang.org/x/net v0.0.0-20220127200216-cd36cc0744dd // indirect
 	golang.org/x/sys v0.0.0-20220222200937-f2425489ef4c // indirect
+	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 )

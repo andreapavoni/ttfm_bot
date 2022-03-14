@@ -98,13 +98,17 @@ Bot can obey to moderators commands, however it depends by the kind of command i
 ## TODO (as of march 10th 2022)
 
 - [x] DJ queues
-- [ ] use a struct for command input and output (ex. CommandInput and CommandOutput)
-- [ ] add cmds: say, pm, action
+- [x] use a struct for command input and output (ex. CommandInput and CommandOutput)
+  - [x] input
+  - [x] output
+  - [x] use Enum types for source/reply fields
+- [ ] add cmds: say, pm, action, whois
 - [ ] song max duration
   - [x] enforce on new song
   - [ ] update value at runtime
 - [ ] put help in bot's profile description, then !help cmd will reply with link to https://turntable.fm/profile/BOT_USER_ID
 - [ ] multiple config source (env, toml) and load before init bot
+- [x] log to file
 - [ ] set max songs per dj
 - [ ] cmd for room stats
 - [ ] use command-output struct to determine if message should be sent privately, in room, not at all, or in "/me" form

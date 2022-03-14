@@ -3,9 +3,13 @@ package ttfm
 import (
 	"errors"
 	"fmt"
+	"io"
+	"os"
+	"path/filepath"
 
 	"github.com/alaingilbert/ttapi"
 	"github.com/sirupsen/logrus"
+	"gopkg.in/natefinch/lumberjack.v2"
 
 	"github.com/andreapavoni/ttfm_bot/utils"
 	"github.com/andreapavoni/ttfm_bot/utils/collections"
@@ -45,9 +49,18 @@ type Config struct {
 
 // BOOT
 func New() *Bot {
+	lumberjackLogger := &lumberjack.Logger{
+		// Log file abbsolute path, os agnostic
+		Filename:   filepath.ToSlash("ttfm_bot.log"),
+		MaxSize:    5, // MB
+		MaxBackups: 5,
+		MaxAge:     30,   // days
+		Compress:   true, // disabled by default
+	}
+	// Fork writing into two outputs
+	multiWriter := io.MultiWriter(os.Stderr, lumberjackLogger)
 	logrus.SetFormatter(&LogFormatter{})
-	// f, _ := os.OpenFile("log.txt", os.O_CREATE|os.O_WRONLY, 0777)
-	// logrus.SetOutput(f)
+	logrus.SetOutput(multiWriter)
 
 	c := loadConfig()
 
