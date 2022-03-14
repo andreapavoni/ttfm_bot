@@ -19,7 +19,6 @@ type Bot struct {
 	api       *ttapi.Bot
 	admins    *collections.SmartList[string]
 	playlist  *Playlist
-	escorting *collections.SmartList[string]
 	commands  *collections.SmartMap[CommandHandler]
 }
 
@@ -60,13 +59,16 @@ func New() *Bot {
 		admins:    collections.NewSmartListFromSlice(c.Admins),
 		playlist:  NewPlaylist(c.CurrentPlaylist),
 		Playlists: collections.NewSmartList[string](),
-		escorting: collections.NewSmartList[string](),
 		commands:  collections.NewSmartMap[CommandHandler](),
 	}
 
 	// Commands
-	b.api.OnSpeak(func(e ttapi.SpeakEvt) { handleCommandSpeak(&b, e.UserID, e.Text) })
-	b.api.OnPmmed(func(e ttapi.PmmedEvt) { handleCommandPm(&b, e.SenderID, e.Text) })
+	b.api.OnSpeak(func(e ttapi.SpeakEvt) {
+		handleCommand(&b, &MessageInput{UserId: e.UserID, Text: e.Text, Source: MessageTypeRoom})
+	})
+	b.api.OnPmmed(func(e ttapi.PmmedEvt) {
+		handleCommand(&b, &MessageInput{UserId: e.SenderID, Text: e.Text, Source: MessageTypePm})
+	})
 
 	// Room events
 	b.api.OnReady(func() { onReady(&b) })
@@ -83,6 +85,7 @@ func New() *Bot {
 
 	return &b
 }
+
 func loadConfig() *Config {
 	return &Config{
 		ApiAuth:                utils.GetEnvOrPanic("TTFM_API_AUTH"),
@@ -105,19 +108,21 @@ func loadConfig() *Config {
 		SetBot:                 utils.GetEnvBoolOrDefault("TTFM_SET_BOT", false),
 	}
 }
+
 func (b *Bot) AddCommand(trigger string, h CommandHandler) {
 	b.commands.Set(trigger, h)
 }
+
 func (b *Bot) Start() {
 	b.api.Start()
 }
 
 // QUEUE
-func (b *Bot) ToggleModQueue() bool {
-	b.Config.ModQueue = !b.Config.ModQueue
+func (b *Bot) ModQueue(status bool) bool {
+	b.Config.ModQueue = status
 	b.Queue.Empty()
 
-	return b.Config.ModQueue
+	return status
 }
 
 func (b *Bot) AddDjEscorting(userId string) error {
@@ -128,15 +133,17 @@ func (b *Bot) AddDjEscorting(userId string) error {
 		return errors.New("You aren't DJing!")
 	}
 
-	if !b.escorting.HasElement(userId) {
-		b.escorting.Push(userId)
+	if !b.Room.escorting.HasElement(userId) {
+		b.Room.escorting.Push(userId)
 	}
 
 	return nil
 }
+
 func (b *Bot) RemoveDjEscorting(userId string) error {
-	return b.escorting.Remove(userId)
+	return b.Room.escorting.Remove(userId)
 }
+
 func (b *Bot) EscortDj(userId string) error {
 	return b.api.RemDj(userId)
 }
@@ -147,18 +154,22 @@ func (b *Bot) Bop() {
 		b.api.Bop()
 	}
 }
+
 func (b *Bot) Downvote() {
 	if b.Room.Song.djId != b.Config.UserId {
 		b.api.VoteDown()
 	}
 }
+
 func (b *Bot) SkipSong() {
 	b.api.Skip()
 }
-func (b *Bot) ToggleAutoBop() bool {
-	b.Config.AutoBop = !b.Config.AutoBop
-	return b.Config.AutoBop
+
+func (b *Bot) AutoBop(status bool) bool {
+	b.Config.AutoBop = status
+	return status
 }
+
 func (b *Bot) ShowSongStats() (header, data string) {
 	song := b.Room.Song
 	header = fmt.Sprintf("Stats for `%s` by `%s` played by @%s:", song.Title, song.Artist, song.DjName)
@@ -168,15 +179,16 @@ func (b *Bot) ShowSongStats() (header, data string) {
 }
 
 // AUTO DJ
-func (b *Bot) AutoDj() {
+func (b *Bot) Dj() {
 	if !b.UserIsDj(b.Config.UserId) {
 		b.api.AddDj()
 	}
 }
-func (b *Bot) ToggleAutoDj() bool {
-	b.Config.AutoDj = !b.Config.AutoDj
+
+func (b *Bot) AutoDj(status bool) bool {
+	b.Config.AutoDj = status
 	b.AddDjEscorting(b.Config.UserId)
-	return b.Config.AutoDj
+	return status
 }
 
 // PLAYLISTS
@@ -186,7 +198,6 @@ func (b *Bot) Snag() error {
 	}
 
 	playlist, err := b.api.PlaylistAll(b.Config.CurrentPlaylist)
-
 	if err != nil {
 		return err
 	}
@@ -205,10 +216,12 @@ func (b *Bot) Snag() error {
 
 	return nil
 }
-func (b *Bot) ToggleAutoSnag() bool {
-	b.Config.AutoSnag = !b.Config.AutoSnag
-	return b.Config.AutoSnag
+
+func (b *Bot) AutoSnag(status bool) bool {
+	b.Config.AutoSnag = status
+	return status
 }
+
 func (b *Bot) LoadPlaylist(playlistName string) error {
 	playlist, err := b.api.PlaylistAll(b.Config.CurrentPlaylist)
 
@@ -226,6 +239,7 @@ func (b *Bot) LoadPlaylist(playlistName string) error {
 	}
 	return nil
 }
+
 func (b *Bot) LoadPlaylists() error {
 	playlists, err := b.api.PlaylistListAll()
 	if err != nil {
@@ -237,6 +251,7 @@ func (b *Bot) LoadPlaylists() error {
 	}
 	return nil
 }
+
 func (b *Bot) AddPlaylist(playlistName string) error {
 	if !b.Playlists.HasElement(playlistName) {
 		if err := b.api.PlaylistCreate(playlistName); err != nil {
@@ -248,6 +263,7 @@ func (b *Bot) AddPlaylist(playlistName string) error {
 
 	return errors.New("Playlist not found")
 }
+
 func (b *Bot) RemovePlaylist(playlistName string) error {
 	if b.Playlists.HasElement(playlistName) {
 		if err := b.api.PlaylistDelete(playlistName); err != nil {
@@ -259,6 +275,7 @@ func (b *Bot) RemovePlaylist(playlistName string) error {
 
 	return errors.New("Playlist not found")
 }
+
 func (b *Bot) SwitchPlaylist(playlistName string) error {
 	if b.Playlists.HasElement(playlistName) {
 		if err := b.api.PlaylistSwitch(playlistName); err != nil {
@@ -270,6 +287,7 @@ func (b *Bot) SwitchPlaylist(playlistName string) error {
 
 	return errors.New("Playlist not found")
 }
+
 func (b *Bot) PushSongBottomPlaylist() error {
 	if err := b.api.PlaylistReorder(b.Config.CurrentPlaylist, 0, b.playlist.songs.Size()-1); err == nil {
 		currentSong, _ := b.playlist.songs.Shift()
@@ -279,6 +297,7 @@ func (b *Bot) PushSongBottomPlaylist() error {
 		return err
 	}
 }
+
 func (b *Bot) RemoveSongFromPlaylist(songId string) error {
 	song, idx, err := b.playlist.GetSongById(songId)
 
@@ -298,6 +317,7 @@ func (b *Bot) RemoveSongFromPlaylist(songId string) error {
 func (b *Bot) PrivateMessage(userId, msg string) {
 	b.api.PM(userId, msg)
 }
+
 func (b *Bot) RoomMessage(msg string) {
 	b.api.Speak(msg)
 }
@@ -310,15 +330,18 @@ func (b *Bot) BootUser(userId, reason string) error {
 func (b *Bot) Fan(userId string) error {
 	return b.api.BecomeFan(userId)
 }
+
 func (b *Bot) Unfan(userId string) error {
 	return b.api.RemoveFan(userId)
 }
+
 func (b *Bot) UserFromId(userId string) (*User, error) {
 	if userName, ok := b.Room.users.Get(userId); ok {
 		return &User{Id: userId, Name: userName}, nil
 	}
 	return &User{}, errors.New("User with ID " + userId + " wasn't found")
 }
+
 func (b *Bot) UserFromName(userName string) (*User, error) {
 	if id, err := b.api.GetUserID(userName); err == nil {
 		return &User{Id: id, Name: userName}, nil
@@ -326,15 +349,19 @@ func (b *Bot) UserFromName(userName string) (*User, error) {
 		return &User{}, err
 	}
 }
+
 func (b *Bot) UserIsAdmin(user *User) bool {
 	return b.admins.HasElement(user.Name)
 }
+
 func (b *Bot) UserIsDj(userId string) bool {
 	return b.Room.djs.HasElement(userId)
 }
+
 func (b *Bot) UserIsCurrentDj(userId string) bool {
 	return b.Room.Song.djId == userId
 }
+
 func (b *Bot) UserIsModerator(userId string) bool {
 	return b.Room.moderators.HasElement(userId)
 }

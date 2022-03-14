@@ -30,7 +30,7 @@ func onRoomChanged(b *Bot, e ttapi.RoomInfoRes) {
 	}
 
 	if b.Config.AutoDj && e.Room.Metadata.Djcount == 0 {
-		b.AutoDj()
+		b.Dj()
 	}
 
 	logrus.WithFields(logrus.Fields{
@@ -55,8 +55,8 @@ func onNewSong(b *Bot, e ttapi.NewSongEvt) {
 	}
 
 	// escort people off the stage
-	if b.UserIsModerator(b.Config.UserId) && b.escorting.Size() > 0 {
-		for _, u := range b.escorting.List() {
+	if b.UserIsModerator(b.Config.UserId) && b.Room.escorting.Size() > 0 {
+		for _, u := range b.Room.escorting.List() {
 			if b.Room.djs.HasElement(u) {
 				b.EscortDj(u)
 				b.RemoveDjEscorting(u)
@@ -198,7 +198,7 @@ func onDeregistered(b *Bot, e ttapi.DeregisteredEvt) {
 	}
 
 	if b.Config.AutoDj && b.Room.djs.Size() == 0 {
-		b.AutoDj()
+		b.Dj()
 	}
 
 	logrus.WithFields(logrus.Fields{
@@ -230,7 +230,7 @@ func onAddDj(b *Bot, e ttapi.AddDJEvt) {
 
 	stageIsFull := b.Room.maxDjs-b.Room.djs.Size() == 0
 	if b.UserIsModerator(b.Config.UserId) && !b.Config.ModQueue && stageIsFull {
-		b.ToggleModQueue()
+		b.ModQueue(true)
 		b.RoomMessage("/me has enabled queue mode")
 	}
 
@@ -251,12 +251,12 @@ func onRemDj(b *Bot, e ttapi.RemDJEvt) {
 	b.RemoveDjEscorting(u.Userid)
 
 	if b.Config.AutoDj && u.Userid == b.Config.UserId && e.Modid != "" {
-		b.ToggleAutoDj()
+		b.AutoDj(false)
 		return
 	}
 
 	if b.Config.AutoDj && b.Room.djs.Size() == 0 {
-		b.AutoDj()
+		b.Dj()
 	}
 
 	logrus.WithFields(logrus.Fields{
@@ -275,7 +275,7 @@ func onRemDj(b *Bot, e ttapi.RemDJEvt) {
 				msg = fmt.Sprintf("Hey @%s! you can now jump on stage :) Your reserved slot will last %d minute(s) from now, grab it till you can!", newDj.Name, b.Config.ModQueueInviteDuration)
 			} else {
 				msg = fmt.Sprintf("Hey @%s! you can now jump on stage :)", newDj.Name)
-				b.ToggleModQueue()
+				b.ModQueue(false)
 				b.RoomMessage("/me has disabled queue mode")
 			}
 

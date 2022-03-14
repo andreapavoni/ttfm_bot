@@ -14,6 +14,7 @@ type Room struct {
 	djs        *collections.SmartList[string]
 	maxDjs     int
 	Song       *Song
+	escorting  *collections.SmartList[string]
 }
 
 type User struct {

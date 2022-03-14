@@ -1,8 +1,8 @@
 package bot
 
 import (
-	"github.com/andreapavoni/ttfm_bot/commands"
 	"github.com/andreapavoni/ttfm_bot/ttfm"
+	"github.com/andreapavoni/ttfm_bot/ttfm/commands"
 )
 
 type Bot struct {

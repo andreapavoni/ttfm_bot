@@ -8,125 +8,126 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// type CommandHandler func(*Bot, string, []string) (string, *User, error)
-type CommandHandler func(*Bot, string, []string) *CommandOutput
+type CommandHandler func(*Bot, *CommandInput) *CommandOutput
+
+type CommandInput struct {
+	UserId string
+	Args   []string
+	Source MessageType
+}
 
 type CommandOutput struct {
-	// msgs []string
 	Msg       string
 	User      *User
-	ReplyWith string // room, pm, action, none
+	ReplyType MessageType
 	Err       error
 }
 
-func handleCommandSpeak(b *Bot, userId string, message string) {
-	user, _ := b.UserFromId(userId)
-
-	if cmd, args, err := parseCommand(message); err == nil {
-		handler, err := b.recognizeCommand(cmd)
-
-		if err != nil {
-			b.RoomMessage("@" + user.Name + " " + err.Error())
-			logrus.WithFields(logrus.Fields{
-				"text":     message,
-				"cmd":      cmd,
-				"args":     args,
-				"userId":   user.Id,
-				"userName": user.Name,
-			}).Info("MSG:ROOM:CMD:ERR")
-			return
-		}
-
-		logrus.WithFields(logrus.Fields{
-			"text":     message,
-			"cmd":      cmd,
-			"args":     args,
-			"userId":   userId,
-			"userName": user.Name,
-		}).Info("MSG:ROOM:CMD")
-
-		out := handler(b, userId, args)
-
-		if out.Msg != "" && out.Err == nil {
-			// b.RoomMessage("@" + user.Name + " " + out.Msg)
-			b.RoomMessage(out.Msg)
-		}
-
-		if err != nil {
-			b.RoomMessage("@" + user.Name + " " + err.Error())
-		}
-
-		return
-	}
-
-	logrus.WithFields(logrus.Fields{"text": message, "userId": userId, "userName": user.Name}).Info("MSG:ROOM")
+type MessageInput struct {
+	Text   string
+	UserId string
+	Source MessageType
 }
 
-func handleCommandPm(b *Bot, userId string, message string) {
-	user, _ := b.UserFromId(userId)
+type MessageType int
 
-	if cmd, args, err := parseCommand(message); err == nil {
-		handler, err := b.recognizeCommand(cmd)
+const (
+	MessageTypeNone MessageType = iota
+	MessageTypePm
+	MessageTypeRoom
+)
 
-		if err != nil {
-			b.PrivateMessage(userId, err.Error())
-			logrus.WithFields(logrus.Fields{
-				"text":     message,
-				"cmd":      cmd,
-				"args":     args,
-				"userId":   userId,
-				"userName": user.Name,
-			}).Info("MSG:PM:CMD:ERR")
-			return
-		}
+func (m MessageType) String() string {
+	switch m {
+	case MessageTypePm:
+		return "pm"
+	case MessageTypeRoom:
+		return "room"
+	default:
+		return "none"
+	}
+}
 
-		logrus.WithFields(logrus.Fields{
-			"text":     message,
-			"cmd":      cmd,
-			"args":     args,
-			"userId":   userId,
-			"userName": user.Name,
-		}).Info("MSG:PM:CMD")
+func handleCommand(b *Bot, i *MessageInput) {
+	user, _ := b.UserFromId(i.UserId)
+	logTag := commandLogTag(i.Source)
 
-		out := handler(b, userId, args)
+	cmd, args, ok := parseCommand(i.Text)
+	if !ok {
+		logrus.WithFields(logrus.Fields{"text": i.Text, "userId": user.Id, "userName": user.Name}).Info(logTag)
+		return
+	}
+	handler, err := b.recognizeCommand(cmd)
+	logFields := logrus.Fields{
+		"text":     i.Text,
+		"cmd":      cmd,
+		"args":     args,
+		"userId":   user.Id,
+		"userName": user.Name,
+	}
 
-		if out.Msg != "" && out.Err == nil {
-			b.PrivateMessage(userId, out.Msg)
-		}
-
-		if out.Err != nil {
-			b.PrivateMessage(userId, out.Err.Error())
-		}
-
+	if err != nil {
+		b.RoomMessage("@" + user.Name + " " + err.Error())
+		logrus.WithFields(logFields).Info(logTag + ":CMD:ERR")
 		return
 	}
 
-	logrus.WithFields(logrus.Fields{"text": message, "userId": userId, "userName": user.Name}).Info("MSG:PM")
+	logrus.WithFields(logFields).Info(logTag + ":CMD")
+
+	out := handler(b, &CommandInput{UserId: user.Id, Args: args, Source: i.Source})
+
+	if out.Msg != "" && out.Err == nil {
+		b.RoomMessage(out.Msg)
+
+		switch out.ReplyType {
+		case MessageTypePm:
+			b.PrivateMessage(user.Id, out.Msg)
+			return
+		case MessageTypeRoom:
+			b.RoomMessage(out.Msg)
+			return
+		default:
+			return
+		}
+	}
+
+	if err != nil {
+		b.PrivateMessage(user.Id, err.Error())
+	}
 }
 
 func (b *Bot) recognizeCommand(cmd string) (CommandHandler, error) {
 	if command, ok := b.commands.Get(cmd); ok {
 		return command, nil
 	}
-	return nil, errors.New("Command not recognized")
+	return nil, errors.New("command not recognized")
 }
 
-func parseCommand(msg string) (string, []string, error) {
+func parseCommand(msg string) (string, []string, bool) {
 	re := regexp.MustCompile(`(?P<cmd>^![a-zA-Z+\-!?]+)(?P<args>\s?(.*)?)`)
 	matches := re.FindStringSubmatch(msg)
 
-	if cmdIndex := re.SubexpIndex("cmd"); cmdIndex >= 0 && len(matches) > cmdIndex {
-		cmd := strings.Trim(matches[cmdIndex], " ")
+	cmdIndex := re.SubexpIndex("cmd")
+	if !(cmdIndex >= 0 && len(matches) > cmdIndex) {
+		return "", nil, false
+	}
+	cmd := strings.Trim(matches[cmdIndex], " ")
 
-		argsIndex := re.SubexpIndex("args")
-		if argsIndex >= 0 && len(strings.Trim(matches[argsIndex], " ")) > 0 {
-			argsRaw := strings.Trim(matches[argsIndex], " ")
-			args := strings.Split(argsRaw, " ")
-			return cmd, args, nil
-		} else {
-			return cmd, nil, nil
-		}
+	argsIndex := re.SubexpIndex("args")
+	if argsIndex >= 0 && len(strings.Trim(matches[argsIndex], " ")) > 0 {
+		argsRaw := strings.Trim(matches[argsIndex], " ")
+		args := strings.Split(argsRaw, " ")
+		return cmd, args, true
 	} else {
-		return "", nil, errors.New("Not a command")
+		return cmd, nil, true
+	}
+}
+
+func commandLogTag(src MessageType) string {
+	switch src {
+	case MessageTypePm:
+		return "MSG:PM"
+	default:
+		return "MSG:ROOM"
 	}
 }
