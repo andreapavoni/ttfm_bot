@@ -46,7 +46,7 @@ func onRoomChanged(b *Bot, e ttapi.RoomInfoRes) {
 
 func onNewSong(b *Bot, e ttapi.NewSongEvt) {
 	// show song stats
-	if b.UserIsModerator(b.Config.UserId) && b.Config.AutoShowSongStats {
+	if b.UserIsModerator(b.Config.UserId) && b.Config.AutoShowSongStats && b.Room.Song.Title != "" {
 		header, data := b.ShowSongStats()
 		b.RoomMessage(header)
 		utils.ExecuteDelayed(time.Duration(5)*time.Millisecond, func() {
