@@ -10,6 +10,7 @@ type Config struct {
 	AutoSnag               bool
 	AutoBop                bool
 	AutoDj                 bool
+	AutoDjCountTrigger     int64
 	AutoShowSongStats      bool
 	ModAutoWelcome         bool
 	ModQueue               bool
@@ -30,6 +31,7 @@ func LoadConfigFromEnvs() *Config {
 		AutoSnag:               utils.GetEnvBoolOrDefault("TTFM_AUTO_SNAG", true),
 		AutoBop:                utils.GetEnvBoolOrDefault("TTFM_AUTO_BOP", true),
 		AutoDj:                 utils.GetEnvBoolOrDefault("TTFM_AUTO_DJ", false),
+		AutoDjCountTrigger:     utils.GetEnvIntOrDefault("TTFM_AUTO_DJ_COUNT_TRIGGER", 0),
 		AutoShowSongStats:      utils.GetEnvBoolOrDefault("TTFM_AUTO_SHOW_SONG_STATS", false),
 		ModAutoWelcome:         utils.GetEnvBoolOrDefault("TTFM_AUTO_WELCOME", false),
 		ModQueue:               utils.GetEnvBoolOrDefault("TTFM_MOD_QUEUE", false),

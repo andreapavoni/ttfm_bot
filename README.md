@@ -49,10 +49,10 @@ Users are the lowest role, basically are listeners or want to DJ
 
 - `!props` let the current DJ know you're appreciating the song
 - `!help` shows the list of commands available for the role of the user that issued the command (_Coming soon_)
-- `!q on|off` shows the current queue status
+- `!q [on|off]` enables/disables queue. without args replies with current status
 - `!qadd` adds user into queue
 - `!qrm` removes user from queue
-- `!r reaction` posts a giphy `reaction` in the chat room (_Coming soon_)
+- `!r <reaction>` posts a giphy `<reaction>` in the chat room (_Coming soon_)
 
 ### DJs
 
@@ -63,25 +63,27 @@ Users are the lowest role, basically are listeners or want to DJ
 Admins are users which were previously configured on the bot to run commands on it.
 
 - `!dj` tells the bot to jump on the stage and starts playing songs, or jump off if it's already djing
-- `!autodj on|off` enables/disables autodj mode
+- `!autodj [on|off]` enables/disables autodj mode. without args replies with current status
 - `!snag` tells the bot to snag the current playing song
-- `!autosnag on|off` enables/disables automatic snag
+- `!autosnag [on|off]` enables/disables automatic snag. without args replies with current status
 - `!bop` tells the bot to bop for the current playing song
-- `!autobop on|off` enables/disables automatic bop
-- `!fan username` and `!unfan username` respectively fan/unfan the specified `username`
-- `!padd name` creates a new playlist
-- `!pdel name` deletes a playlist
+- `!autobop [on|off]` enables/disables automatic bop. without args replies with current status
+- `!fan <user_name>` and `!unfan <user_name>` respectively fan/unfan the specified `<user_name>`
+- `!padd <playlist_name>` creates a new playlist
+- `!pdel <playlist_name>` deletes a playlist
 - `!pls` lists available playlists
 - `!prm` removes the current playing song from the current playlist
-- `!pc name` switch playlist
+- `!pc <playlist_name>` switch to `<playlist_name>` playlist
+- `!say <something>` say something in the room
+- `!cfg <config_key> [<config_value>]` sets config key and value. without `<config_value>`, it replies with current configuration for `<config_key>`
 
 ### Moderators
 
 Bot can obey to moderators commands, however it depends by the kind of command issued and by the bot's role in the current room.
 
 - `!skip` tells the bot to skip the current playing song
-- `!escort username` tells the bot to escort the specified `username` off the stage
-- `!boot username` tells the bot to kick the specified `username` off the room (_Coming soon_)
+- `!escort <user_name>` tells the bot to escort the specified `<user_name>` off the stage
+- `!boot <user_name>` tells the bot to kick the specified `<user_name>` off the room
 
 ## Credits
 
@@ -102,7 +104,7 @@ Bot can obey to moderators commands, however it depends by the kind of command i
   - [x] input
   - [x] output
   - [x] use Enum types for source/reply fields
-- [ ] add cmds: say, pm, action, whois
+- [x] add say cmd
 - [x] song max duration
   - [x] enforce on new song
   - [x] update value at runtime
@@ -111,6 +113,6 @@ Bot can obey to moderators commands, however it depends by the kind of command i
 - [x] log to file
 - [x] set max songs per dj at runtime
 - [ ] cmd for room stats?
-- [ ] group all string messages into a struct/file
+- [ ] group all string messages into a struct/file?
 - [ ] add docs for functions
 - [ ] shell for commands

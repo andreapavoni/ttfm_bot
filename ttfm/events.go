@@ -29,7 +29,7 @@ func onRoomChanged(b *Bot, e ttapi.RoomInfoRes) {
 		utils.ExecuteDelayedRandom(15, b.Bop)
 	}
 
-	if b.Config.AutoDj && e.Room.Metadata.Djcount == 0 {
+	if b.Config.AutoDj && e.Room.Metadata.Djcount <= int(b.Config.AutoDjCountTrigger) {
 		b.Dj()
 	}
 
@@ -68,7 +68,7 @@ func onNewSong(b *Bot, e ttapi.NewSongEvt) {
 
 	// forward queue
 	if b.UserIsModerator(b.Config.UserId) && b.Config.ModQueue {
-		stageIsFull := b.Room.maxDjs-b.Room.djs.Size() == 0
+		stageIsFull := (b.Room.maxDjs - b.Room.djs.Size()) == 0
 		queueNotEmpty := b.Queue.Size() > 0
 		if err := b.EscortDj(b.Room.Song.djId); err == nil && stageIsFull && queueNotEmpty {
 			b.Queue.Push(b.Room.Song.djId)
@@ -204,7 +204,7 @@ func onDeregistered(b *Bot, e ttapi.DeregisteredEvt) {
 		b.Queue.Remove(u.ID)
 	}
 
-	if b.Config.AutoDj && b.Room.djs.Size() == 0 {
+	if b.Config.AutoDj && b.Room.djs.Size() <= int(b.Config.AutoDjCountTrigger) {
 		b.Dj()
 	}
 
@@ -235,7 +235,7 @@ func onAddDj(b *Bot, e ttapi.AddDJEvt) {
 		return
 	}
 
-	stageIsFull := b.Room.maxDjs-b.Room.djs.Size() == 0
+	stageIsFull := (b.Room.maxDjs - b.Room.djs.Size()) == 0
 	if b.UserIsModerator(b.Config.UserId) && !b.Config.ModQueue && stageIsFull {
 		b.ModQueue(true)
 		b.RoomMessage("/me has enabled queue mode")
@@ -267,7 +267,7 @@ func onRemDj(b *Bot, e ttapi.RemDJEvt) {
 		return
 	}
 
-	if b.Config.AutoDj && b.Room.djs.Size() == 0 {
+	if b.Config.AutoDj && b.Room.djs.Size() <= int(b.Config.AutoDjCountTrigger) {
 		b.Dj()
 	}
 
@@ -277,7 +277,7 @@ func onRemDj(b *Bot, e ttapi.RemDJEvt) {
 		"moderator": e.Modid,
 	}).Info("STAGE:DJ_LEFT")
 
-	stageIsAvailable := b.Room.maxDjs-b.Room.djs.Size() > 0
+	stageIsAvailable := (b.Room.maxDjs - b.Room.djs.Size()) > 0
 	if b.UserIsModerator(b.Config.UserId) && b.Config.ModQueue && stageIsAvailable {
 		if newDjId, err := b.Queue.Shift(int(b.Config.ModQueueInviteDuration)); err == nil {
 			var msg string

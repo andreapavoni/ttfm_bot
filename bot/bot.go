@@ -38,7 +38,7 @@ func (b *Bot) Start() {
 	b.Bot.AddCommand("!q", commands.QueueCommandHandler)
 	b.Bot.AddCommand("!qadd", commands.QueueAddCommandHandler)
 	b.Bot.AddCommand("!qrm", commands.QueueRemoveCommandHandler)
-	b.Bot.AddCommand("!config", commands.SetConfigCommandHandler)
+	b.Bot.AddCommand("!cfg", commands.SetConfigCommandHandler)
 	b.Bot.AddCommand("!say", commands.SayCommandHandler)
 
 	b.Bot.Start()
