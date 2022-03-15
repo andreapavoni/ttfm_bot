@@ -9,7 +9,7 @@ import (
 func PlaylistRemoveSongCommand() *ttfm.Command {
 	return &ttfm.Command{
 		AuthorizationRoles: []ttfm.UserRole{ttfm.UserRoleAdmin},
-		Help:               "Remove current song playing song from current playlist",
+		Help:               "Remove current playing song from current playlist",
 		Handler:            playlistRemoveSongCommandHandler,
 	}
 }
