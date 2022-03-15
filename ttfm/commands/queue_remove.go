@@ -9,7 +9,7 @@ import (
 
 func QueueRemoveCommand() *ttfm.Command {
 	return &ttfm.Command{
-		AuthorizationRoles: []ttfm.UserRole{ttfm.UserRoleAdmin, ttfm.UserRoleBotModerator},
+		AuthorizationRoles: []ttfm.UserRole{ttfm.UserRoleBotModerator},
 		Help:               "Ask to be removed from the queue",
 		Handler:            queueRemoveCommandHandler,
 	}

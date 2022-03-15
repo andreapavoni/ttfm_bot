@@ -91,3 +91,12 @@ func FormatSecondsToMinutes(secs int) string {
 	return fmt.Sprintf("%02d:%02d", minutes, seconds)
 
 }
+
+func IndexOf[T comparable](value T, collection []T) int {
+	for idx, element := range collection {
+		if element == value {
+			return idx
+		}
+	}
+	return -1
+}

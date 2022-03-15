@@ -3,6 +3,8 @@ package collections
 import (
 	"errors"
 	"sync"
+
+	"github.com/andreapavoni/ttfm_bot/utils"
 )
 
 type SmartList[T comparable] struct {
@@ -47,7 +49,7 @@ func (l *SmartList[T]) Remove(value T) error {
 	l.lock.Lock()
 	defer l.lock.Unlock()
 
-	if idx := indexOf(value, l.list); idx >= 0 {
+	if idx := utils.IndexOf(value, l.list); idx >= 0 {
 		l.list = append(l.list[:idx], l.list[idx+1:]...)
 		return nil
 	}
@@ -56,7 +58,7 @@ func (l *SmartList[T]) Remove(value T) error {
 }
 
 func (l *SmartList[T]) HasElement(value T) bool {
-	return indexOf(value, l.list) >= 0
+	return utils.IndexOf(value, l.list) >= 0
 }
 
 func (l *SmartList[T]) List() []T {
@@ -64,7 +66,7 @@ func (l *SmartList[T]) List() []T {
 }
 
 func (l *SmartList[T]) IndexOf(value T) int {
-	return indexOf(value, l.list)
+	return utils.IndexOf(value, l.list)
 }
 
 func (l *SmartList[T]) Find(f func(*T) bool) (*T, int) {
@@ -82,13 +84,4 @@ func (l *SmartList[T]) Size() int {
 
 func (l *SmartList[T]) Empty() {
 	l.list = make([]T, 0)
-}
-
-func indexOf[T comparable](value T, collection []T) int {
-	for idx, element := range collection {
-		if element == value {
-			return idx
-		}
-	}
-	return -1
 }

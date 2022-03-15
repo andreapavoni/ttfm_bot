@@ -1,0 +1,48 @@
+package commands
+
+import (
+	"fmt"
+	"sort"
+	"strings"
+
+	"github.com/andreapavoni/ttfm_bot/ttfm"
+)
+
+func HelpCommand() *ttfm.Command {
+	return &ttfm.Command{
+		AuthorizationRoles: []ttfm.UserRole{ttfm.UserRoleNone},
+		Help:               "Show available commands for asking user, or the description of a specific command",
+		Handler:            helpCommandHandler,
+	}
+}
+
+func helpCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandOutput {
+	user, _ := b.UserFromId(cmd.UserId)
+
+	if len(cmd.Args) == 1 {
+		command, err := b.GetCommand(cmd.Args[0])
+
+		if err != nil {
+			return &ttfm.CommandOutput{User: user, ReplyType: cmd.Source, Err: err}
+		}
+
+		msg := fmt.Sprintf("%s - %s", cmd.Args[0], command.Help)
+		return &ttfm.CommandOutput{Msg: msg, User: user, ReplyType: cmd.Source}
+	}
+
+	availableCmds := []string{}
+	for _, c := range b.ListCommands() {
+		command, err := b.GetCommand(c)
+		if err != nil {
+			continue
+		}
+
+		if err := ttfm.CheckAuthorizations(b, user, command.AuthorizationRoles...); err == nil {
+			availableCmds = append(availableCmds, c)
+		}
+	}
+
+	sort.Strings(availableCmds)
+	msg := fmt.Sprintf("@%s according to our respective roles here, you can run the following commands: ", user.Name) + strings.Join(availableCmds, ", ")
+	return &ttfm.CommandOutput{Msg: msg, User: user, ReplyType: cmd.Source}
+}

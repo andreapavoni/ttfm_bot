@@ -108,7 +108,7 @@ Bot can obey to moderators commands, however it depends by the kind of command i
 - [x] song max duration
   - [x] enforce on new song
   - [x] update value at runtime
-- [ ] put help in bot's profile description, then !help cmd will reply with link to https://turntable.fm/profile/BOT_USER_ID
+- [x] add help cmd
 - [ ] multiple config source (env, toml) and load before init bot
 - [x] log to file
 - [x] set max songs per dj at runtime

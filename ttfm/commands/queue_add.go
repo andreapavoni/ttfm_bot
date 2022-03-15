@@ -9,7 +9,7 @@ import (
 
 func QueueAddCommand() *ttfm.Command {
 	return &ttfm.Command{
-		AuthorizationRoles: []ttfm.UserRole{ttfm.UserRoleAdmin, ttfm.UserRoleBotModerator},
+		AuthorizationRoles: []ttfm.UserRole{ttfm.UserRoleBotModerator},
 		Help:               "Ask to get added into queue",
 		Handler:            queueAddCommandHandler,
 	}

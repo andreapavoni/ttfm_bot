@@ -81,6 +81,22 @@ func (b *Bot) AddCommand(trigger string, cmd *Command) {
 	b.commands.Set(trigger, cmd)
 }
 
+func (b *Bot) GetCommand(name string) (*Command, error) {
+	if cmd, ok := b.commands.Get(name); ok {
+		return cmd, nil
+	}
+
+	return nil, errors.New("command not found")
+}
+
+func (b *Bot) ListCommands() []string {
+	commands := []string{}
+	for cmd := range b.commands.Iter() {
+		commands = append(commands, cmd.Key)
+	}
+	return commands
+}
+
 func (b *Bot) Start() {
 	b.api.Start()
 }
@@ -316,7 +332,7 @@ func (b *Bot) Unfan(userId string) error {
 }
 
 func (b *Bot) UserFromId(userId string) (*User, error) {
-	if userName, ok := b.Room.users.Get(userId); ok {
+	if userName, ok := b.Room.Users.Get(userId); ok {
 		return &User{Id: userId, Name: userName}, nil
 	}
 	return &User{}, errors.New("User with ID " + userId + " wasn't found")
@@ -335,7 +351,7 @@ func (b *Bot) UserIsAdmin(user *User) bool {
 }
 
 func (b *Bot) UserIsDj(userId string) bool {
-	return b.Room.djs.HasElement(userId)
+	return b.Room.Djs.HasElement(userId)
 }
 
 func (b *Bot) UserIsCurrentDj(userId string) bool {
@@ -343,5 +359,5 @@ func (b *Bot) UserIsCurrentDj(userId string) bool {
 }
 
 func (b *Bot) UserIsModerator(userId string) bool {
-	return b.Room.moderators.HasElement(userId)
+	return b.Room.Moderators.HasElement(userId)
 }

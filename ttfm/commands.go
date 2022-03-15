@@ -122,7 +122,7 @@ func (b *Bot) recognizeCommand(cmd string) (*Command, error) {
 }
 
 func parseCommand(msg string) (string, []string, bool) {
-	re := regexp.MustCompile(`(?P<cmd>^![a-zA-Z+\-!?]+)(?P<args>\s?(.*)?)`)
+	re := regexp.MustCompile(`^!(?P<cmd>[a-zA-Z+\-!?]+)(?P<args>\s?(.*)?)`)
 	matches := re.FindStringSubmatch(msg)
 
 	cmdIndex := re.SubexpIndex("cmd")
