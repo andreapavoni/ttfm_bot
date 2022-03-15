@@ -4,12 +4,16 @@ import (
 	"github.com/andreapavoni/ttfm_bot/ttfm"
 )
 
-func AutoSnagCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandOutput {
-	user, _ := b.UserFromId(cmd.UserId)
-
-	if err := requireAdmin(b, user); err != nil {
-		return &ttfm.CommandOutput{User: user, ReplyType: ttfm.MessageTypePm, Err: err}
+func AutoSnagCommand() *ttfm.Command {
+	return &ttfm.Command{
+		AuthorizationRoles: []ttfm.UserRole{ttfm.UserRoleAdmin},
+		Help:               "Enables/disables auto snag mode. Without args prints current setting",
+		Handler:            autoSnagCommandHandler,
 	}
+}
+
+func autoSnagCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandOutput {
+	user, _ := b.UserFromId(cmd.UserId)
 
 	if len(cmd.Args) == 0 {
 		return &ttfm.CommandOutput{Msg: currentAutoSnagStatusMsg(b.Config.AutoSnag), User: user, ReplyType: cmd.Source}

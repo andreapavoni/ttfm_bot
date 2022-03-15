@@ -8,17 +8,16 @@ import (
 	"github.com/andreapavoni/ttfm_bot/ttfm"
 )
 
-func BootCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandOutput {
+func BootCommand() *ttfm.Command {
+	return &ttfm.Command{
+		AuthorizationRoles: []ttfm.UserRole{ttfm.UserRoleAdmin, ttfm.UserRoleBotModerator},
+		Help:               "Boots a user out of the room",
+		Handler:            bootCommandHandler,
+	}
+}
+
+func bootCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandOutput {
 	user, _ := b.UserFromId(cmd.UserId)
-
-	if err := requireAdmin(b, user); err != nil {
-		return &ttfm.CommandOutput{User: user, ReplyType: ttfm.MessageTypePm}
-
-	}
-
-	if err := requireBotModerator(b, user); err != nil {
-		return &ttfm.CommandOutput{User: user, ReplyType: ttfm.MessageTypePm}
-	}
 
 	if len(cmd.Args) < 1 {
 		return &ttfm.CommandOutput{User: user, ReplyType: cmd.Source, Err: errors.New("You must specify the username of the user you kick")}

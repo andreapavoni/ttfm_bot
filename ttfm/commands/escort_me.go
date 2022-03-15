@@ -6,13 +6,16 @@ import (
 	"github.com/andreapavoni/ttfm_bot/ttfm"
 )
 
-func EscortMeCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandOutput {
-	user, _ := b.UserFromId(cmd.UserId)
-
-	if err := requireBotModerator(b, user); err != nil {
-		return &ttfm.CommandOutput{User: user, ReplyType: ttfm.MessageTypePm, Err: err}
+func EscortMeCommand() *ttfm.Command {
+	return &ttfm.Command{
+		AuthorizationRoles: []ttfm.UserRole{ttfm.UserRoleBotModerator},
+		Help:               "Ask to be escorted after current song has been played",
+		Handler:            escortMeCommandHandler,
 	}
+}
 
+func escortMeCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandOutput {
+	user, _ := b.UserFromId(cmd.UserId)
 	b.AddDjEscorting(cmd.UserId)
 
 	var msg string

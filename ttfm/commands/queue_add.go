@@ -7,17 +7,16 @@ import (
 	"github.com/andreapavoni/ttfm_bot/ttfm"
 )
 
-func QueueAddCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandOutput {
+func QueueAddCommand() *ttfm.Command {
+	return &ttfm.Command{
+		AuthorizationRoles: []ttfm.UserRole{ttfm.UserRoleAdmin, ttfm.UserRoleBotModerator},
+		Help:               "Ask to get added into queue",
+		Handler:            queueAddCommandHandler,
+	}
+}
+
+func queueAddCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandOutput {
 	user, _ := b.UserFromId(cmd.UserId)
-
-	if err := requireAdmin(b, user); err != nil {
-		return &ttfm.CommandOutput{User: user, ReplyType: ttfm.MessageTypePm, Err: err}
-	}
-
-	if err := requireBotModerator(b, user); err != nil {
-		return &ttfm.CommandOutput{User: user, ReplyType: ttfm.MessageTypePm, Err: err}
-	}
-
 	if !b.Config.ModQueue {
 		return &ttfm.CommandOutput{User: user, ReplyType: ttfm.MessageTypePm, Err: errors.New("Queue mode is disabled")}
 	}

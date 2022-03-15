@@ -8,6 +8,20 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+type Command struct {
+	Help               string
+	Handler            CommandHandler
+	AuthorizationRoles []UserRole
+}
+
+func (c *Command) Run(b *Bot, u *User, i *CommandInput) *CommandOutput {
+	if err := CheckAuthorizations(b, u, c.AuthorizationRoles...); err != nil {
+		return &CommandOutput{User: u, ReplyType: MessageTypePm, Err: err}
+	}
+
+	return c.Handler(b, i)
+}
+
 type CommandHandler func(*Bot, *CommandInput) *CommandOutput
 
 type CommandInput struct {
@@ -57,7 +71,7 @@ func handleCommand(b *Bot, i *MessageInput) {
 		logrus.WithFields(logrus.Fields{"text": i.Text, "userId": user.Id, "userName": user.Name}).Info(logTag)
 		return
 	}
-	handler, err := b.recognizeCommand(cmd)
+	command, err := b.recognizeCommand(cmd)
 	logFields := logrus.Fields{
 		"text":     i.Text,
 		"cmd":      cmd,
@@ -83,7 +97,7 @@ func handleCommand(b *Bot, i *MessageInput) {
 
 	logrus.WithFields(logFields).Info(logTag + ":CMD")
 
-	out := handler(b, &CommandInput{UserId: user.Id, Args: args, Source: i.Source})
+	out := command.Run(b, user, &CommandInput{UserId: user.Id, Args: args, Source: i.Source})
 	msg := commandOutputMessage(out)
 
 	if msg != "" {
@@ -100,7 +114,7 @@ func handleCommand(b *Bot, i *MessageInput) {
 	}
 }
 
-func (b *Bot) recognizeCommand(cmd string) (CommandHandler, error) {
+func (b *Bot) recognizeCommand(cmd string) (*Command, error) {
 	if command, ok := b.commands.Get(cmd); ok {
 		return command, nil
 	}

@@ -6,7 +6,15 @@ import (
 	"github.com/andreapavoni/ttfm_bot/ttfm"
 )
 
-func PropsCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandOutput {
+func PropsCommand() *ttfm.Command {
+	return &ttfm.Command{
+		AuthorizationRoles: []ttfm.UserRole{},
+		Help:               "Give props to current dj",
+		Handler:            propsCommandHandler,
+	}
+}
+
+func propsCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandOutput {
 	user, _ := b.UserFromId(cmd.UserId)
 
 	msg := fmt.Sprintf("🔥 Hey @%s! @%s is enjoying the song you're playing! 🚀", b.Room.Song.DjName, user.Name)

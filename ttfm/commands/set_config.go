@@ -8,16 +8,16 @@ import (
 	"github.com/andreapavoni/ttfm_bot/ttfm"
 )
 
-func SetConfigCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandOutput {
+func SetConfigCommand() *ttfm.Command {
+	return &ttfm.Command{
+		AuthorizationRoles: []ttfm.UserRole{ttfm.UserRoleAdmin},
+		Help:               "Set config values at runtime",
+		Handler:            setConfigCommandHandler,
+	}
+}
+
+func setConfigCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandOutput {
 	user, _ := b.UserFromId(cmd.UserId)
-
-	if err := requireAdmin(b, user); err != nil {
-		return &ttfm.CommandOutput{User: user, ReplyType: ttfm.MessageTypePm, Err: err}
-	}
-
-	if err := requireBotModerator(b, user); err != nil {
-		return &ttfm.CommandOutput{User: user, ReplyType: ttfm.MessageTypePm, Err: err}
-	}
 
 	if len(cmd.Args) == 1 {
 		key := cmd.Args[0]

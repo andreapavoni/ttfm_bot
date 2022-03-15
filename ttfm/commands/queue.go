@@ -4,17 +4,16 @@ import (
 	"github.com/andreapavoni/ttfm_bot/ttfm"
 )
 
-func QueueCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandOutput {
+func QueueCommand() *ttfm.Command {
+	return &ttfm.Command{
+		AuthorizationRoles: []ttfm.UserRole{ttfm.UserRoleAdmin, ttfm.UserRoleBotModerator},
+		Help:               "Enable/disable queue mode. Without args prints current setting",
+		Handler:            queueCommandHandler,
+	}
+}
+
+func queueCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandOutput {
 	user, _ := b.UserFromId(cmd.UserId)
-
-	if err := requireAdmin(b, user); err != nil {
-		return &ttfm.CommandOutput{User: user, ReplyType: ttfm.MessageTypePm, Err: err}
-	}
-
-	if err := requireBotModerator(b, user); err != nil {
-		return &ttfm.CommandOutput{User: user, ReplyType: ttfm.MessageTypePm, Err: err}
-	}
-
 	if len(cmd.Args) == 0 {
 		return &ttfm.CommandOutput{Msg: currentQueueStatusMsg(b.Config.ModQueue), User: user, ReplyType: cmd.Source}
 	}

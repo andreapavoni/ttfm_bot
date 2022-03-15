@@ -22,7 +22,7 @@ type Bot struct {
 	api       *ttapi.Bot
 	admins    *collections.SmartList[string]
 	playlist  *Playlist
-	commands  *collections.SmartMap[CommandHandler]
+	commands  *collections.SmartMap[*Command]
 }
 
 // BOOT
@@ -50,7 +50,7 @@ func New() *Bot {
 		admins:    collections.NewSmartListFromSlice(cfg.Admins),
 		playlist:  NewPlaylist(cfg.CurrentPlaylist),
 		Playlists: collections.NewSmartList[string](),
-		commands:  collections.NewSmartMap[CommandHandler](),
+		commands:  collections.NewSmartMap[*Command](),
 	}
 
 	// Commands
@@ -77,8 +77,8 @@ func New() *Bot {
 	return &b
 }
 
-func (b *Bot) AddCommand(trigger string, h CommandHandler) {
-	b.commands.Set(trigger, h)
+func (b *Bot) AddCommand(trigger string, cmd *Command) {
+	b.commands.Set(trigger, cmd)
 }
 
 func (b *Bot) Start() {

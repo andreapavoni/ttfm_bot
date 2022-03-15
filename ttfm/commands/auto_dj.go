@@ -4,12 +4,16 @@ import (
 	"github.com/andreapavoni/ttfm_bot/ttfm"
 )
 
-func AutoDjCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandOutput {
-	user, _ := b.UserFromId(cmd.UserId)
-
-	if err := requireAdmin(b, user); err != nil {
-		return &ttfm.CommandOutput{Msg: disableAutoDj(b), User: user, ReplyType: ttfm.MessageTypePm, Err: err}
+func AutoDjCommand() *ttfm.Command {
+	return &ttfm.Command{
+		AuthorizationRoles: []ttfm.UserRole{ttfm.UserRoleAdmin},
+		Help:               "Enables/disables auto dj mode. Without args prints current setting",
+		Handler:            autoDjCommandHandler,
 	}
+}
+
+func autoDjCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandOutput {
+	user, _ := b.UserFromId(cmd.UserId)
 
 	if len(cmd.Args) == 0 {
 		return &ttfm.CommandOutput{Msg: currentAutoDjStatusMsg(b.Config.AutoDj), User: user, ReplyType: cmd.Source}

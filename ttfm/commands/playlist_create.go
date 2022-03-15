@@ -8,13 +8,16 @@ import (
 	"github.com/andreapavoni/ttfm_bot/ttfm"
 )
 
-func PlaylistCreateCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandOutput {
-	user, _ := b.UserFromId(cmd.UserId)
-
-	if err := requireAdmin(b, user); err != nil {
-		return &ttfm.CommandOutput{User: user, ReplyType: ttfm.MessageTypePm, Err: err}
+func PlaylistCreateCommand() *ttfm.Command {
+	return &ttfm.Command{
+		AuthorizationRoles: []ttfm.UserRole{ttfm.UserRoleAdmin},
+		Help:               "Create new playlist",
+		Handler:            playlistCreateCommandHandler,
 	}
+}
 
+func playlistCreateCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandOutput {
+	user, _ := b.UserFromId(cmd.UserId)
 	if len(cmd.Args) < 1 {
 		return &ttfm.CommandOutput{User: user, ReplyType: cmd.Source, Err: errors.New("You must specify a name of the new playlist")}
 	}
