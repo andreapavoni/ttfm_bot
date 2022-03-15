@@ -28,6 +28,7 @@ func NewRoom() *Room {
 		moderators: collections.NewSmartList[string](),
 		djs:        collections.NewSmartList[string](),
 		Song:       &Song{},
+		escorting:  collections.NewSmartList[string](),
 	}
 }
 

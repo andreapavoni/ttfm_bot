@@ -49,19 +49,21 @@ func onNewSong(b *Bot, e ttapi.NewSongEvt) {
 	if b.UserIsModerator(b.Config.UserId) && b.Config.AutoShowSongStats {
 		header, data := b.ShowSongStats()
 		b.RoomMessage(header)
-		utils.ExecuteDelayed(time.Duration(10)*time.Millisecond, func() {
+		utils.ExecuteDelayed(time.Duration(5)*time.Millisecond, func() {
 			b.RoomMessage(data)
 		})
 	}
 
 	// escort people off the stage
 	if b.UserIsModerator(b.Config.UserId) && b.Room.escorting.Size() > 0 {
-		for _, u := range b.Room.escorting.List() {
-			if b.Room.djs.HasElement(u) {
-				b.EscortDj(u)
-				b.RemoveDjEscorting(u)
+		utils.ExecuteDelayed(time.Duration(10)*time.Millisecond, func() {
+			for _, u := range b.Room.escorting.List() {
+				if b.Room.djs.HasElement(u) {
+					b.EscortDj(u)
+					b.RemoveDjEscorting(u)
+				}
 			}
-		}
+		})
 	}
 
 	// forward queue
@@ -191,7 +193,12 @@ func onDeregistered(b *Bot, e ttapi.DeregisteredEvt) {
 
 	b.Room.RemoveDj(u.ID)
 	b.Room.RemoveUser(u.ID)
-	b.RemoveDjEscorting(b.Room.Song.djId)
+
+	if b.UserIsModerator(b.Config.UserId) && b.Room.escorting.Size() > 0 {
+		if b.Room.djs.HasElement(u.Userid) {
+			b.RemoveDjEscorting(u.Userid)
+		}
+	}
 
 	if b.UserIsModerator(b.Config.UserId) && b.Config.ModQueue {
 		b.Queue.Remove(u.ID)
@@ -248,7 +255,12 @@ func onAddDj(b *Bot, e ttapi.AddDJEvt) {
 func onRemDj(b *Bot, e ttapi.RemDJEvt) {
 	u := e.User[0]
 	b.Room.RemoveDj(u.Userid)
-	b.RemoveDjEscorting(u.Userid)
+
+	if b.UserIsModerator(b.Config.UserId) && b.Room.escorting.Size() > 0 {
+		if b.Room.djs.HasElement(u.Userid) {
+			b.RemoveDjEscorting(u.Userid)
+		}
+	}
 
 	if b.Config.AutoDj && u.Userid == b.Config.UserId && e.Modid != "" {
 		b.AutoDj(false)

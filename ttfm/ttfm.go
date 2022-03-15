@@ -155,7 +155,19 @@ func (b *Bot) Dj() {
 
 func (b *Bot) AutoDj(status bool) bool {
 	b.Config.AutoDj = status
-	b.AddDjEscorting(b.Config.UserId)
+
+	if status {
+		return status
+	}
+
+	if !status && b.UserIsDj(b.Config.UserId) {
+		if b.UserIsCurrentDj(b.Config.UserId) {
+			b.AddDjEscorting(b.Config.UserId)
+			return status
+		}
+		b.api.RemDj("")
+	}
+
 	return status
 }
 

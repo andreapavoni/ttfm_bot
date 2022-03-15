@@ -67,18 +67,26 @@ func handleCommand(b *Bot, i *MessageInput) {
 	}
 
 	if err != nil {
-		b.RoomMessage("@" + user.Name + " " + err.Error())
 		logrus.WithFields(logFields).Info(logTag + ":CMD:ERR")
-		return
+
+		switch i.Source {
+		case MessageTypePm:
+			b.PrivateMessage(user.Id, err.Error())
+			return
+		case MessageTypeRoom:
+			b.RoomMessage("@" + user.Name + " " + err.Error())
+			return
+		default:
+			return
+		}
 	}
 
 	logrus.WithFields(logFields).Info(logTag + ":CMD")
 
 	out := handler(b, &CommandInput{UserId: user.Id, Args: args, Source: i.Source})
+	msg := commandOutputMessage(out)
 
-	if out.Msg != "" && out.Err == nil {
-		b.RoomMessage(out.Msg)
-
+	if msg != "" {
 		switch out.ReplyType {
 		case MessageTypePm:
 			b.PrivateMessage(user.Id, out.Msg)
@@ -89,10 +97,6 @@ func handleCommand(b *Bot, i *MessageInput) {
 		default:
 			return
 		}
-	}
-
-	if err != nil {
-		b.PrivateMessage(user.Id, err.Error())
 	}
 }
 
@@ -121,6 +125,18 @@ func parseCommand(msg string) (string, []string, bool) {
 	} else {
 		return cmd, nil, true
 	}
+}
+
+func commandOutputMessage(out *CommandOutput) string {
+	if out.Msg != "" && out.Err == nil && out.ReplyType != MessageTypeNone {
+		return out.Msg
+	}
+
+	if out.Err == nil && out.ReplyType != MessageTypeNone {
+		return out.Err.Error()
+	}
+
+	return ""
 }
 
 func commandLogTag(src MessageType) string {
