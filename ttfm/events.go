@@ -67,12 +67,12 @@ func onNewSong(b *Bot, e ttapi.NewSongEvt) {
 	}
 
 	// forward queue
-	if b.UserIsModerator(b.Config.UserId) && b.Config.ModQueue {
-		stageIsFull := (b.Room.MaxDjs - b.Room.Djs.Size()) == 0
-		queueNotEmpty := b.Queue.Size() > 0
-		if err := b.EscortDj(b.Room.Song.djId); err == nil && stageIsFull && queueNotEmpty {
-			b.Queue.Push(b.Room.Song.djId)
-			b.PrivateMessage(b.Room.Song.djId, "Thank you for your awesome set. You've been temporarily removed from the stage and automatically added to the queue. I'll let you know when it'll be your turn again. If you want to opt-out, just type !q- and you'll be removed.")
+	if b.UserIsModerator(b.Config.UserId) && b.Config.ModQueue && b.Queue.Size() > 0 {
+		if (b.Room.MaxDjs - b.Room.Djs.Size()) == 0 {
+			if err := b.EscortDj(b.Room.Song.djId); err == nil {
+				b.Queue.Push(b.Room.Song.djId)
+				b.PrivateMessage(b.Room.Song.djId, "Thank you for your awesome set. You've been temporarily removed from the stage and automatically added to the queue. I'll let you know when it'll be your turn again. If you want to opt-out, just type !qrm and you'll be removed.")
+			}
 		}
 
 		if newDjId, err := b.Queue.Shift(int(b.Config.ModQueueInviteDuration)); err == nil {
