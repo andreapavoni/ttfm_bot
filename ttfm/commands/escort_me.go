@@ -16,7 +16,9 @@ func EscortMeCommand() *ttfm.Command {
 
 func escortMeCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandOutput {
 	user, _ := b.UserFromId(cmd.UserId)
-	b.AddDjEscorting(cmd.UserId)
+	if err := b.AddDjEscorting(cmd.UserId); err != nil {
+		return &ttfm.CommandOutput{User: user, ReplyType: cmd.Source, Err: err}
+	}
 
 	var msg string
 

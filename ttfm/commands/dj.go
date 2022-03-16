@@ -1,7 +1,7 @@
 package commands
 
 import (
-	"errors"
+	"fmt"
 
 	"github.com/andreapavoni/ttfm_bot/ttfm"
 )
@@ -20,7 +20,7 @@ func djCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandOutput {
 	if b.UserIsDj(b.Config.UserId) {
 		if b.UserIsCurrentDj(b.Config.UserId) {
 			if err := b.AddDjEscorting(b.Config.UserId); err != nil {
-				return &ttfm.CommandOutput{User: user, ReplyType: ttfm.MessageTypePm, Err: errors.New("I've was unable to prepare myself for escorting : " + err.Error())}
+				return &ttfm.CommandOutput{User: user, ReplyType: ttfm.MessageTypePm, Err: fmt.Errorf("I've was unable to prepare myself for escorting : %s", err.Error())}
 			}
 			return &ttfm.CommandOutput{Msg: "/me will get off the stage at the end of current song", User: user, ReplyType: cmd.Source}
 		}

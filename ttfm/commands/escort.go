@@ -2,6 +2,7 @@ package commands
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/andreapavoni/ttfm_bot/ttfm"
@@ -24,11 +25,11 @@ func escortCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandOutp
 
 	escortedUser, err := b.UserFromName(strings.Join(cmd.Args, " "))
 	if err != nil {
-		return &ttfm.CommandOutput{User: user, ReplyType: ttfm.MessageTypePm, Err: errors.New("I can't find the user you want to escort: @" + escortedUser.Name)}
+		return &ttfm.CommandOutput{User: user, ReplyType: ttfm.MessageTypePm, Err: fmt.Errorf("I can't find the user you want to escort: @%s", escortedUser.Name)}
 	}
 
 	if err := b.EscortDj(escortedUser.Id); err != nil {
-		return &ttfm.CommandOutput{User: user, ReplyType: ttfm.MessageTypePm, Err: errors.New("I was unable to escort @" + escortedUser.Name)}
+		return &ttfm.CommandOutput{User: user, ReplyType: ttfm.MessageTypePm, Err: fmt.Errorf("I was unable to escort @%s", escortedUser.Name)}
 
 	}
 	return &ttfm.CommandOutput{User: user, ReplyType: ttfm.MessageTypeNone}

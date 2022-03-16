@@ -10,7 +10,7 @@ import (
 
 func PlaylistSwitchCommand() *ttfm.Command {
 	return &ttfm.Command{
-		AuthorizationRoles: []ttfm.UserRole{ttfm.UserRoleAdmin, ttfm.UserRoleBotModerator},
+		AuthorizationRoles: []ttfm.UserRole{ttfm.UserRoleAdmin},
 		Help:               "Switch to another playlist",
 		Handler:            playlistSwitchCommandHandler,
 	}
@@ -25,7 +25,7 @@ func playlistSwitchCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.Com
 	playlistName := strings.Join(cmd.Args, " ")
 
 	if err := b.SwitchPlaylist(playlistName); err != nil {
-		return &ttfm.CommandOutput{User: user, ReplyType: ttfm.MessageTypePm, Err: errors.New("I was unable to switch playlist: " + err.Error())}
+		return &ttfm.CommandOutput{User: user, ReplyType: ttfm.MessageTypePm, Err: fmt.Errorf("I was unable to switch playlist: %s", err.Error())}
 	}
 
 	msg := fmt.Sprintf("/me switched to playlist `%s`", playlistName)

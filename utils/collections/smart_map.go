@@ -43,6 +43,15 @@ func (sm *SmartMap[T]) Delete(key string) {
 	delete(sm.items, key)
 }
 
+// Checks if map has the given key
+func (sm *SmartMap[T]) HasKey(key string) bool {
+	sm.Lock()
+	defer sm.Unlock()
+
+	_, ok := sm.items[key]
+	return ok
+}
+
 // Gets a key from a concurrent map
 func (sm *SmartMap[T]) Get(key string) (T, bool) {
 	sm.Lock()

@@ -5,11 +5,30 @@ package ttfm
 import (
 	"bytes"
 	"fmt"
+	"io"
+	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 
 	"github.com/sirupsen/logrus"
+	"gopkg.in/natefinch/lumberjack.v2"
 )
+
+func SetupLogging() {
+	lumberjackLogger := &lumberjack.Logger{
+		// Log file abbsolute path, os agnostic
+		Filename:   filepath.ToSlash("ttfm_bot.log"),
+		MaxSize:    5, // MB
+		MaxBackups: 5,
+		MaxAge:     30,   // days
+		Compress:   true, // disabled by default
+	}
+	// Fork writing into two outputs
+	multiWriter := io.MultiWriter(os.Stderr, lumberjackLogger)
+	logrus.SetFormatter(&LogFormatter{})
+	logrus.SetOutput(multiWriter)
+}
 
 // LogFormatter - logrus formatter, implements logrus.Formatter
 type LogFormatter struct {

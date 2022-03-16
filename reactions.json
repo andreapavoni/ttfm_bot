@@ -1,0 +1,39 @@
+[
+  {
+    "Name": "dance",
+    "Imgs": [
+      "https://media.giphy.com/media/l3vRlT2k2L35Cnn5C/giphy-downsized.gif",
+      "https://media.giphy.com/media/CDzdJSkC4iyLC/giphy-downsized.gif",
+      "https://media.giphy.com/media/l41Ym8O8dbIG0XvFK/giphy-downsized.gif",
+      "https://media.giphy.com/media/l2QZSjo0lwEMC0GVG/giphy.gif",
+      "https://media.giphy.com/media/12CEzd0Ra4qq4M/giphy.gif"
+    ]
+  },
+  {
+    "Name": "clap",
+    "Imgs": [
+      "https://media.giphy.com/media/el0ou7lRocwSI/giphy.gif",
+      "https://media.giphy.com/media/KJCsv8KcpwHjG/giphy.gif",
+      "https://media.giphy.com/media/4HmjztpLpjUIscxWMJ/giphy-downsized.gif",
+      "https://media.giphy.com/media/xT5LMMX3iZwDH5ocso/giphy.gif",
+      "https://media.giphy.com/media/rFOh9PEpElUH8aLLgA/giphy-downsized.gif",
+      "https://media.giphy.com/media/12RoepEnSacGl2/giphy.gif",
+      "https://media.giphy.com/media/agxrC4gTKbCQzvDypZ/giphy.gif",
+      "https://media.giphy.com/media/BQAk13taTaKYw/giphy.gif"
+    ]
+  },
+  {
+    "Name": "thanks",
+    "Imgs": [
+      "https://media.giphy.com/media/ToMjGpAyK3hX5s1xyOk/giphy.gif",
+      "https://media.giphy.com/media/4Rd3RQPeksO6RvBPXu/giphy.gif",
+      "https://media.giphy.com/media/l2Sqgnr6m7zBGob9C/giphy-downsized.gif",
+      "https://media.giphy.com/media/3ohhwkfYcpOyeuepqw/giphy.gif",
+      "https://media.giphy.com/media/MFOKtDGXzvm9yZI2CA/giphy-downsized.gif",
+      "https://media.giphy.com/media/LRORznnSGSNYqjUxUf/giphy.gif",
+      "https://media.giphy.com/media/6tHy8UAbv3zgs/giphy.gif",
+      "https://media.giphy.com/media/3oEdva9BUHPIs2SkGk/giphy.gif",
+      "https://media.giphy.com/media/KB8C86UMgLDThpt4WT/giphy.gif"
+    ]
+  }
+]

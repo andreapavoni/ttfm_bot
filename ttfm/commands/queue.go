@@ -9,7 +9,7 @@ import (
 func QueueCommand() *ttfm.Command {
 	return &ttfm.Command{
 		AuthorizationRoles: []ttfm.UserRole{ttfm.UserRoleAdmin, ttfm.UserRoleBotModerator},
-		Help:               "Enable/disable queue mode. Without args prints current setting",
+		Help:               "Enable/disable queue mode. Without args shows current setting",
 		Handler:            queueCommandHandler,
 	}
 }

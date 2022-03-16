@@ -7,7 +7,7 @@ import (
 func AutoDjCommand() *ttfm.Command {
 	return &ttfm.Command{
 		AuthorizationRoles: []ttfm.UserRole{ttfm.UserRoleAdmin},
-		Help:               "Enables/disables auto dj mode. Without args prints current setting",
+		Help:               "Enables/disables auto dj mode. Without args shows current setting",
 		Handler:            autoDjCommandHandler,
 	}
 }

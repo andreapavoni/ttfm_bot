@@ -7,7 +7,7 @@ import (
 func AutoSnagCommand() *ttfm.Command {
 	return &ttfm.Command{
 		AuthorizationRoles: []ttfm.UserRole{ttfm.UserRoleAdmin},
-		Help:               "Enables/disables auto snag mode. Without args prints current setting",
+		Help:               "Enables/disables auto snag mode. Without args shows current setting",
 		Handler:            autoSnagCommandHandler,
 	}
 }

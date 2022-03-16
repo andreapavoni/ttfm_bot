@@ -41,5 +41,6 @@ func (b *Bot) Start() {
 	b.Bot.AddCommand("cfg", commands.SetConfigCommand())
 	b.Bot.AddCommand("say", commands.SayCommand())
 	b.Bot.AddCommand("help", commands.HelpCommand())
+	b.Bot.AddCommand("r", commands.ReactionCommand())
 	b.Bot.Start()
 }

@@ -118,7 +118,7 @@ func (b *Bot) recognizeCommand(cmd string) (*Command, error) {
 	if command, ok := b.commands.Get(cmd); ok {
 		return command, nil
 	}
-	return nil, errors.New("command not recognized")
+	return nil, errors.New("command not recognized. Type !help to know available commands")
 }
 
 func parseCommand(msg string) (string, []string, bool) {

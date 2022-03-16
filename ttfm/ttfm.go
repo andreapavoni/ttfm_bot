@@ -3,14 +3,8 @@ package ttfm
 import (
 	"errors"
 	"fmt"
-	"io"
-	"os"
-	"path/filepath"
 
 	"github.com/alaingilbert/ttapi"
-	"github.com/sirupsen/logrus"
-	"gopkg.in/natefinch/lumberjack.v2"
-
 	"github.com/andreapavoni/ttfm_bot/utils/collections"
 )
 
@@ -23,24 +17,14 @@ type Bot struct {
 	admins    *collections.SmartList[string]
 	playlist  *Playlist
 	commands  *collections.SmartMap[*Command]
+	Reactions *Reactions
 }
 
 // BOOT
 func New() *Bot {
-	lumberjackLogger := &lumberjack.Logger{
-		// Log file abbsolute path, os agnostic
-		Filename:   filepath.ToSlash("ttfm_bot.log"),
-		MaxSize:    5, // MB
-		MaxBackups: 5,
-		MaxAge:     30,   // days
-		Compress:   true, // disabled by default
-	}
-	// Fork writing into two outputs
-	multiWriter := io.MultiWriter(os.Stderr, lumberjackLogger)
-	logrus.SetFormatter(&LogFormatter{})
-	logrus.SetOutput(multiWriter)
-
+	SetupLogging()
 	cfg := LoadConfigFromEnvs()
+	reactions := NewReactions("reactions.json")
 
 	b := Bot{
 		Config:    cfg,
@@ -51,6 +35,7 @@ func New() *Bot {
 		playlist:  NewPlaylist(cfg.CurrentPlaylist),
 		Playlists: collections.NewSmartList[string](),
 		commands:  collections.NewSmartMap[*Command](),
+		Reactions: reactions,
 	}
 
 	// Commands
@@ -129,6 +114,13 @@ func (b *Bot) RemoveDjEscorting(userId string) error {
 }
 
 func (b *Bot) EscortDj(userId string) error {
+	if !b.UserIsDj(userId) {
+		if userId == b.Config.UserId {
+			return errors.New("I'm not on stage!")
+		}
+		return errors.New("user is not on stage")
+	}
+
 	return b.api.RemDj(userId)
 }
 

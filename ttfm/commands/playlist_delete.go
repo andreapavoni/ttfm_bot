@@ -26,7 +26,7 @@ func playlistDeleteCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.Com
 	playlistName := strings.Join(cmd.Args, " ")
 
 	if err := b.RemovePlaylist(playlistName); err != nil {
-		return &ttfm.CommandOutput{User: user, ReplyType: ttfm.MessageTypePm, Err: errors.New("I was unable to delete the playlist: " + err.Error())}
+		return &ttfm.CommandOutput{User: user, ReplyType: ttfm.MessageTypePm, Err: fmt.Errorf("I was unable to delete the playlist: %s", err.Error())}
 	}
 
 	msg := fmt.Sprintf("/me deleted playlist `%s`", playlistName)

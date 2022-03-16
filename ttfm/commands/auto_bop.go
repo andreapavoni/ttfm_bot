@@ -7,7 +7,7 @@ import (
 func AutoBopCommand() *ttfm.Command {
 	return &ttfm.Command{
 		AuthorizationRoles: []ttfm.UserRole{ttfm.UserRoleAdmin},
-		Help:               "Enables/disables auto bop mode. Without args prints current setting",
+		Help:               "Enables/disables auto bop mode. Without args shows current setting",
 		Handler:            autoBopCommandHandler,
 	}
 }
