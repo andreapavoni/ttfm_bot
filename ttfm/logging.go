@@ -108,7 +108,6 @@ func (f *LogFormatter) writeFields(b *bytes.Buffer, entry *logrus.Entry) {
 		for field := range entry.Data {
 			fields = append(fields, field)
 		}
-
 		sort.Strings(fields)
 
 		for _, field := range fields {

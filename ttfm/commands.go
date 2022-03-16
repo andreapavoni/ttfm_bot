@@ -103,10 +103,10 @@ func handleCommand(b *Bot, i *MessageInput) {
 	if msg != "" {
 		switch out.ReplyType {
 		case MessageTypePm:
-			b.PrivateMessage(user.Id, out.Msg)
+			b.PrivateMessage(user.Id, msg)
 			return
 		case MessageTypeRoom:
-			b.RoomMessage(out.Msg)
+			b.RoomMessage(msg)
 			return
 		default:
 			return
@@ -142,11 +142,15 @@ func parseCommand(msg string) (string, []string, bool) {
 }
 
 func commandOutputMessage(out *CommandOutput) string {
-	if out.Msg != "" && out.Err == nil && out.ReplyType != MessageTypeNone {
+	if out.ReplyType == MessageTypeNone {
+		return ""
+	}
+
+	if out.Msg != "" && out.Err == nil {
 		return out.Msg
 	}
 
-	if out.Err == nil && out.ReplyType != MessageTypeNone {
+	if out.Err != nil {
 		return out.Err.Error()
 	}
 
