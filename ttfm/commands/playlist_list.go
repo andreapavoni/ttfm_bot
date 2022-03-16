@@ -25,6 +25,6 @@ func playlistListCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.Comma
 		pls = append(pls, pl)
 	}
 
-	msg := "Available playists (the current one is prefixed with a *): " + strings.Join(pls, ", ")
+	msg := "Available playists (the current one is highlighted): " + strings.Join(pls, ", ")
 	return &ttfm.CommandOutput{Msg: msg, User: user, ReplyType: cmd.Source}
 }
