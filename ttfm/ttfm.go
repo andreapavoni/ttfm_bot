@@ -19,6 +19,7 @@ type Bot struct {
 	commands  *collections.SmartMap[*Command]
 	Reactions *Reactions
 	Brain     *Brain
+	Actions   *Actions
 }
 
 // BOOT
@@ -41,6 +42,8 @@ func New() *Bot {
 		Reactions: reactions,
 		Brain:     brain,
 	}
+
+	b.Actions = &Actions{&b}
 
 	// Commands
 	b.api.OnSpeak(func(e ttapi.SpeakEvt) {
@@ -74,7 +77,6 @@ func (b *Bot) GetCommand(name string) (*Command, error) {
 	if cmd, ok := b.commands.Get(name); ok {
 		return cmd, nil
 	}
-
 	return nil, errors.New("command not found")
 }
 
@@ -84,6 +86,10 @@ func (b *Bot) ListCommands() []string {
 		commands = append(commands, cmd.Key)
 	}
 	return commands
+}
+
+func (b *Bot) GetRoomInfo() (ttapi.RoomInfoRes, error) {
+	return b.api.RoomInfo()
 }
 
 func (b *Bot) Start() {
@@ -131,13 +137,13 @@ func (b *Bot) EscortDj(userId string) error {
 
 // SONG
 func (b *Bot) Bop() {
-	if b.Room.Song.djId != b.Config.UserId {
+	if b.Room.Song.DjId != b.Config.UserId {
 		b.api.Bop()
 	}
 }
 
 func (b *Bot) Downvote() {
-	if b.Room.Song.djId != b.Config.UserId {
+	if b.Room.Song.DjId != b.Config.UserId {
 		b.api.VoteDown()
 	}
 }
@@ -188,7 +194,7 @@ func (b *Bot) AutoDj(status bool) bool {
 
 // PLAYLISTS
 func (b *Bot) Snag() error {
-	if b.Room.Song.djId == b.Config.UserId {
+	if b.Room.Song.DjId == b.Config.UserId {
 		return errors.New("I'm the current DJ and I already have this song in my playlist...")
 	}
 
@@ -356,7 +362,7 @@ func (b *Bot) UserIsDj(userId string) bool {
 }
 
 func (b *Bot) UserIsCurrentDj(userId string) bool {
-	return b.Room.Song.djId == userId
+	return b.Room.Song.DjId == userId
 }
 
 func (b *Bot) UserIsModerator(userId string) bool {

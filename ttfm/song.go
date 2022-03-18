@@ -7,7 +7,7 @@ import (
 type Song struct {
 	Id     string
 	DjName string
-	djId   string
+	DjId   string
 	Title  string
 	Artist string
 	Length int
@@ -25,7 +25,7 @@ func (s *Song) UpdateStats(up, down, snag int) {
 func (s *Song) Reset(id, title, artist string, length int, djName, djId string) {
 	s.Id = id
 	s.DjName = djName
-	s.djId = djId
+	s.DjId = djId
 	s.Title = title
 	s.Artist = artist
 	s.Length = length
