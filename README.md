@@ -112,6 +112,7 @@ Bot can obey to moderators commands, however it depends by the kind of command i
 - [ ] multiple config source (env, toml) and load before init bot
 - [x] log to file
 - [x] set max songs per dj at runtime
+- [x] data persistence on disk (aka brain)
 - [ ] cmd for room stats?
 - [ ] group all string messages into a struct/file?
 - [ ] add docs for functions

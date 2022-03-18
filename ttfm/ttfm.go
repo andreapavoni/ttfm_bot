@@ -18,13 +18,16 @@ type Bot struct {
 	playlist  *Playlist
 	commands  *collections.SmartMap[*Command]
 	Reactions *Reactions
+	Brain     *Brain
 }
 
 // BOOT
 func New() *Bot {
 	SetupLogging()
-	cfg := LoadConfigFromEnvs()
-	reactions := NewReactions("reactions.json")
+	brain := NewBrain("./db")
+
+	cfg := NewConfig(brain)
+	reactions := NewReactions(brain, "reactions")
 
 	b := Bot{
 		Config:    cfg,
@@ -36,6 +39,7 @@ func New() *Bot {
 		Playlists: collections.NewSmartList[string](),
 		commands:  collections.NewSmartMap[*Command](),
 		Reactions: reactions,
+		Brain:     brain,
 	}
 
 	// Commands
@@ -90,6 +94,7 @@ func (b *Bot) Start() {
 func (b *Bot) ModQueue(status bool) bool {
 	b.Config.ModQueue = status
 	b.Queue.Empty()
+	b.Config.Save()
 
 	return status
 }
@@ -143,6 +148,7 @@ func (b *Bot) SkipSong() {
 
 func (b *Bot) AutoBop(status bool) bool {
 	b.Config.AutoBop = status
+	b.Config.Save()
 	return status
 }
 
@@ -163,6 +169,7 @@ func (b *Bot) Dj() {
 
 func (b *Bot) AutoDj(status bool) bool {
 	b.Config.AutoDj = status
+	b.Config.Save()
 
 	if status {
 		return status
@@ -207,6 +214,7 @@ func (b *Bot) Snag() error {
 
 func (b *Bot) AutoSnag(status bool) bool {
 	b.Config.AutoSnag = status
+	b.Config.Save()
 	return status
 }
 
@@ -270,6 +278,7 @@ func (b *Bot) SwitchPlaylist(playlistName string) error {
 			return err
 		}
 		b.Config.CurrentPlaylist = playlistName
+		b.Config.Save()
 		return b.LoadPlaylist(playlistName)
 	}
 

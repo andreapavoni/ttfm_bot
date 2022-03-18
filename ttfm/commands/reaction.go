@@ -2,7 +2,6 @@ package commands
 
 import (
 	"fmt"
-	"sort"
 	"strings"
 
 	"github.com/andreapavoni/ttfm_bot/ttfm"
@@ -20,12 +19,7 @@ func reactionCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandOu
 	user, _ := b.UserFromId(cmd.UserId)
 
 	if len(cmd.Args) == 0 {
-		availableReactions := b.Reactions.Availables.List()
-		reactionsList := make([]string, len(availableReactions))
-		copy(reactionsList, availableReactions)
-		sort.Strings(reactionsList)
-
-		msg := fmt.Sprintf("Available reactions: %s", strings.Join(reactionsList, ", "))
+		msg := fmt.Sprintf("Available reactions: %s", strings.Join(b.Reactions.Availables(), ", "))
 		return &ttfm.CommandOutput{Msg: msg, User: user, ReplyType: cmd.Source}
 	}
 

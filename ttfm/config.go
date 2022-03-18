@@ -1,6 +1,10 @@
 package ttfm
 
-import "github.com/andreapavoni/ttfm_bot/utils"
+import (
+	"errors"
+
+	"github.com/andreapavoni/ttfm_bot/utils"
+)
 
 type Config struct {
 	ApiAuth                string
@@ -20,9 +24,36 @@ type Config struct {
 	ModDjRestDuration      int64
 	CurrentPlaylist        string
 	SetBot                 bool
+	brain                  *Brain
 }
 
-func LoadConfigFromEnvs() *Config {
+func NewConfig(b *Brain) *Config {
+	var cfg *Config
+	var err error
+
+	cfg, err = loadConfigFromDb(b)
+	if err != nil {
+		cfg = loadConfigFromEnvs()
+	}
+	cfg.brain = b
+
+	return cfg
+}
+
+func (c *Config) Save() error {
+	return c.brain.Put("config", "config", c)
+}
+
+func loadConfigFromDb(b *Brain) (*Config, error) {
+	c := Config{}
+	if err := b.Get("config", "config", &c); err != nil {
+		return nil, errors.New("config not found")
+	}
+
+	return &c, nil
+}
+
+func loadConfigFromEnvs() *Config {
 	return &Config{
 		ApiAuth:                utils.GetEnvOrPanic("TTFM_API_AUTH"),
 		UserId:                 utils.GetEnvOrPanic("TTFM_API_USER_ID"),

@@ -1,25 +1,46 @@
 package ttfm
 
 import (
+	"encoding/json"
+	"errors"
+	"sort"
+
 	"github.com/andreapavoni/ttfm_bot/utils"
 	"github.com/andreapavoni/ttfm_bot/utils/collections"
 )
 
-type JsonReaction struct {
-	Name string
-	Imgs []string
-}
-
 type Reactions struct {
-	filePath string
 	*collections.SmartMap[[]string]
-	Availables *collections.SmartList[string]
+	availables *collections.SmartList[string]
+	brain      *Brain
+	bucket     string
 }
 
-func NewReactions(filePath string) *Reactions {
-	r := &Reactions{SmartMap: collections.NewSmartMap[[]string](), filePath: filePath, Availables: collections.NewSmartList[string]()}
+func NewReactions(brain *Brain, bucket string) *Reactions {
+	r := &Reactions{SmartMap: collections.NewSmartMap[[]string](), brain: brain, availables: collections.NewSmartList[string](), bucket: bucket}
 	r.loadReactions()
 	return r
+}
+
+func (r *Reactions) Put(reactionName, imgUrl string) error {
+	imgs, ok := r.SmartMap.Get(reactionName)
+	if !ok {
+		r.SmartMap.Set(reactionName, []string{imgUrl})
+		return nil
+	}
+
+	if utils.IndexOf(imgUrl, imgs) >= 0 {
+		return errors.New("already present")
+	}
+
+	if !r.availables.HasElement(reactionName) {
+		r.availables.Push(reactionName)
+	}
+
+	imgs = append(imgs, imgUrl)
+	r.SmartMap.Set(reactionName, imgs)
+	r.brain.Put(r.bucket, reactionName, imgs)
+	return nil
 }
 
 func (r *Reactions) Get(reactionName string) string {
@@ -30,29 +51,29 @@ func (r *Reactions) Get(reactionName string) string {
 	return ""
 }
 
-func (r *Reactions) loadReactions() error {
-	data := []JsonReaction{}
-	if err := utils.ReadJson(r.filePath, &data); err != nil {
-		return err
-	}
-
-	for _, i := range data {
-		r.Set(i.Name, i.Imgs)
-		r.Availables.Push(i.Name)
-	}
-	return nil
+func (r *Reactions) Availables() []string {
+	availableReactions := r.availables.List()
+	reactionsList := make([]string, len(availableReactions))
+	copy(reactionsList, availableReactions)
+	sort.Strings(reactionsList)
+	return reactionsList
 }
 
-func (r *Reactions) dumpReactions() error {
-	data := []JsonReaction{}
-
-	for i := range r.Iter() {
-		data = append(data, JsonReaction{Name: i.Key, Imgs: i.Value})
-	}
-
-	if err := utils.WriteJson(r.filePath, &data); err != nil {
+func (r *Reactions) loadReactions() error {
+	records, err := r.brain.Db.ReadAll(r.bucket)
+	if err != nil {
 		return err
 	}
 
+	for key, value := range records {
+		imgs := []string{}
+		for _, img := range value {
+			if err := json.Unmarshal([]byte(img), &imgs); err != nil {
+				return err
+			}
+		}
+		r.Set(key, imgs)
+		r.availables.Push(key)
+	}
 	return nil
 }
