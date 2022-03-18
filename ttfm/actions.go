@@ -104,6 +104,11 @@ func (a *Actions) EscortDjs() {
 	}
 }
 
+func (a *Actions) InitPlaylists() {
+	a.bot.LoadPlaylists()
+	a.bot.SwitchPlaylist(a.bot.Config.CurrentPlaylist)
+}
+
 func (a *Actions) ShiftPlaylistSong() {
 	if a.bot.Room.Song.DjId == a.bot.Config.UserId {
 		a.bot.PushSongBottomPlaylist()
@@ -124,6 +129,14 @@ func (a *Actions) UpdateRoom(e ttapi.RoomInfoRes) {
 	a.bot.Room.Update(e)
 }
 
+func (a *Actions) UpdateRoomFromApi() {
+	if roomInfo, err := a.bot.GetRoomInfo(); err == nil {
+		a.UpdateRoom(roomInfo)
+	} else {
+		panic(err)
+	}
+}
+
 func (a *Actions) EnforceSongDuration() {
 	maxDurationSeconds := int(a.bot.Config.ModSongsMaxDuration) * 60
 	durationDiff := maxDurationSeconds - a.bot.Room.Song.Length
@@ -136,7 +149,8 @@ func (a *Actions) EnforceSongDuration() {
 	}
 }
 
-func (a *Actions) UpdateSongStats() {
+func (a *Actions) UpdateSongStats(ups, downs, snags int) {
+	a.bot.Room.Song.UpdateStats(ups, downs, snags)
 }
 
 func (a *Actions) SetBot() {
@@ -173,6 +187,10 @@ func (a *Actions) UnregisterUser(userId string) {
 	}
 }
 
+func (a *Actions) AddDj(userId string) {
+	a.bot.Room.AddDj(userId)
+}
+
 func (a *Actions) RemoveDj(userId, modId string) {
 	a.bot.Room.RemoveDj(userId)
 	if a.bot.UserIsModerator(a.bot.Config.UserId) && a.bot.Room.escorting.Size() > 0 {
@@ -181,6 +199,7 @@ func (a *Actions) RemoveDj(userId, modId string) {
 		}
 	}
 
+	// disable auto-dj if bot has been removed by a moderator
 	if a.bot.Config.AutoDj && userId == a.bot.Config.UserId && modId != "" {
 		a.bot.AutoDj(false)
 		return

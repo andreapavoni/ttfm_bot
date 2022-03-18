@@ -6,11 +6,9 @@ import (
 )
 
 func onReady(b *Bot) {
-	logrus.Info("BOT:READY")
-
 	b.Actions.SetBot()
-	b.LoadPlaylists()
-	b.SwitchPlaylist(b.Config.CurrentPlaylist)
+	b.Actions.InitPlaylists()
+	logrus.Info("BOT:READY")
 }
 
 func onRoomChanged(b *Bot, e ttapi.RoomInfoRes) {
@@ -31,11 +29,6 @@ func onRoomChanged(b *Bot, e ttapi.RoomInfoRes) {
 
 func onNewSong(b *Bot, e ttapi.NewSongEvt) {
 	b.Actions.ShowSongStats()
-	b.Actions.EscortDjs()
-	b.Actions.ForwardQueue()
-	// when bot is djing, push the last song to bottom of its playlist
-	b.Actions.ShiftPlaylistSong()
-
 	logrus.WithFields(logrus.Fields{
 		"djName": b.Room.Song.DjName,
 		"djId":   b.Room.Song.DjId,
@@ -47,12 +40,15 @@ func onNewSong(b *Bot, e ttapi.NewSongEvt) {
 		"snag":   b.Room.Song.snag,
 	}).Info("ROOM:LAST_SONG_STATS")
 
-	if roomInfo, err := b.GetRoomInfo(); err == nil {
-		b.Room.Update(roomInfo)
-	} else {
-		logrus.Info("ROOM:ERR:UPDATE")
-		panic(err)
-	}
+	b.Actions.EscortDjs()
+	b.Actions.ForwardQueue()
+	// when bot is djing, push the last played song to bottom of its playlist
+	b.Actions.ShiftPlaylistSong()
+	b.Actions.UpdateRoomFromApi()
+	// enforce song duration to avoid trolls with 2hours tracks
+	b.Actions.EnforceSongDuration()
+	b.Actions.AutoBop()
+	b.Actions.AutoSnag()
 
 	logrus.WithFields(logrus.Fields{
 		"djName": b.Room.Song.DjName,
@@ -61,36 +57,23 @@ func onNewSong(b *Bot, e ttapi.NewSongEvt) {
 		"artist": b.Room.Song.Artist,
 		"length": b.Room.Song.Length,
 	}).Info("ROOM:NEW_SONG")
-
-	// enforce song duration to avoid trolls with 2hours tracks
-	b.Actions.EnforceSongDuration()
-	b.Actions.AutoBop()
-	b.Actions.AutoSnag()
 }
 
 func onUpdateVotes(b *Bot, e ttapi.UpdateVotesEvt) {
-	b.Room.Song.UpdateStats(e.Room.Metadata.Upvotes, e.Room.Metadata.Downvotes, b.Room.Song.snag)
-	userId, vote := b.Room.Song.UnpackVotelog(e.Room.Metadata.Votelog)
-	user, _ := b.UserFromId(userId)
-
+	b.Actions.UpdateSongStats(e.Room.Metadata.Upvotes, e.Room.Metadata.Downvotes, b.Room.Song.snag)
 	logrus.WithFields(logrus.Fields{
 		"up":        e.Room.Metadata.Upvotes,
 		"down":      e.Room.Metadata.Downvotes,
 		"listeners": e.Room.Metadata.Listeners,
-		"userId":    userId,
-		"vote":      vote,
-		"userName":  user.Name,
 	}).Info("SONG:VOTE")
 }
 
 func onSnagged(b *Bot, e ttapi.SnaggedEvt) {
-	b.Room.Song.UpdateStats(b.Room.Song.up, b.Room.Song.down, b.Room.Song.snag+1)
-	user, _ := b.UserFromId(e.UserID)
+	b.Actions.UpdateSongStats(b.Room.Song.up, b.Room.Song.down, b.Room.Song.snag+1)
 
 	logrus.WithFields(logrus.Fields{
-		"userId":   e.UserID,
-		"userName": user.Name,
-		"roomId":   e.RoomID,
+		"userId": e.UserID,
+		"roomId": e.RoomID,
 	}).Info("SONG:SNAG")
 }
 
@@ -108,10 +91,6 @@ func onRegistered(b *Bot, e ttapi.RegisteredEvt) {
 
 func onDeregistered(b *Bot, e ttapi.DeregisteredEvt) {
 	u := e.User[0]
-	if u.ID == b.Config.UserId {
-		return
-	}
-
 	b.Actions.UnregisterUser(u.ID)
 	b.Actions.AutoDj()
 
@@ -125,6 +104,9 @@ func onDeregistered(b *Bot, e ttapi.DeregisteredEvt) {
 
 func onAddDj(b *Bot, e ttapi.AddDJEvt) {
 	u := e.User[0]
+	b.Actions.AddDj(u.Userid)
+	b.Actions.EnforceQueueStageReservation(u.ID)
+	b.Actions.ConsiderQueueActivation()
 
 	logrus.WithFields(logrus.Fields{
 		"userId":   u.Userid,
@@ -132,10 +114,6 @@ func onAddDj(b *Bot, e ttapi.AddDJEvt) {
 		"fans":     u.Fans,
 		"points":   u.Points,
 	}).Info("STAGE:DJ_JOINED")
-
-	b.Room.AddDj(u.Userid)
-	b.Actions.EnforceQueueStageReservation(u.ID)
-	b.Actions.ConsiderQueueActivation()
 }
 
 func onRemDj(b *Bot, e ttapi.RemDJEvt) {
