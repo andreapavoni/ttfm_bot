@@ -79,7 +79,7 @@ func onSnagged(b *Bot, e ttapi.SnaggedEvt) {
 
 func onRegistered(b *Bot, e ttapi.RegisteredEvt) {
 	u := e.User[0]
-	b.Actions.RegisterUser(u.ID)
+	b.Actions.RegisterUser(u.ID, u.Name)
 
 	logrus.WithFields(logrus.Fields{
 		"userId":   u.ID,

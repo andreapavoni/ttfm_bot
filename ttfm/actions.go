@@ -159,15 +159,14 @@ func (a *Actions) SetBot() {
 	}
 }
 
-func (a *Actions) RegisterUser(userId string) {
+func (a *Actions) RegisterUser(userId, userName string) {
 	if userId == a.bot.Config.UserId {
 		return
 	}
 
-	user, _ := a.bot.UserFromId(userId)
-	a.bot.Room.AddUser(user.Id, user.Name)
+	a.bot.Room.AddUser(userId, userName)
 	if a.bot.Config.ModAutoWelcome && a.bot.UserIsModerator(a.bot.Config.UserId) {
-		msg := fmt.Sprintf("Hey @%s, welcome to %s! :) Type `!help` to know how to interact with me.", user.Name, a.bot.Room.Name)
+		msg := fmt.Sprintf("Hey @%s, welcome to %s! :) Type `!help` to know how to interact with me.", userName, a.bot.Room.Name)
 		a.bot.RoomMessage(msg)
 	}
 }

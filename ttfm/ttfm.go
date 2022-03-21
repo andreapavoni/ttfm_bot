@@ -26,7 +26,6 @@ type Bot struct {
 func New() *Bot {
 	SetupLogging()
 	brain := NewBrain("./db")
-
 	cfg := NewConfig(brain)
 	reactions := NewReactions(brain, "reactions")
 
