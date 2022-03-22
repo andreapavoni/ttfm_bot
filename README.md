@@ -97,23 +97,14 @@ Bot can obey to moderators commands, however it depends by the kind of command i
 - [Aunt Jackie](https://turntable.fm/aunt_jackie)
 - [I ❤️ The 80's](https://turntable.fm/i_the_80s)
 
-## TODO (as of march 10th 2022)
+## TODO (as of march 22th 2022)
 
-- [x] DJ queues
-- [x] use a struct for command input and output (ex. CommandInput and CommandOutput)
-  - [x] input
-  - [x] output
-  - [x] use Enum types for source/reply fields
-- [x] add say cmd
-- [x] song max duration
-  - [x] enforce on new song
-  - [x] update value at runtime
-- [x] add help cmd
-- [ ] multiple config source (env, toml) and load before init bot
-- [x] log to file
-- [x] set max songs per dj at runtime
-- [x] data persistence on disk (aka brain)
-- [ ] cmd for room stats?
-- [ ] group all string messages into a struct/file?
-- [ ] add docs for functions
-- [ ] shell for commands
+- [ ] rooms should be faved on server, then loaded from API at startup and cached in mem
+- [ ] current room should be saved somewhere on db, then used to join when bot starts
+- [x] github releases
+- [ ] all the commands with on/off args should be ported into `cfg` command
+- [ ] refactor code into dedicated files by passing bot instance to its objects (eg: Room, Users, Playlist, ...), then wrapped in `Actions` if needed
+- [ ] add bot initializer: create a basic default db to edit manually
+- [ ] refactor "brain" db callers (eg: `Config`) to use `brain` bucket
+- [ ] add `reload brain` command to reload all data from db OR add `reload-X` for granular reloading AND refresh cache
+- [ ] refactor `Reactions` to have only one file
