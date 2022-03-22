@@ -125,6 +125,10 @@ func (a *Actions) ShowSongStats() {
 	}
 }
 
+func (a *Actions) ReloadRooms() {
+	a.bot.Rooms.LoadRoomsFromDb()
+}
+
 func (a *Actions) UpdateRoom(e ttapi.RoomInfoRes) {
 	a.bot.Room.Update(e)
 }

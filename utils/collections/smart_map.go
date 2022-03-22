@@ -27,7 +27,7 @@ func NewSmartMap[T any]() *SmartMap[T] {
 	return &SmartMap[T]{items: map[string]T{}}
 }
 
-// Sets a key in a concurrent map
+// Set sets a key in a concurrent map
 func (sm *SmartMap[T]) Set(key string, value T) {
 	sm.Lock()
 	defer sm.Unlock()
@@ -35,7 +35,7 @@ func (sm *SmartMap[T]) Set(key string, value T) {
 	sm.items[key] = value
 }
 
-// Removes a key in a concurrent map
+// Delete removes a key in a concurrent map
 func (sm *SmartMap[T]) Delete(key string) {
 	sm.Lock()
 	defer sm.Unlock()
@@ -43,7 +43,7 @@ func (sm *SmartMap[T]) Delete(key string) {
 	delete(sm.items, key)
 }
 
-// Checks if map has the given key
+// HasKey checks if map has the given key
 func (sm *SmartMap[T]) HasKey(key string) bool {
 	sm.Lock()
 	defer sm.Unlock()
@@ -52,7 +52,19 @@ func (sm *SmartMap[T]) HasKey(key string) bool {
 	return ok
 }
 
-// Gets a key from a concurrent map
+// Keys returns a list of string keys in the map
+func (sm *SmartMap[T]) Keys() (keys []string) {
+	sm.Lock()
+	defer sm.Unlock()
+
+	for k := range sm.items {
+		keys = append(keys, k)
+	}
+
+	return keys
+}
+
+// Get gets a key from a concurrent map
 func (sm *SmartMap[T]) Get(key string) (T, bool) {
 	sm.Lock()
 	defer sm.Unlock()
@@ -62,7 +74,7 @@ func (sm *SmartMap[T]) Get(key string) (T, bool) {
 	return value, ok
 }
 
-// Gets the number of keys from a concurrent map
+// Length gets the number of keys from a concurrent map
 func (sm *SmartMap[T]) Length() int {
 	sm.Lock()
 	defer sm.Unlock()

@@ -60,6 +60,7 @@ func setConfigCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandO
 		return &ttfm.CommandOutput{User: user, ReplyType: cmd.Source, Err: errors.New("I can't find the key you want to set")}
 	}
 
+	b.Config.Save()
 	msg := fmt.Sprintf("/me has set `%s` to: `%v`", key, value)
 	return &ttfm.CommandOutput{Msg: msg, User: user, ReplyType: cmd.Source}
 }

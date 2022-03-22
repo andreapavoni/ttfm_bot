@@ -76,6 +76,7 @@ Admins are users which were previously configured on the bot to run commands on 
 - `!pc <playlist_name>` switch to `playlist_name` playlist
 - `!say <something>` say something in the room
 - `!cfg <config_key> [<config_value>]` sets config key and value. Without `config_value`, it replies with current configuration for `<config_key>`
+- `!room [list | <sub_command> <room_slug>]`
 
 ### Moderators
 
@@ -105,6 +106,7 @@ Bot can obey to moderators commands, however it depends by the kind of command i
 - [ ] all the commands with on/off args should be ported into `cfg` command
 - [ ] refactor code into dedicated files by passing bot instance to its objects (eg: Room, Users, Playlist, ...), then wrapped in `Actions` if needed
 - [ ] add bot initializer: create a basic default db to edit manually
-- [ ] refactor "brain" db callers (eg: `Config`) to use `brain` bucket
+- [ ] admins should be cached as users (to accept commands through PM even if in different rooms)
+- [x] refactor "brain" db callers (eg: `Config`) to use `brain` bucket
 - [ ] add `reload brain` command to reload all data from db OR add `reload-X` for granular reloading AND refresh cache
-- [ ] refactor `Reactions` to have only one file
+- [x] refactor `Reactions` to have only one file

@@ -1,13 +1,17 @@
 package ttfm
 
 import (
-	"encoding/json"
 	"errors"
 	"sort"
 
 	"github.com/andreapavoni/ttfm_bot/utils"
 	"github.com/andreapavoni/ttfm_bot/utils/collections"
 )
+
+type reaction struct {
+	Name string
+	Imgs []string
+}
 
 type Reactions struct {
 	*collections.SmartMap[[]string]
@@ -39,7 +43,7 @@ func (r *Reactions) Put(reactionName, imgUrl string) error {
 
 	imgs = append(imgs, imgUrl)
 	r.SmartMap.Set(reactionName, imgs)
-	r.brain.Put(r.bucket, reactionName, imgs)
+	r.brain.Put(reactionName, imgs)
 	return nil
 }
 
@@ -60,20 +64,15 @@ func (r *Reactions) Availables() []string {
 }
 
 func (r *Reactions) loadReactions() error {
-	records, err := r.brain.Db.ReadAll(r.bucket)
+	reactions := []reaction{}
+	err := r.brain.Get("reactions", &reactions)
 	if err != nil {
 		return err
 	}
 
-	for key, value := range records {
-		imgs := []string{}
-		for _, img := range value {
-			if err := json.Unmarshal([]byte(img), &imgs); err != nil {
-				return err
-			}
-		}
-		r.Set(key, imgs)
-		r.availables.Push(key)
+	for _, react := range reactions {
+		r.Set(react.Name, react.Imgs)
+		r.availables.Push(react.Name)
 	}
 	return nil
 }

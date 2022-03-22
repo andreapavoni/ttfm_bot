@@ -5,6 +5,8 @@ import (
 	"github.com/andreapavoni/ttfm_bot/ttfm/commands"
 )
 
+var Version = "v0.0.0-dev"
+
 func main() {
 	b := ttfm.New()
 	b.AddCommand("dj", commands.DjCommand())
@@ -33,5 +35,6 @@ func main() {
 	b.AddCommand("say", commands.SayCommand())
 	b.AddCommand("help", commands.HelpCommand())
 	b.AddCommand("r", commands.ReactionCommand())
+	b.AddCommand("room", commands.RoomCommand())
 	b.Start()
 }

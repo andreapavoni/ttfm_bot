@@ -17,13 +17,13 @@ func NewBrain(dir string) *Brain {
 	return &Brain{Db: db}
 }
 
-func (b *Brain) Get(bucket, key string, value interface{}) error {
-	if err := b.Db.Read(bucket, key, value); err != nil {
+func (b *Brain) Get(key string, value interface{}) error {
+	if err := b.Db.Read("brain", key, value); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (b *Brain) Put(bucket, key string, value interface{}) error {
-	return b.Db.Write(bucket, key, value)
+func (b *Brain) Put(key string, value interface{}) error {
+	return b.Db.Write("brain", key, value)
 }

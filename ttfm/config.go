@@ -41,12 +41,12 @@ func NewConfig(b *Brain) *Config {
 }
 
 func (c *Config) Save() error {
-	return c.brain.Put("config", "config", c)
+	return c.brain.Put("config", c)
 }
 
 func loadConfigFromDb(b *Brain) (*Config, error) {
 	c := Config{}
-	if err := b.Get("config", "config", &c); err != nil {
+	if err := b.Get("config", &c); err != nil {
 		return nil, errors.New("config not found")
 	}
 
