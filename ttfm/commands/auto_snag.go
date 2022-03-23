@@ -13,10 +13,10 @@ func AutoSnagCommand() *ttfm.Command {
 }
 
 func autoSnagCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandOutput {
-	user, _ := b.UserFromId(cmd.UserId)
+	user, _ := b.Users.UserFromId(cmd.UserId)
 
 	if len(cmd.Args) == 0 {
-		return &ttfm.CommandOutput{Msg: currentAutoSnagStatusMsg(b.Config.AutoSnag), User: user, ReplyType: cmd.Source}
+		return &ttfm.CommandOutput{Msg: currentAutoSnagStatusMsg(b.Config.AutoSnagEnabled), User: user, ReplyType: cmd.Source}
 	}
 
 	switch cmd.Args[0] {
@@ -25,7 +25,7 @@ func autoSnagCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandOu
 	case "off":
 		return &ttfm.CommandOutput{Msg: disableAutoSnag(b), User: user, ReplyType: cmd.Source}
 	default:
-		return &ttfm.CommandOutput{Msg: currentAutoSnagStatusMsg(b.Config.AutoSnag), User: user, ReplyType: cmd.Source}
+		return &ttfm.CommandOutput{Msg: currentAutoSnagStatusMsg(b.Config.AutoSnagEnabled), User: user, ReplyType: cmd.Source}
 	}
 }
 
@@ -38,8 +38,8 @@ func currentAutoSnagStatusMsg(status bool) string {
 }
 
 func enableAutoSnag(b *ttfm.Bot) string {
-	if !b.Config.AutoSnag {
-		b.AutoSnag(true)
+	if !b.Config.AutoSnagEnabled {
+		b.Config.EnableAutoSnag(true)
 
 		return "/me enabled auto snag mode"
 	}
@@ -48,8 +48,8 @@ func enableAutoSnag(b *ttfm.Bot) string {
 }
 
 func disableAutoSnag(b *ttfm.Bot) string {
-	if b.Config.AutoSnag {
-		b.AutoSnag(false)
+	if b.Config.AutoSnagEnabled {
+		b.Config.EnableAutoSnag(false)
 
 		return "/me disabled auto snag mode"
 	}

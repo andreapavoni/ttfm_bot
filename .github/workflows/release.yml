@@ -1,15 +1,12 @@
-name: build
+name: release
 
 on:
   push:
     tags:
-      - "*"
-    branches: [main]
-  pull_request:
-    branches: [main]
+      - "v*"
 
 jobs:
-  build:
+  release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -25,7 +22,7 @@ jobs:
         run: go test -v ./...
 
       - name: Set up dependencies
-        run: go get github.com/mitchellh/gox
+        run: go install github.com/mitchellh/gox
 
       - name: Build
         run: ./gh_build.sh

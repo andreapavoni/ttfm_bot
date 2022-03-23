@@ -7,33 +7,30 @@ import (
 	"github.com/andreapavoni/ttfm_bot/utils/collections"
 )
 
-type Rooms struct {
+type FavRooms struct {
 	bot *Bot
 	*collections.SmartMap[string]
 }
 
-func NewRooms(b *Bot) *Rooms {
-	r := Rooms{bot: b, SmartMap: collections.NewSmartMap[string]()}
-	r.LoadRoomsFromDb()
+func NewFavRooms(b *Bot) *FavRooms {
+	r := FavRooms{bot: b, SmartMap: collections.NewSmartMap[string]()}
+	r.LoadFavRoomsFromDb()
 	return &r
 }
 
 // AddFavoriteRoom
-func (r *Rooms) AddFavorite(roomSlug, roomId string) error {
+func (r *FavRooms) AddFavorite(roomSlug, roomId string) error {
 	r.Set(roomSlug, roomId)
-	return r.storeRoomsOnDb()
+	return r.storeFavRoomsOnDb()
 }
 
-// ListFavoriteRooms
-func (r *Rooms) ListFavorites() (rooms []string) {
-	for _, k := range r.Keys() {
-		rooms = append(rooms, k)
-	}
-	return rooms
+// ListFavoriteFavRooms
+func (r *FavRooms) ListFavorites() (rooms []string) {
+	return r.Keys()
 }
 
 // JoinRoom
-func (r *Rooms) Join(roomSlug string) error {
+func (r *FavRooms) Join(roomSlug string) error {
 	roomId, ok := r.Get(roomSlug)
 
 	if !ok {
@@ -48,10 +45,12 @@ func (r *Rooms) Join(roomSlug string) error {
 		return err
 	}
 
+	r.bot.Config.RoomId = roomId
+	r.bot.Config.Save()
 	return nil
 }
 
-func (r *Rooms) LoadRoomsFromDb() error {
+func (r *FavRooms) LoadFavRoomsFromDb() error {
 	rooms := map[string]string{}
 	if err := r.bot.Brain.Get("rooms", &rooms); err != nil {
 		if r.bot.Room.Shortcut != "" {
@@ -71,7 +70,7 @@ func (r *Rooms) LoadRoomsFromDb() error {
 	return nil
 }
 
-func (r *Rooms) storeRoomsOnDb() error {
+func (r *FavRooms) storeFavRoomsOnDb() error {
 	rooms := map[string]string{}
 	for i := range r.SmartMap.Iter() {
 		rooms[i.Key] = i.Value

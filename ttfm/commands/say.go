@@ -16,7 +16,7 @@ func SayCommand() *ttfm.Command {
 }
 
 func sayCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandOutput {
-	user, _ := b.UserFromId(cmd.UserId)
+	user, _ := b.Users.UserFromId(cmd.UserId)
 
 	if len(cmd.Args) < 1 {
 		return &ttfm.CommandOutput{User: user, ReplyType: ttfm.MessageTypePm, Err: errors.New("You must specify the message you want me to say")}

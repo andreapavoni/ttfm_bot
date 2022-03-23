@@ -11,8 +11,8 @@ func SnagCommand() *ttfm.Command {
 }
 
 func snagCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandOutput {
-	user, _ := b.UserFromId(cmd.UserId)
-	if err := b.Snag(); err == nil {
+	user, _ := b.Users.UserFromId(cmd.UserId)
+	if err := b.CurrentPlaylist.Snag(); err == nil {
 		return &ttfm.CommandOutput{Msg: "/me snagged this song", User: user, ReplyType: cmd.Source}
 	}
 

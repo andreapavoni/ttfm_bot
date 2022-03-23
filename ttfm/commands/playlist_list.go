@@ -15,7 +15,7 @@ func PlaylistListCommand() *ttfm.Command {
 }
 
 func playlistListCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandOutput {
-	user, _ := b.UserFromId(cmd.UserId)
+	user, _ := b.Users.UserFromId(cmd.UserId)
 	pls := []string{}
 
 	for _, pl := range b.Playlists.List() {

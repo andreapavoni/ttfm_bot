@@ -7,6 +7,8 @@ import (
 
 func onReady(b *Bot) {
 	b.Actions.SetBot()
+	b.Actions.LoadBotIdentity()
+	b.Actions.LoadMainAdmin()
 	b.Actions.InitPlaylists()
 	logrus.Info("BOT:READY")
 }

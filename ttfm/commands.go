@@ -5,6 +5,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/andreapavoni/ttfm_bot/utils/collections"
 	"github.com/sirupsen/logrus"
 )
 
@@ -15,7 +16,7 @@ type Command struct {
 }
 
 func (c *Command) Run(b *Bot, u *User, i *CommandInput) *CommandOutput {
-	if err := CheckAuthorizations(b, u, c.AuthorizationRoles...); err != nil {
+	if err := b.Users.CheckAuthorizations(u, c.AuthorizationRoles...); err != nil {
 		return &CommandOutput{User: u, ReplyType: MessageTypePm, Err: err}
 	}
 
@@ -37,10 +38,35 @@ type CommandOutput struct {
 	Err       error
 }
 
-type MessageInput struct {
-	Text   string
-	UserId string
-	Source MessageType
+func (out *CommandOutput) String() string {
+	if out.ReplyType == MessageTypeNone {
+		return ""
+	}
+
+	if out.Msg != "" && out.Err == nil {
+		return out.Msg
+	}
+
+	if out.Err != nil {
+		return out.Err.Error()
+	}
+
+	return ""
+}
+
+func (out *CommandOutput) SendReply(b *Bot, userId string) {
+	if out.String() != "" {
+		switch out.ReplyType {
+		case MessageTypePm:
+			b.PrivateMessage(userId, out.String())
+			return
+		case MessageTypeRoom:
+			b.RoomMessage(out.String())
+			return
+		default:
+			return
+		}
+	}
 }
 
 type MessageType int
@@ -62,16 +88,32 @@ func (m MessageType) String() string {
 	}
 }
 
-func handleCommand(b *Bot, i *MessageInput) {
-	user, _ := b.UserFromId(i.UserId)
-	logTag := commandLogTag(i.Source)
+type MessageInput struct {
+	Text   string
+	UserId string
+	Source MessageType
+}
 
-	cmd, args, ok := parseCommand(i.Text)
+func (i *MessageInput) HandleCommand(b *Bot) {
+	logTag := i.commandLogTag()
+
+	cmd, args, ok := i.parseCommand()
 	if !ok {
-		logrus.WithFields(logrus.Fields{"text": i.Text, "userId": user.Id, "userName": user.Name}).Info(logTag)
+		logrus.WithFields(logrus.Fields{"text": i.Text, "userId": i.UserId}).Info(logTag)
 		return
 	}
-	command, err := b.recognizeCommand(cmd)
+
+	user, err := i.userFromCommand(b)
+	if err != nil {
+		logFields := logrus.Fields{
+			"text":   i.Text,
+			"userId": i.UserId,
+		}
+		logrus.WithFields(logFields).Info(logTag + ":CMD:ERR " + err.Error())
+		return
+	}
+
+	command, err := b.Commands.RecognizeCommand(cmd)
 	logFields := logrus.Fields{
 		"text":     i.Text,
 		"cmd":      cmd,
@@ -81,7 +123,7 @@ func handleCommand(b *Bot, i *MessageInput) {
 	}
 
 	if err != nil {
-		logrus.WithFields(logFields).Info(logTag + ":CMD:ERR")
+		logrus.WithFields(logFields).Info(logTag + ":CMD:ERR " + err.Error())
 
 		switch i.Source {
 		case MessageTypePm:
@@ -96,34 +138,13 @@ func handleCommand(b *Bot, i *MessageInput) {
 	}
 
 	logrus.WithFields(logFields).Info(logTag + ":CMD")
-
 	out := command.Run(b, user, &CommandInput{UserId: user.Id, Args: args, Source: i.Source})
-	msg := commandOutputMessage(out)
-
-	if msg != "" {
-		switch out.ReplyType {
-		case MessageTypePm:
-			b.PrivateMessage(user.Id, msg)
-			return
-		case MessageTypeRoom:
-			b.RoomMessage(msg)
-			return
-		default:
-			return
-		}
-	}
+	out.SendReply(b, user.Id)
 }
 
-func (b *Bot) recognizeCommand(cmd string) (*Command, error) {
-	if command, ok := b.commands.Get(cmd); ok {
-		return command, nil
-	}
-	return nil, errors.New("command not recognized. Type !help to know available commands")
-}
-
-func parseCommand(msg string) (string, []string, bool) {
+func (i *MessageInput) parseCommand() (string, []string, bool) {
 	re := regexp.MustCompile(`^!(?P<cmd>[a-zA-Z+\-!?]+)(?P<args>\s?(.*)?)`)
-	matches := re.FindStringSubmatch(msg)
+	matches := re.FindStringSubmatch(i.Text)
 
 	cmdIndex := re.SubexpIndex("cmd")
 	if !(cmdIndex >= 0 && len(matches) > cmdIndex) {
@@ -141,27 +162,52 @@ func parseCommand(msg string) (string, []string, bool) {
 	}
 }
 
-func commandOutputMessage(out *CommandOutput) string {
-	if out.ReplyType == MessageTypeNone {
-		return ""
+func (i *MessageInput) userFromCommand(b *Bot) (*User, error) {
+	if user, err := b.Users.UserFromId(i.UserId); err != nil && b.Users.UserIsAdmin(i.UserId) {
+		return b.Admins.Get(i.UserId)
+	} else {
+		return user, nil
 	}
-
-	if out.Msg != "" && out.Err == nil {
-		return out.Msg
-	}
-
-	if out.Err != nil {
-		return out.Err.Error()
-	}
-
-	return ""
 }
 
-func commandLogTag(src MessageType) string {
-	switch src {
+func (i *MessageInput) commandLogTag() string {
+	switch i.Source {
 	case MessageTypePm:
 		return "MSG:PM"
 	default:
 		return "MSG:ROOM"
 	}
+}
+
+type Commands struct {
+	*collections.SmartMap[*Command]
+}
+
+func NewCommands() *Commands {
+	return &Commands{SmartMap: collections.NewSmartMap[*Command]()}
+}
+
+func (c *Commands) RecognizeCommand(cmd string) (*Command, error) {
+	if command, ok := c.SmartMap.Get(cmd); ok {
+		return command, nil
+	}
+	return nil, errors.New("command not recognized. Type !help to know available commands")
+}
+
+// ListCommands available
+func (c *Commands) List() []string {
+	return c.Keys()
+}
+
+// Get command if exists
+func (c *Commands) Get(name string) (*Command, error) {
+	if cmd, ok := c.SmartMap.Get(name); ok {
+		return cmd, nil
+	}
+	return nil, errors.New("command not found")
+}
+
+// Add command with given alias
+func (c *Commands) Add(alias string, cmd *Command) {
+	c.SmartMap.Set(alias, cmd)
 }

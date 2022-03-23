@@ -13,10 +13,10 @@ func AutoDjCommand() *ttfm.Command {
 }
 
 func autoDjCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandOutput {
-	user, _ := b.UserFromId(cmd.UserId)
+	user, _ := b.Users.UserFromId(cmd.UserId)
 
 	if len(cmd.Args) == 0 {
-		return &ttfm.CommandOutput{Msg: currentAutoDjStatusMsg(b.Config.AutoDj), User: user, ReplyType: cmd.Source}
+		return &ttfm.CommandOutput{Msg: currentAutoDjStatusMsg(b.Config.AutoDjEnabled), User: user, ReplyType: cmd.Source}
 	}
 
 	switch cmd.Args[0] {
@@ -25,7 +25,7 @@ func autoDjCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandOutp
 	case "off":
 		return &ttfm.CommandOutput{Msg: disableAutoDj(b), User: user, ReplyType: cmd.Source}
 	default:
-		return &ttfm.CommandOutput{Msg: currentAutoDjStatusMsg(b.Config.AutoDj), User: user, ReplyType: cmd.Source}
+		return &ttfm.CommandOutput{Msg: currentAutoDjStatusMsg(b.Config.AutoDjEnabled), User: user, ReplyType: cmd.Source}
 	}
 }
 
@@ -38,16 +38,16 @@ func currentAutoDjStatusMsg(status bool) string {
 }
 
 func enableAutoDj(b *ttfm.Bot) string {
-	if !b.Config.AutoDj {
-		b.AutoDj(true)
+	if !b.Config.AutoDjEnabled {
+		b.Config.EnableAutoDj(true)
 		return "/me enabled auto dj mode"
 	}
 	return "/me has already enabled auto dj mode"
 }
 
 func disableAutoDj(b *ttfm.Bot) string {
-	if b.Config.AutoDj {
-		b.AutoDj(false)
+	if b.Config.AutoDjEnabled {
+		b.Config.EnableAutoDj(false)
 		return "/me disabled auto dj mode"
 	}
 	return "/me has already disabled auto dj mode"

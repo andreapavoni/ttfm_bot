@@ -17,14 +17,14 @@ func PlaylistSwitchCommand() *ttfm.Command {
 }
 
 func playlistSwitchCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandOutput {
-	user, _ := b.UserFromId(cmd.UserId)
+	user, _ := b.Users.UserFromId(cmd.UserId)
 	if len(cmd.Args) < 1 {
 		return &ttfm.CommandOutput{User: user, ReplyType: cmd.Source, Err: errors.New("You must specify a name of the playlist you want to switch to")}
 	}
 
 	playlistName := strings.Join(cmd.Args, " ")
 
-	if err := b.SwitchPlaylist(playlistName); err != nil {
+	if err := b.Playlists.Switch(playlistName); err != nil {
 		return &ttfm.CommandOutput{User: user, ReplyType: ttfm.MessageTypePm, Err: fmt.Errorf("I was unable to switch playlist: %s", err.Error())}
 	}
 

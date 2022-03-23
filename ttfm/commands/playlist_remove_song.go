@@ -15,8 +15,8 @@ func PlaylistRemoveSongCommand() *ttfm.Command {
 }
 
 func playlistRemoveSongCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandOutput {
-	user, _ := b.UserFromId(cmd.UserId)
-	if err := b.RemoveSongFromPlaylist(b.Room.Song.Id); err != nil {
+	user, _ := b.Users.UserFromId(cmd.UserId)
+	if err := b.CurrentPlaylist.RemoveSong(b.Room.Song.Id); err != nil {
 		return &ttfm.CommandOutput{User: user, ReplyType: ttfm.MessageTypePm, Err: fmt.Errorf("I was unable to delete the playlist: %s", err.Error())}
 	}
 

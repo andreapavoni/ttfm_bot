@@ -17,20 +17,20 @@ func BootCommand() *ttfm.Command {
 }
 
 func bootCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandOutput {
-	user, _ := b.UserFromId(cmd.UserId)
+	user, _ := b.Users.UserFromId(cmd.UserId)
 
 	if len(cmd.Args) < 1 {
 		return &ttfm.CommandOutput{User: user, ReplyType: cmd.Source, Err: errors.New("You must specify the username of the user you kick")}
 	}
 
-	kickedUser, err := b.UserFromName(strings.Join(cmd.Args, " "))
+	kickedUser, err := b.Users.UserFromName(strings.Join(cmd.Args, " "))
 	reason := fmt.Sprintf("Ask @%s for details", user.Name)
 
 	if err != nil {
 		return &ttfm.CommandOutput{User: user, ReplyType: ttfm.MessageTypePm, Err: errors.New("I can't find the user you want to kick")}
 	}
 
-	if err := b.BootUser(kickedUser.Id, reason); err != nil {
+	if err := b.Users.BootUser(kickedUser.Id, reason); err != nil {
 		return &ttfm.CommandOutput{User: user, ReplyType: ttfm.MessageTypePm, Err: fmt.Errorf("I wasn't able to boot @%s", kickedUser.Name)}
 	}
 

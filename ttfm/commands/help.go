@@ -17,10 +17,10 @@ func HelpCommand() *ttfm.Command {
 }
 
 func helpCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandOutput {
-	user, _ := b.UserFromId(cmd.UserId)
+	user, _ := b.Users.UserFromId(cmd.UserId)
 
 	if len(cmd.Args) == 1 {
-		command, err := b.GetCommand(cmd.Args[0])
+		command, err := b.Commands.Get(cmd.Args[0])
 
 		if err != nil {
 			return &ttfm.CommandOutput{User: user, ReplyType: cmd.Source, Err: err}
@@ -31,13 +31,13 @@ func helpCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandOutput
 	}
 
 	availableCmds := []string{}
-	for _, c := range b.ListCommands() {
-		command, err := b.GetCommand(c)
+	for _, c := range b.Commands.List() {
+		command, err := b.Commands.Get(c)
 		if err != nil {
 			continue
 		}
 
-		if err := ttfm.CheckAuthorizations(b, user, command.AuthorizationRoles...); err == nil {
+		if err := b.Users.CheckAuthorizations(user, command.AuthorizationRoles...); err == nil {
 			availableCmds = append(availableCmds, c)
 		}
 	}

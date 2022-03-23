@@ -13,17 +13,17 @@ func UnfanCommand() *ttfm.Command {
 }
 
 func unfanCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandOutput {
-	user, _ := b.UserFromId(cmd.UserId)
+	user, _ := b.Users.UserFromId(cmd.UserId)
 	if len(cmd.Args) < 1 {
 		return &ttfm.CommandOutput{User: user, ReplyType: cmd.Source, Err: errors.New("You must specify the username of the user you want to unfan")}
 	}
 
-	unfannedUser, err := b.UserFromName(strings.Join(cmd.Args, " "))
+	unfannedUser, err := b.Users.UserFromName(strings.Join(cmd.Args, " "))
 	if err != nil {
 		return &ttfm.CommandOutput{User: user, ReplyType: ttfm.MessageTypePm, Err: errors.New("I can't find the user you want to unfan")}
 	}
 
-	if err := b.Unfan(unfannedUser.Id); err != nil {
+	if err := b.Users.Unfan(unfannedUser.Id); err != nil {
 		return &ttfm.CommandOutput{User: user, ReplyType: ttfm.MessageTypePm, Err: fmt.Errorf("I was unable to unfan @%s", unfannedUser.Name)}
 	}
 

@@ -19,21 +19,7 @@ It's based on [alaingilbert/ttapi](https://github.com/alaingilbert/ttapi), a Gol
 - `TTFM_API_AUTH`: the API key to connect to Turntables.fm
 - `TTFM_API_USER_ID`: User ID for the user
 - `TTFM_API_ROOM_ID`: ID of the room to join
-
-#### Optional (with defaults)
-
-- `TTFM_ADMINS` (default: empty): a list of comma-separated usernames
-- `TTFM_AUTO_SNAG` (default: false): wether the bot should snag every song played by others
-- `TTFM_AUTO_BOP` (default: true): wether the bot should bop every song played by others
-- `TTFM_AUTO_DJ` (default: false): if none is playing, then the bot will automatically jump on the stage
-- `TTFM_AUTO_QUEUE` (default: false): joins queues managed by others
-- `TTFM_AUTO_QUEUE_MSG` (default: empty): react when mentioned to join the stage (works with AutoDJ)
-- `TTFM_AUTO_SHOW_SONG_STATS` (default: ): communicate to the room the stats of the last song played
-- `TTFM_AUTO_WELCOME` (default: false): welcomes every user that joins the room
-- `TTFM_MOD_QUEUE` (default: false): enables queueing when the room is crowded with aspiring DJs
-- `TTFM_MOD_SONGS_MAX_DURATION` (default: 0): duration limit of the song in minutes (0 means disabled)
-- `TTFM_DEFAULT_PLAYLIST` (default: "default"): which playlist should use the bot (for snag or DJ)
-- `TTFM_SET_BOT` (default: false): tells the server that this is a bot
+- `TTFM_ADMIN_MAIN_ID`: the ID of the user that will be the first and main admin
 
 ## Commands
 
@@ -76,7 +62,7 @@ Admins are users which were previously configured on the bot to run commands on 
 - `!pc <playlist_name>` switch to `playlist_name` playlist
 - `!say <something>` say something in the room
 - `!cfg <config_key> [<config_value>]` sets config key and value. Without `config_value`, it replies with current configuration for `<config_key>`
-- `!room [list | <sub_command> <room_slug>]`
+- `!room [list | <sub_command> <room_slug>]` handles favorite rooms
 
 ### Moderators
 
@@ -97,16 +83,3 @@ Bot can obey to moderators commands, however it depends by the kind of command i
 - [Disco Clubbing](https://turntable.fm/disco_clubbing) (here you can find this bot running)
 - [Aunt Jackie](https://turntable.fm/aunt_jackie)
 - [I ❤️ The 80's](https://turntable.fm/i_the_80s)
-
-## TODO (as of march 22th 2022)
-
-- [ ] rooms should be faved on server, then loaded from API at startup and cached in mem
-- [ ] current room should be saved somewhere on db, then used to join when bot starts
-- [x] github releases
-- [ ] all the commands with on/off args should be ported into `cfg` command
-- [ ] refactor code into dedicated files by passing bot instance to its objects (eg: Room, Users, Playlist, ...), then wrapped in `Actions` if needed
-- [ ] add bot initializer: create a basic default db to edit manually
-- [ ] admins should be cached as users (to accept commands through PM even if in different rooms)
-- [x] refactor "brain" db callers (eg: `Config`) to use `brain` bucket
-- [ ] add `reload brain` command to reload all data from db OR add `reload-X` for granular reloading AND refresh cache
-- [x] refactor `Reactions` to have only one file

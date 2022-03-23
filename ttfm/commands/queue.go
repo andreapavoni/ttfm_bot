@@ -15,9 +15,9 @@ func QueueCommand() *ttfm.Command {
 }
 
 func queueCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandOutput {
-	user, _ := b.UserFromId(cmd.UserId)
+	user, _ := b.Users.UserFromId(cmd.UserId)
 	if len(cmd.Args) == 0 {
-		return &ttfm.CommandOutput{Msg: currentQueueStatusMsg(b, b.Config.ModQueue), User: user, ReplyType: cmd.Source}
+		return &ttfm.CommandOutput{Msg: currentQueueStatusMsg(b, b.Config.QueueEnabled), User: user, ReplyType: cmd.Source}
 	}
 
 	switch cmd.Args[0] {
@@ -26,7 +26,7 @@ func queueCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandOutpu
 	case "off":
 		return &ttfm.CommandOutput{Msg: disableQueue(b), User: user, ReplyType: cmd.Source}
 	default:
-		return &ttfm.CommandOutput{Msg: currentQueueStatusMsg(b, b.Config.ModQueue), User: user, ReplyType: cmd.Source}
+		return &ttfm.CommandOutput{Msg: currentQueueStatusMsg(b, b.Config.QueueEnabled), User: user, ReplyType: cmd.Source}
 	}
 }
 
@@ -43,16 +43,18 @@ func currentQueueStatusMsg(b *ttfm.Bot, status bool) string {
 }
 
 func enableQueue(b *ttfm.Bot) string {
-	if !b.Config.ModQueue {
-		b.ModQueue(true)
+	if !b.Config.QueueEnabled {
+		b.Config.EnableQueue(true)
+		b.Queue.Empty()
 		return "/me has enabled queue mode"
 	}
 	return "I've already enabled queue mode"
 }
 
 func disableQueue(b *ttfm.Bot) string {
-	if b.Config.ModQueue {
-		b.ModQueue(false)
+	if b.Config.QueueEnabled {
+		b.Config.EnableQueue(false)
+		b.Queue.Empty()
 
 		return "/me has disabled queue mode"
 	}

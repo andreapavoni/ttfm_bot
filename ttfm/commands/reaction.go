@@ -16,7 +16,7 @@ func ReactionCommand() *ttfm.Command {
 }
 
 func reactionCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandOutput {
-	user, _ := b.UserFromId(cmd.UserId)
+	user, _ := b.Users.UserFromId(cmd.UserId)
 
 	if len(cmd.Args) == 0 {
 		msg := fmt.Sprintf("Available reactions: %s", strings.Join(b.Reactions.Availables(), ", "))

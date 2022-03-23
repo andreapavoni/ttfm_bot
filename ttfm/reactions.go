@@ -17,11 +17,10 @@ type Reactions struct {
 	*collections.SmartMap[[]string]
 	availables *collections.SmartList[string]
 	brain      *Brain
-	bucket     string
 }
 
-func NewReactions(brain *Brain, bucket string) *Reactions {
-	r := &Reactions{SmartMap: collections.NewSmartMap[[]string](), brain: brain, availables: collections.NewSmartList[string](), bucket: bucket}
+func NewReactions(brain *Brain) *Reactions {
+	r := &Reactions{SmartMap: collections.NewSmartMap[[]string](), brain: brain, availables: collections.NewSmartList[string]()}
 	r.loadReactions()
 	return r
 }
@@ -43,8 +42,7 @@ func (r *Reactions) Put(reactionName, imgUrl string) error {
 
 	imgs = append(imgs, imgUrl)
 	r.SmartMap.Set(reactionName, imgs)
-	r.brain.Put(reactionName, imgs)
-	return nil
+	return r.Save()
 }
 
 func (r *Reactions) Get(reactionName string) string {
@@ -61,6 +59,14 @@ func (r *Reactions) Availables() []string {
 	copy(reactionsList, availableReactions)
 	sort.Strings(reactionsList)
 	return reactionsList
+}
+
+func (r *Reactions) Save() error {
+	reactions := []reaction{}
+	for i := range r.Iter() {
+		reactions = append(reactions, reaction{Name: i.Key, Imgs: i.Value})
+	}
+	return r.brain.Put("reactions", &reactions)
 }
 
 func (r *Reactions) loadReactions() error {

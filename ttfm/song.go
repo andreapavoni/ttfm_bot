@@ -14,6 +14,11 @@ type Song struct {
 	up     int
 	down   int
 	snag   int
+	bot    *Bot
+}
+
+func NewSong(bot *Bot) *Song {
+	return &Song{bot: bot}
 }
 
 func (s *Song) UpdateStats(up, down, snag int) {
@@ -40,4 +45,23 @@ func (s *Song) UnpackVotelog(votelog [][]string) (userId, vote string) {
 		return "", ""
 	}
 	return votelog[0][0], votelog[0][1]
+}
+
+// Bop
+func (s *Song) Bop() {
+	if s.bot.Room.Song.DjId != s.bot.Identity.Id {
+		s.bot.api.Bop()
+	}
+}
+
+// Downvote
+func (s *Song) Downvote() {
+	if s.bot.Room.Song.DjId != s.bot.Identity.Id {
+		s.bot.api.VoteDown()
+	}
+}
+
+// SkipSong current song (must be moderator to skip others songs)
+func (s *Song) Skip() {
+	s.bot.api.Skip()
 }

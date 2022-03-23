@@ -4,21 +4,10 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
-	"strconv"
-	"strings"
 	"time"
 
 	"github.com/sirupsen/logrus"
 )
-
-// String helpers
-func StringToSlice(str string, separator string) (list []string) {
-	for _, v := range strings.Split(str, separator) {
-		list = append(list, strings.Trim(v, " "))
-	}
-
-	return list
-}
 
 // ENVs
 func GetEnvOrPanic(key string) string {
@@ -28,34 +17,6 @@ func GetEnvOrPanic(key string) string {
 	} else {
 		return val
 	}
-}
-
-func GetEnvOrDefault(key string, defaultValue string) string {
-	if val, ok := os.LookupEnv(key); ok {
-		return val
-	}
-
-	return defaultValue
-}
-
-func GetEnvBoolOrDefault(key string, defaultValue bool) bool {
-	if val, ok := os.LookupEnv(key); ok {
-		if value, err := strconv.ParseBool(val); err == nil {
-			return value
-		}
-	}
-
-	return defaultValue
-}
-
-func GetEnvIntOrDefault(key string, defaultValue int64) int64 {
-	if val, ok := os.LookupEnv(key); ok {
-		if value, err := strconv.ParseInt(val, 10, 32); err == nil {
-			return value
-		}
-	}
-
-	return defaultValue
 }
 
 // Rand numbers

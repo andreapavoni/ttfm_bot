@@ -26,7 +26,6 @@ func (q *Queue) Shift(inviteExpirationMinutes int) (string, error) {
 
 	now := time.Now()
 	waitDuration := time.Duration(int64(inviteExpirationMinutes)) * time.Minute
-
 	q.reservationDjId = next
 	q.reservationExpiresAt = now.Add(waitDuration)
 
@@ -39,7 +38,6 @@ func (q *Queue) Add(djId string) error {
 	if q.SmartList.HasElement(djId) {
 		return errors.New("You're already in queue")
 	}
-
 	q.SmartList.Push(djId)
 
 	return nil
@@ -53,7 +51,6 @@ func (q *Queue) Remove(djId string) error {
 	if q.reservationDjId == djId {
 		q.resetReservation()
 	}
-
 	return nil
 }
 

@@ -17,18 +17,18 @@ func EscortCommand() *ttfm.Command {
 }
 
 func escortCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandOutput {
-	user, _ := b.UserFromId(cmd.UserId)
+	user, _ := b.Users.UserFromId(cmd.UserId)
 
 	if len(cmd.Args) < 1 {
 		return &ttfm.CommandOutput{User: user, ReplyType: cmd.Source, Err: errors.New("You must specify the username of the user you want to escort")}
 	}
 
-	escortedUser, err := b.UserFromName(strings.Join(cmd.Args, " "))
+	escortedUser, err := b.Users.UserFromName(strings.Join(cmd.Args, " "))
 	if err != nil {
 		return &ttfm.CommandOutput{User: user, ReplyType: ttfm.MessageTypePm, Err: fmt.Errorf("I can't find the user you want to escort: @%s", escortedUser.Name)}
 	}
 
-	if err := b.EscortDj(escortedUser.Id); err != nil {
+	if err := b.Users.EscortDj(escortedUser.Id); err != nil {
 		return &ttfm.CommandOutput{User: user, ReplyType: ttfm.MessageTypePm, Err: fmt.Errorf("I was unable to escort @%s", escortedUser.Name)}
 
 	}

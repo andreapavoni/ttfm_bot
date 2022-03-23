@@ -16,8 +16,8 @@ func QueueRemoveCommand() *ttfm.Command {
 }
 
 func queueRemoveCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandOutput {
-	user, _ := b.UserFromId(cmd.UserId)
-	if !b.Config.ModQueue {
+	user, _ := b.Users.UserFromId(cmd.UserId)
+	if !b.Config.QueueEnabled {
 		return &ttfm.CommandOutput{User: user, ReplyType: ttfm.MessageTypePm, Err: errors.New("Queue mode is disabled")}
 	}
 
