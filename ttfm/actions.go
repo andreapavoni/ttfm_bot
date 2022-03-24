@@ -30,7 +30,21 @@ func (a *Actions) AutoSnag() {
 
 func (a *Actions) AutoDj() {
 	if a.bot.Config.AutoDjEnabled && a.bot.Room.Djs.Size() <= int(a.bot.Config.AutoDjMinDjs) && !a.bot.Users.UserIsDj(a.bot.Identity.Id) {
-		a.bot.api.AddDj()
+		if err := a.bot.api.AddDj(); err == nil {
+			a.bot.RoomMessage("/me is going on stage")
+		}
+	}
+}
+
+func (a *Actions) ConsiderStopAutoDj() {
+	if a.bot.Users.UserIsDj(a.bot.Identity.Id) && a.bot.Room.Djs.Size() > int(a.bot.Config.AutoDjMinDjs) {
+		if a.bot.Users.UserIsCurrentDj(a.bot.Identity.Id) {
+			a.bot.Room.AddDjEscorting(a.bot.Identity.Id)
+			a.bot.RoomMessage("/me will leave the stage at the end of this song to free a slot for humans")
+		} else {
+			a.bot.Users.EscortDj(a.bot.Identity.Id)
+			a.bot.RoomMessage("/me leaves the stage to free a slot for humans")
+		}
 	}
 }
 
@@ -78,22 +92,22 @@ func (a *Actions) EnforceQueueStageReservation(userId string) {
 }
 
 func (a *Actions) ConsiderQueueActivation() {
-	stageIsFull := (a.bot.Room.MaxDjs - a.bot.Room.Djs.Size()) == 0
+	stageIsFull := a.bot.Room.MaxDjs == a.bot.Room.Djs.Size()
 
 	if a.bot.Users.UserIsModerator(a.bot.Identity.Id) && !a.bot.Config.QueueEnabled && stageIsFull {
 		a.bot.Config.EnableQueue(true)
 		a.bot.Queue.Empty()
 		a.bot.RoomMessage("/me has enabled queue mode")
 	}
+}
 
-	if stageIsFull && a.bot.Users.UserIsDj(a.bot.Identity.Id) {
-		if a.bot.Users.UserIsCurrentDj(a.bot.Identity.Id) {
-			a.bot.Room.AddDjEscorting(a.bot.Identity.Id)
-			a.bot.RoomMessage("/me will leave the stage at the end of this song to free a slot for humans")
-		} else {
-			a.bot.Users.EscortDj(a.bot.Identity.Id)
-			a.bot.RoomMessage("/me leaves the stage to free a slot for humans")
-		}
+func (a *Actions) ConsiderQueueDeactivation() {
+	stageIsAvailable := a.bot.Room.MaxDjs-a.bot.Room.Djs.Size() > 0
+
+	if a.bot.Users.UserIsModerator(a.bot.Identity.Id) && a.bot.Config.QueueEnabled && stageIsAvailable && a.bot.Queue.Size() == 0 {
+		a.bot.Config.EnableQueue(false)
+		a.bot.Queue.Empty()
+		a.bot.RoomMessage("/me has disabled queue mode")
 	}
 }
 

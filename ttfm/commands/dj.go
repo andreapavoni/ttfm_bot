@@ -33,5 +33,5 @@ func djCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandOutput {
 	}
 
 	b.Actions.AutoDj()
-	return &ttfm.CommandOutput{Msg: "/me is going on stage", User: user, ReplyType: cmd.Source}
+	return &ttfm.CommandOutput{User: user, ReplyType: ttfm.MessageTypeNone}
 }

@@ -51,6 +51,7 @@ func onNewSong(b *Bot, e ttapi.NewSongEvt) {
 	b.Actions.EnforceSongDuration()
 	b.Actions.AutoBop()
 	b.Actions.AutoSnag()
+	b.Actions.AutoDj()
 
 	logrus.WithFields(logrus.Fields{
 		"djName": b.Room.Song.DjName,
@@ -82,6 +83,7 @@ func onSnagged(b *Bot, e ttapi.SnaggedEvt) {
 func onRegistered(b *Bot, e ttapi.RegisteredEvt) {
 	u := e.User[0]
 	b.Actions.RegisterUser(u.ID, u.Name)
+	b.Actions.AutoDj()
 
 	logrus.WithFields(logrus.Fields{
 		"userId":   u.ID,
@@ -121,8 +123,9 @@ func onAddDj(b *Bot, e ttapi.AddDJEvt) {
 func onRemDj(b *Bot, e ttapi.RemDJEvt) {
 	u := e.User[0]
 	b.Actions.RemoveDj(u.Userid, e.Modid)
-	b.Actions.AutoDj()
+	b.Actions.ConsiderQueueDeactivation()
 	b.Actions.ForwardQueue()
+	b.Actions.AutoDj()
 
 	logrus.WithFields(logrus.Fields{
 		"userId":    u.Userid,
