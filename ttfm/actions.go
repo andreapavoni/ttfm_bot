@@ -181,12 +181,12 @@ func (a *Actions) UpdateRoomFromApi() {
 func (a *Actions) EnforceSongDuration() {
 	maxDurationSeconds := int(a.bot.Config.MaxSongDuration) * 60
 	durationDiff := maxDurationSeconds - a.bot.Room.Song.Length
+
 	if a.bot.Users.UserIsModerator(a.bot.Identity.Id) && maxDurationSeconds > 0 && durationDiff < 0 {
-		utils.ExecuteDelayed(time.Duration(maxDurationSeconds)*time.Second, func() {
-			a.bot.Room.Song.Skip()
-		})
-		msg := fmt.Sprintf("@%s song will be skipped at %s because it exceeds the limit.", a.bot.Room.Song.DjName, utils.FormatSecondsToMinutes(maxDurationSeconds))
+		msg := fmt.Sprintf("@%s this song exceeds the duration limit of %s minutes: remaning %s will be skipped", a.bot.Room.Song.DjName, utils.FormatSecondsToMinutes(maxDurationSeconds), utils.FormatSecondsToMinutes(-durationDiff))
 		a.bot.RoomMessage(msg)
+	} else {
+		a.bot.Room.Song.StopSkipTimer()
 	}
 }
 

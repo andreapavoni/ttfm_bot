@@ -4,7 +4,7 @@ A bot to bring some fun and utils on [turntable.fm](https://turntable.fm) rooms.
 
 It's based on [alaingilbert/ttapi](https://github.com/alaingilbert/ttapi), a Golang library to build bots for Turntable.fm.
 
-## Features
+## Features
 
 Features are inspired by [chillybot](https://github.com/jaycammarano/chillybot), with some differences here and there.
 
@@ -20,7 +20,7 @@ Features are inspired by [chillybot](https://github.com/jaycammarano/chillybot),
 - [x] Room greeting (only when enabled, and bot is moderator)
   - [ ] Greeting message configurable
 - [x] Playlists
-  - [x] Add/Remove songs to your bots playlist
+  - [x] Add/Remove songs to your bot's playlists
   - [x] Create/Remove playlists
   - [x] Switch to another playlist
 - [x] Auto SNAG every song into current playlist

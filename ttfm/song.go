@@ -1,24 +1,30 @@
 package ttfm
 
 import (
+	"time"
+
+	"github.com/andreapavoni/ttfm_bot/utils"
 	"github.com/sirupsen/logrus"
 )
 
 type Song struct {
-	Id     string
-	DjName string
-	DjId   string
-	Title  string
-	Artist string
-	Length int
-	up     int
-	down   int
-	snag   int
-	bot    *Bot
+	Id        string
+	DjName    string
+	DjId      string
+	Title     string
+	Artist    string
+	Length    int
+	up        int
+	down      int
+	snag      int
+	bot       *Bot
+	skipTimer *time.Timer
 }
 
 func NewSong(bot *Bot) *Song {
-	return &Song{bot: bot}
+	s := &Song{bot: bot}
+	s.ResetSkipTimer()
+	return s
 }
 
 func (s *Song) UpdateStats(up, down, snag int) {
@@ -37,6 +43,7 @@ func (s *Song) Reset(id, title, artist string, length int, djName, djId string) 
 	s.up = 0
 	s.down = 0
 	s.snag = 0
+	s.ResetSkipTimer()
 }
 
 func (s *Song) UnpackVotelog(votelog [][]string) (userId, vote string) {
@@ -64,4 +71,21 @@ func (s *Song) Downvote() {
 // SkipSong current song (must be moderator to skip others songs)
 func (s *Song) Skip() {
 	s.bot.api.Skip()
+}
+
+func (s *Song) StopSkipTimer() {
+	if s.skipTimer != nil {
+		s.skipTimer.Stop()
+	}
+}
+
+func (s *Song) ResetSkipTimer() {
+	if s.skipTimer != nil {
+		s.skipTimer.Stop()
+	}
+
+	duration := utils.MinutesToDuration(int(s.bot.Config.MaxSongDuration))
+	s.skipTimer = utils.ExecuteDelayed(duration, func() {
+		s.Skip()
+	})
 }

@@ -20,5 +20,5 @@ func playlistRemoveSongCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm
 		return &ttfm.CommandOutput{User: user, ReplyType: ttfm.MessageTypePm, Err: fmt.Errorf("I was unable to delete the playlist: %s", err.Error())}
 	}
 
-	return &ttfm.CommandOutput{Msg: "I've removed the song from the current playlist", User: user, ReplyType: ttfm.MessageTypePm}
+	return &ttfm.CommandOutput{Msg: "/me removed the song from the current playlist", User: user, ReplyType: cmd.Source}
 }

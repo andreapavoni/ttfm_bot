@@ -5,8 +5,6 @@ import (
 	"math/rand"
 	"os"
 	"time"
-
-	"github.com/sirupsen/logrus"
 )
 
 // ENVs
@@ -28,20 +26,16 @@ func RandomInteger(min, max int) int {
 // Delay execution helpers
 func RandomDelay(secs int) time.Duration {
 	delay := RandomInteger(1, secs)
-
-	logrus.WithField("delaySeconds", delay).Trace("Random delay")
 	return time.Duration(delay) * time.Second
 }
 
-func ExecuteDelayed(waitTime time.Duration, f func()) {
-	logrus.WithField("waitTime", waitTime).Debug("Scheduling delayed action")
-	time.AfterFunc(waitTime, f)
+func ExecuteDelayed(waitTime time.Duration, f func()) *time.Timer {
+	return time.AfterFunc(waitTime, f)
 }
 
-func ExecuteDelayedRandom(max int, f func()) {
+func ExecuteDelayedRandom(max int, f func()) *time.Timer {
 	waitTime := RandomDelay(max)
-	logrus.WithField("waitTime", waitTime).Debug("Scheduling delayed action")
-	time.AfterFunc(waitTime, f)
+	return time.AfterFunc(waitTime, f)
 }
 
 // Time formatting
@@ -53,6 +47,14 @@ func FormatSecondsToMinutes(secs int) string {
 
 }
 
+// TIME
+
+func MinutesToDuration(minutes int) time.Duration {
+	durationSeconds := minutes * 60
+	return time.Duration(durationSeconds) * time.Second
+}
+
+// Slices
 func IndexOf[T comparable](value T, collection []T) int {
 	for idx, element := range collection {
 		if element == value {
