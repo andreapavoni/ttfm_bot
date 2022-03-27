@@ -31,6 +31,7 @@ func onRoomChanged(b *Bot, e ttapi.RoomInfoRes) {
 
 func onNewSong(b *Bot, e ttapi.NewSongEvt) {
 	b.Actions.ShowSongStats()
+	b.Actions.UpdateDjStats(b.Room.Song.DjId, b.Room.Song.up, b.Room.Song.down, b.Room.Song.snag)
 	logrus.WithFields(logrus.Fields{
 		"djName": b.Room.Song.DjName,
 		"djId":   b.Room.Song.DjId,
@@ -54,11 +55,14 @@ func onNewSong(b *Bot, e ttapi.NewSongEvt) {
 	b.Actions.ConsiderStartAutoDj()
 
 	logrus.WithFields(logrus.Fields{
-		"djName": b.Room.Song.DjName,
-		"djId":   b.Room.Song.DjId,
-		"title":  b.Room.Song.Title,
-		"artist": b.Room.Song.Artist,
-		"length": b.Room.Song.Length,
+		"songSourceId": e.Room.Metadata.CurrentSong.Sourceid,
+		"songSource":   e.Room.Metadata.CurrentSong.Source,
+		"songId":       e.Room.Metadata.CurrentSong.ID,
+		"djName":       b.Room.Song.DjName,
+		"djId":         b.Room.Song.DjId,
+		"title":        b.Room.Song.Title,
+		"artist":       b.Room.Song.Artist,
+		"length":       b.Room.Song.Length,
 	}).Info("ROOM:NEW_SONG")
 }
 
@@ -106,6 +110,19 @@ func onDeregistered(b *Bot, e ttapi.DeregisteredEvt) {
 	}).Info("ROOM:USER_LEFT")
 }
 
+func onBootedUser(b *Bot, e ttapi.BootedUserEvt) {
+	user, _ := b.Users.UserFromId(e.Userid)
+	b.Actions.UnregisterUser(user.Id)
+	b.Actions.ConsiderStartAutoDj()
+
+	logrus.WithFields(logrus.Fields{
+		"userId":    e.Userid,
+		"userName":  user.Name,
+		"moderator": e.Modid,
+		"reason":    e.Reason,
+	}).Info("ROOM:USER_BOOTED")
+}
+
 func onAddDj(b *Bot, e ttapi.AddDJEvt) {
 	u := e.User[0]
 	b.Actions.AddDj(u.Userid)
@@ -122,6 +139,7 @@ func onAddDj(b *Bot, e ttapi.AddDJEvt) {
 
 func onRemDj(b *Bot, e ttapi.RemDJEvt) {
 	u := e.User[0]
+	b.Actions.ShowDjStats(u.Userid)
 	b.Actions.RemoveDj(u.Userid, e.Modid)
 	b.Actions.ConsiderQueueStop()
 	b.Actions.ForwardQueue()

@@ -8,12 +8,24 @@ import (
 	"github.com/andreapavoni/ttfm_bot/utils/collections"
 )
 
+type Dj struct {
+	userId string
+	up     int
+	down   int
+	snag   int
+	plays  int
+}
+
+func NewDj(userId string) *Dj {
+	return &Dj{userId, 0, 0, 0, 0}
+}
+
 type Room struct {
 	Name       string
 	Id         string
 	Shortcut   string
 	moderators *collections.SmartList[string]
-	Djs        *collections.SmartList[string]
+	Djs        *collections.SmartMap[*Dj]
 	MaxDjs     int
 	Song       *Song
 	escorting  *collections.SmartList[string]
@@ -24,7 +36,7 @@ func NewRoom(bot *Bot) *Room {
 	return &Room{
 		bot:        bot,
 		moderators: collections.NewSmartList[string](),
-		Djs:        collections.NewSmartList[string](),
+		Djs:        collections.NewSmartMap[*Dj](),
 		Song:       NewSong(bot),
 		escorting:  collections.NewSmartList[string](),
 	}
@@ -52,15 +64,32 @@ func (r *Room) Update(ri ttapi.RoomInfoRes) error {
 }
 
 func (r *Room) AddDj(id string) {
-	r.Djs.Push(id)
+	r.Djs.Set(id, NewDj(id))
 }
 
 func (r *Room) RemoveDj(id string) {
-	r.Djs.Remove(id)
+	r.Djs.Delete(id)
 }
 
 func (r *Room) UpdateDjs(djs []string) {
-	r.Djs = collections.NewSmartListFromSlice(djs)
+	r.Djs = collections.NewSmartMap[*Dj]()
+	for _, djId := range djs {
+		r.AddDj(djId)
+	}
+}
+
+func (r *Room) UpdateDjStats(userId string, up, down, snag int) error {
+	d, ok := r.Djs.Get(userId)
+
+	if !ok {
+		return errors.New("Dj not found")
+	}
+
+	d.up += up
+	d.down += down
+	d.snag += snag
+	d.plays += 1
+	return nil
 }
 
 func (r *Room) UpdateModerators(moderators []string) {
@@ -84,8 +113,20 @@ func (r *Room) SongStats() (header, data string) {
 	song := r.Song
 	header = fmt.Sprintf("Stats for `%s` by `%s` played by @%s:", song.Title, song.Artist, song.DjName)
 	data = fmt.Sprintf("👍 %d | 👎 %d | ❤️ %d", song.up, song.down, song.snag)
-
 	return header, data
+}
+
+// DjStats
+func (r *Room) DjStats(userId string) (header, data string, err error) {
+	dj, ok := r.Djs.Get(userId)
+
+	if !ok {
+		return "", "", errors.New("Dj not found")
+	}
+
+	header = fmt.Sprintf("Stats for @%s", r.Song.DjName)
+	data = fmt.Sprintf("👍 %d | 👎 %d | ❤️ %d | 🎧 %d", dj.up, dj.down, dj.snag, dj.plays)
+	return header, data, nil
 }
 
 // AddDjEscorting the dj will be escorted after the current song is played
@@ -96,11 +137,9 @@ func (r *Room) AddDjEscorting(userId string) error {
 		}
 		return errors.New("You aren't DJing!")
 	}
-
 	if !r.escorting.HasElement(userId) {
 		r.escorting.Push(userId)
 	}
-
 	return nil
 }
 

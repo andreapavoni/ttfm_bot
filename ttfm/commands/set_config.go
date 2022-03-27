@@ -20,7 +20,7 @@ func setConfigCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandO
 	user, _ := b.Users.UserFromId(cmd.UserId)
 
 	if len(cmd.Args) == 0 {
-		msg := fmt.Sprintf("Availble configs: autobop, autodj, autodjslots, autosnag, autowelcome, bot, maxduration, maxsongs, qinviteduration, queue, songstats")
+		msg := fmt.Sprintf("Availble configs: autobop, autodj, autodjslots, autosnag, autowelcome, bot, djstats, maxduration, maxsongs, qinviteduration, queue, songstats")
 		return &ttfm.CommandOutput{Msg: msg, User: user, ReplyType: cmd.Source}
 	}
 
@@ -41,6 +41,8 @@ func setConfigCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandO
 			msg += fmt.Sprintf("`autowelcome` is: %s", printBool(b.Config.AutoWelcomeEnabled))
 		case "bot":
 			msg += fmt.Sprintf("`bot` is: %s", printBool(b.Config.SetBot))
+		case "djstats":
+			msg += fmt.Sprintf("`djstats` is: %s", printBool(b.Config.AutoShowDjStatsEnabled))
 		case "maxduration":
 			msg += fmt.Sprintf("`maxduration` is: %d", b.Config.MaxSongDuration)
 		case "maxsongs":
@@ -78,6 +80,11 @@ func setConfigCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandO
 		value, err = setBool(&b.Config.AutoWelcomeEnabled, cmd.Args[1])
 	case "bot":
 		value, err = setBool(&b.Config.SetBot, cmd.Args[1])
+		if value.(bool) {
+			b.Actions.SetBot()
+		}
+	case "djstats":
+		value, err = setBool(&b.Config.AutoShowDjStatsEnabled, cmd.Args[1])
 		if value.(bool) {
 			b.Actions.SetBot()
 		}

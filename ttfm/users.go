@@ -69,7 +69,7 @@ func (u *Users) UserIsAdmin(userId string) bool {
 
 // UserIsDj
 func (u *Users) UserIsDj(userId string) bool {
-	return u.bot.Room.Djs.HasElement(userId)
+	return u.bot.Room.Djs.HasKey(userId)
 }
 
 // UserIsCurrentDj
@@ -151,7 +151,7 @@ func requireAdmin(b *Bot, u *User) error {
 
 func requireModerator(b *Bot, u *User) error {
 	if !b.Users.UserIsModerator(u.Id) {
-		return errors.New("Sorry, I can't proceed because I'm not a moderator in this room")
+		return errors.New("Sorry, I can't proceed because you're not a moderator in this room")
 	}
 
 	return nil

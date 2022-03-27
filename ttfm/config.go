@@ -16,6 +16,7 @@ type Config struct {
 	AutoDjEnabled            bool
 	AutoDjMinDjs             int64
 	AutoShowSongStatsEnabled bool
+	AutoShowDjStatsEnabled   bool
 	AutoWelcomeEnabled       bool
 	QueueEnabled             bool
 	QueueInviteDuration      int64
@@ -84,6 +85,7 @@ func (c *Config) loadDefaultConfig() {
 	c.AutoDjEnabled = false
 	c.AutoDjMinDjs = 0
 	c.AutoShowSongStatsEnabled = false
+	c.AutoShowDjStatsEnabled = false
 	c.AutoWelcomeEnabled = false
 	c.QueueEnabled = false
 	c.QueueInviteDuration = 1

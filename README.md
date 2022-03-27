@@ -40,6 +40,11 @@ Features are inspired by [chillybot](https://github.com/jaycammarano/chillybot),
 - [ ] Configure a path where to write bot's saved data and logs
 - [ ] afk limit
 - [ ] afk audience limit(separate from afk limit, both can be toggled on and off)
+- [x] DJ stats (when goes off the stage)
+- [ ] Print room rules (by command and/or when user joins)
+- [ ] Room music current theme (default "free play")
+- [ ] Bot info (by command: print version, uptime, ...)
+- [ ] custom prefix for commands (actual is `!`)
 
 ## Installation and setup
 

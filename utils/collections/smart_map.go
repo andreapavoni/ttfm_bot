@@ -74,8 +74,8 @@ func (sm *SmartMap[T]) Get(key string) (T, bool) {
 	return value, ok
 }
 
-// Length gets the number of keys from a concurrent map
-func (sm *SmartMap[T]) Length() int {
+// Size gets the number of keys from a concurrent map
+func (sm *SmartMap[T]) Size() int {
 	sm.Lock()
 	defer sm.Unlock()
 

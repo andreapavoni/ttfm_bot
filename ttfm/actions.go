@@ -118,10 +118,10 @@ func (a *Actions) ConsiderQueueStop() {
 func (a *Actions) EscortDjs() {
 	if a.bot.Users.UserIsModerator(a.bot.Identity.Id) && a.bot.Room.escorting.Size() > 0 {
 		utils.ExecuteDelayed(time.Duration(10)*time.Millisecond, func() {
-			for _, u := range a.bot.Room.escorting.List() {
-				if a.bot.Room.Djs.HasElement(u) {
-					a.bot.Room.EscortDj(u)
-					a.bot.Room.RemoveDjEscorting(u)
+			for _, userId := range a.bot.Room.escorting.List() {
+				if a.bot.Room.Djs.HasKey(userId) {
+					a.bot.Room.EscortDj(userId)
+					a.bot.Room.RemoveDjEscorting(userId)
 				}
 			}
 		})
@@ -221,7 +221,7 @@ func (a *Actions) UnregisterUser(userId string) {
 	a.bot.Users.RemoveUser(userId)
 
 	if a.bot.Users.UserIsModerator(a.bot.Identity.Id) && a.bot.Room.escorting.Size() > 0 {
-		if a.bot.Room.Djs.HasElement(userId) {
+		if a.bot.Room.Djs.HasKey(userId) {
 			a.bot.Room.RemoveDjEscorting(userId)
 		}
 	}
@@ -238,7 +238,7 @@ func (a *Actions) AddDj(userId string) {
 func (a *Actions) RemoveDj(userId, modId string) {
 	a.bot.Room.RemoveDj(userId)
 	if a.bot.Users.UserIsModerator(a.bot.Identity.Id) && a.bot.Room.escorting.Size() > 0 {
-		if a.bot.Room.Djs.HasElement(userId) {
+		if a.bot.Room.Djs.HasKey(userId) {
 			a.bot.Room.RemoveDjEscorting(userId)
 		}
 	}
@@ -257,6 +257,28 @@ func (a *Actions) RemoveDj(userId, modId string) {
 		}
 		return
 	}
+}
+
+func (a *Actions) UpdateDjStats(userId string, ups, downs, snags int) {
+	a.bot.Room.UpdateDjStats(userId, ups, downs, snags)
+}
+
+func (a *Actions) ShowDjStats(userId string) {
+	if !a.bot.Config.AutoShowDjStatsEnabled {
+		return
+	}
+
+	header, data, err := a.bot.Room.DjStats(userId)
+
+	if err != nil {
+		return
+	}
+
+	a.bot.RoomMessage(header)
+	utils.ExecuteDelayed(time.Duration(5)*time.Millisecond, func() {
+		a.bot.RoomMessage(data)
+	})
+
 }
 
 func (a *Actions) BootUser(userId, reason string) error {

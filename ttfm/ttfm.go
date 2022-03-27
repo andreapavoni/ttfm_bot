@@ -65,6 +65,7 @@ func New() *Bot {
 	b.api.OnDeregistered(func(e ttapi.DeregisteredEvt) { onDeregistered(&b, e) })
 	b.api.OnUpdateVotes(func(e ttapi.UpdateVotesEvt) { onUpdateVotes(&b, e) })
 	b.api.OnSnagged(func(e ttapi.SnaggedEvt) { onSnagged(&b, e) })
+	b.api.OnBootedUser(func(e ttapi.BootedUserEvt) { onBootedUser(&b, e) })
 
 	// DJing
 	b.api.OnRemDJ(func(e ttapi.RemDJEvt) { onRemDj(&b, e) })
