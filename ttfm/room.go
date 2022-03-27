@@ -108,3 +108,19 @@ func (r *Room) AddDjEscorting(userId string) error {
 func (r *Room) RemoveDjEscorting(userId string) error {
 	return r.escorting.Remove(userId)
 }
+
+// BootUser from room
+func (r *Room) BootUser(userId, reason string) error {
+	return r.bot.api.BootUser(userId, reason)
+}
+
+// EscortDj
+func (r *Room) EscortDj(userId string) error {
+	if !r.bot.Users.UserIsDj(userId) {
+		if userId == r.bot.Identity.Id {
+			return errors.New("I'm not on stage!")
+		}
+		return errors.New("user is not on stage")
+	}
+	return r.bot.api.RemDj(userId)
+}

@@ -18,7 +18,7 @@ import (
 func SetupLogging() {
 	lumberjackLogger := &lumberjack.Logger{
 		// Log file abbsolute path, os agnostic
-		Filename:   filepath.ToSlash("ttfm_bot.log"),
+		Filename:   filepath.ToSlash("logs/ttfm_bot.log"),
 		MaxSize:    5, // MB
 		MaxBackups: 5,
 		MaxAge:     30,   // days

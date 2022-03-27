@@ -20,7 +20,7 @@ func setConfigCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandO
 	user, _ := b.Users.UserFromId(cmd.UserId)
 
 	if len(cmd.Args) == 0 {
-		msg := fmt.Sprintf("Availble configs: autodjslots, autowelcome, bot, maxduration, maxsongs, qinviteduration, songstats")
+		msg := fmt.Sprintf("Availble configs: autobop, autodj, autodjslots, autosnag, autowelcome, bot, maxduration, maxsongs, qinviteduration, queue, songstats")
 		return &ttfm.CommandOutput{Msg: msg, User: user, ReplyType: cmd.Source}
 	}
 
@@ -29,30 +29,32 @@ func setConfigCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandO
 		msg := "Current setting for "
 
 		switch key {
+		case "autobop":
+			msg += fmt.Sprintf("`autobop` is: %s", printBool(b.Config.AutoBopEnabled))
+		case "autodj":
+			msg += fmt.Sprintf("`autodj` is: %s", printBool(b.Config.AutoDjEnabled))
 		case "autodjslots":
 			msg += fmt.Sprintf("`autodjslots` is: %d", b.Config.AutoDjMinDjs)
-			return &ttfm.CommandOutput{Msg: msg, User: user, ReplyType: cmd.Source}
+		case "autosnag":
+			msg += fmt.Sprintf("`autosnag` is: %s", printBool(b.Config.AutoSnagEnabled))
+		case "autowelcome":
+			msg += fmt.Sprintf("`autowelcome` is: %s", printBool(b.Config.AutoWelcomeEnabled))
+		case "bot":
+			msg += fmt.Sprintf("`bot` is: %s", printBool(b.Config.SetBot))
 		case "maxduration":
 			msg += fmt.Sprintf("`maxduration` is: %d", b.Config.MaxSongDuration)
-			return &ttfm.CommandOutput{Msg: msg, User: user, ReplyType: cmd.Source}
 		case "maxsongs":
 			msg += fmt.Sprintf("`maxsongs` is: %d", b.Config.MaxSongsPerDj)
-			return &ttfm.CommandOutput{Msg: msg, User: user, ReplyType: cmd.Source}
-		case "songstats":
-			msg += fmt.Sprintf("`songstats` is: %v", printBool(b.Config.AutoShowSongStatsEnabled))
-			return &ttfm.CommandOutput{Msg: msg, User: user, ReplyType: cmd.Source}
-		case "autowelcome":
-			msg += fmt.Sprintf("`autowelcome` is: %v", printBool(b.Config.AutoWelcomeEnabled))
-			return &ttfm.CommandOutput{Msg: msg, User: user, ReplyType: cmd.Source}
 		case "qinviteduration":
-			msg += fmt.Sprintf("`qinviteduration` is: %v", b.Config.QueueInviteDuration)
-			return &ttfm.CommandOutput{Msg: msg, User: user, ReplyType: cmd.Source}
-		case "bot":
-			msg += fmt.Sprintf("`bot` is: %v", printBool(b.Config.SetBot))
-			return &ttfm.CommandOutput{Msg: msg, User: user, ReplyType: cmd.Source}
+			msg += fmt.Sprintf("`qinviteduration` is: %d", b.Config.QueueInviteDuration)
+		case "queue":
+			msg += fmt.Sprintf("`queue` is: %s", printBool(b.Config.QueueEnabled))
+		case "songstats":
+			msg += fmt.Sprintf("`songstats` is: %s", printBool(b.Config.AutoShowSongStatsEnabled))
 		default:
 			return &ttfm.CommandOutput{User: user, ReplyType: cmd.Source, Err: errors.New("I can't find the setting you specified")}
 		}
+		return &ttfm.CommandOutput{Msg: msg, User: user, ReplyType: cmd.Source}
 	}
 
 	if len(cmd.Args) != 2 {
@@ -60,30 +62,36 @@ func setConfigCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandO
 	}
 
 	key := cmd.Args[0]
-
 	var value interface{}
 	var err error
 
 	switch key {
+	case "autobop":
+		value, err = setBool(&b.Config.AutoBopEnabled, cmd.Args[1])
+	case "autodj":
+		value, err = setBool(&b.Config.AutoDjEnabled, cmd.Args[1])
 	case "autodjslots":
 		value, err = setInt(&b.Config.AutoDjMinDjs, cmd.Args[1])
-	case "maxduration":
-		value, err = setInt(&b.Config.MaxSongDuration, cmd.Args[1])
-		b.Actions.EnforceSongDuration()
-	case "maxsongs":
-		value, err = setInt(&b.Config.MaxSongsPerDj, cmd.Args[1])
-	case "songstats":
-		value, err = setBool(&b.Config.AutoShowSongStatsEnabled, cmd.Args[1])
+	case "autosnag":
+		value, err = setBool(&b.Config.AutoSnagEnabled, cmd.Args[1])
 	case "autowelcome":
 		value, err = setBool(&b.Config.AutoWelcomeEnabled, cmd.Args[1])
-	case "qinviteduration":
-		value, err = setInt(&b.Config.QueueInviteDuration, cmd.Args[1])
 	case "bot":
 		value, err = setBool(&b.Config.SetBot, cmd.Args[1])
 		if value.(bool) {
 			b.Actions.SetBot()
 		}
-
+	case "maxduration":
+		value, err = setInt(&b.Config.MaxSongDuration, cmd.Args[1])
+		b.Actions.EnforceSongDuration()
+	case "maxsongs":
+		value, err = setInt(&b.Config.MaxSongsPerDj, cmd.Args[1])
+	case "qinviteduration":
+		value, err = setInt(&b.Config.QueueInviteDuration, cmd.Args[1])
+	case "queue":
+		value, err = setBool(&b.Config.QueueEnabled, cmd.Args[1])
+	case "songstats":
+		value, err = setBool(&b.Config.AutoShowSongStatsEnabled, cmd.Args[1])
 	default:
 		return &ttfm.CommandOutput{User: user, ReplyType: cmd.Source, Err: errors.New("I can't find the key you want to set")}
 	}
@@ -108,8 +116,10 @@ func setInt(cfg *int64, val string) (int64, error) {
 func setBool(cfg *bool, val string) (bool, error) {
 	switch val {
 	case "on":
+		*cfg = true
 		return true, nil
 	case "off":
+		*cfg = false
 		return false, nil
 	default:
 		return false, errors.New("I can't parse `on` or `off` value")

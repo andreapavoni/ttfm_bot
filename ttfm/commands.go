@@ -19,7 +19,6 @@ func (c *Command) Run(b *Bot, u *User, i *CommandInput) *CommandOutput {
 	if err := b.Users.CheckAuthorizations(u, c.AuthorizationRoles...); err != nil {
 		return &CommandOutput{User: u, ReplyType: MessageTypePm, Err: err}
 	}
-
 	return c.Handler(b, i)
 }
 

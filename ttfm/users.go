@@ -92,11 +92,6 @@ func (u *Users) CheckAuthorizations(user *User, roles ...UserRole) error {
 	return nil
 }
 
-// BootUser from room
-func (u *Users) BootUser(userId, reason string) error {
-	return u.bot.api.BootUser(userId, reason)
-}
-
 // Fan another user
 func (u *Users) Fan(userId string) error {
 	return u.bot.api.BecomeFan(userId)
@@ -105,17 +100,6 @@ func (u *Users) Fan(userId string) error {
 // Unfan
 func (u *Users) Unfan(userId string) error {
 	return u.bot.api.RemoveFan(userId)
-}
-
-// EscortDj
-func (u *Users) EscortDj(userId string) error {
-	if !u.UserIsDj(userId) {
-		if userId == u.bot.Identity.Id {
-			return errors.New("I'm not on stage!")
-		}
-		return errors.New("user is not on stage")
-	}
-	return u.bot.api.RemDj(userId)
 }
 
 type UserRole int

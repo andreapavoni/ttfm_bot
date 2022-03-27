@@ -30,7 +30,7 @@ func bootCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandOutput
 		return &ttfm.CommandOutput{User: user, ReplyType: ttfm.MessageTypePm, Err: errors.New("I can't find the user you want to kick")}
 	}
 
-	if err := b.Users.BootUser(kickedUser.Id, reason); err != nil {
+	if err := b.Actions.BootUser(kickedUser.Id, reason); err != nil {
 		return &ttfm.CommandOutput{User: user, ReplyType: ttfm.MessageTypePm, Err: fmt.Errorf("I wasn't able to boot @%s", kickedUser.Name)}
 	}
 

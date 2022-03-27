@@ -37,15 +37,16 @@ Features are inspired by [chillybot](https://github.com/jaycammarano/chillybot),
 - [x] Logging
   - [ ] More details for some events/actions
   - [x] Logs rotation
+- [ ] Configure a path where to write bot's saved data and logs
 - [ ] afk limit
 - [ ] afk audience limit(separate from afk limit, both can be toggled on and off)
 
 ## Installation and setup
 
-- Esnure to have at least a directory where you can write files (bot saved data, logs)
-- Download binary (recommended) or source code (requires Go v1.18 or higher) of the [latest release](https://github.com/andreapavoni/ttfm_bot/releases/latest)
+- Ensure to put the executable where you can write files (bot's saved data and logs)
+- Download [latest release](https://github.com/andreapavoni/ttfm_bot/releases/latest) binary for your platform (recommended) or source code (you'll need Go v1.18 or higher to build this project)
 - Set environment variables (see below) on the host you want to run the bot
-- Run with `./ttfm_bot`
+- Run with `./ttfm_bot` (better if you run it from `screen` or `tmux` session)
 
 ### Configuration settings
 
@@ -58,11 +59,9 @@ These environment variables are required to make the bot work
 
 ## Commands
 
-**NOTES:**
+Each command can be either issued on the chat room or by private message. Bot _might_ reply (or not) in the proper place.
 
-- Each command can be either issued on the chat room or by private message. Bot _might_ reply (or not) in the proper place.
-- A command might require a certain user (and sometimes bot's) role to execute a command.
-- Commands which accept `on` or `off` to enable/disable some feature, can be called without arguments to get the current status
+A command might require a certain user (and sometimes bot's) role to execute a command.
 
 ### Users
 
@@ -70,10 +69,10 @@ Users are the lowest role, basically anyone who isn't bot's admin or room modera
 
 - `!props` let the current DJ know you're appreciating the song
 - `!help <cmd>` shows description of a command. Without `cmd` shows the list of commands available for the role of the user that issued the command
-- `!q [on|off]` enables/disables queue. Without `on` or `off` replies with current status
+- `!q [add|rm]` add or remove yourself from the queue. Without args shows the current line in queue
 - `!qadd` adds user into queue
 - `!qrm` removes user from queue
-- `!r <reaction>` shows a funny gif reaction. Without `reaction` shows available ones.
+- `!r <reaction>` shows a funny gif reaction. Without `reaction` shows available ones
 
 ### DJs
 
@@ -84,17 +83,10 @@ Users are the lowest role, basically anyone who isn't bot's admin or room modera
 Admins are users which can run commands on bot
 
 - `!dj` tells the bot to jump on the stage and starts playing songs, or jump off if it's already djing
-- `!autodj [on|off]` enables/disables autodj mode. Without `on` or `off` replies with current status
 - `!snag` tells the bot to snag the current playing song
-- `!autosnag [on|off]` enables/disables automatic snag. Without `on` or `off` replies with current status
 - `!bop` tells the bot to bop for the current playing song
-- `!autobop [on|off]` enables/disables automatic bop. Without Without `on` or `off` replies with current status
 - `!fan <user_name>` and `!unfan <user_name>` respectively fan/unfan the specified `user_name`
-- `!padd <playlist_name>` creates a new playlist
-- `!pdel <playlist_name>` deletes a playlist
-- `!pls` lists available playlists
-- `!prm` removes the current playing song from the current playlist
-- `!pc <playlist_name>` switch to `playlist_name` playlist
+- `!p [[add | rm | switch] <playlist_name> | list | rmsong]` handles playlists
 - `!say <something>` say something in the room
 - `!cfg <config_key> [<config_value>]` sets config key and value. Without `config_value`, it replies with current configuration for `<config_key>`
 - `!room [list | <sub_command> <room_slug>]` handles favorite rooms

@@ -13,6 +13,6 @@ func BopCommand() *ttfm.Command {
 func bopCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandOutput {
 	user, _ := b.Users.UserFromId(cmd.UserId)
 
-	b.Room.Song.Bop()
+	b.Actions.Bop()
 	return &ttfm.CommandOutput{User: user, ReplyType: ttfm.MessageTypeNone}
 }

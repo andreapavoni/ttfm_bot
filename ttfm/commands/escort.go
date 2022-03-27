@@ -28,7 +28,7 @@ func escortCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandOutp
 		return &ttfm.CommandOutput{User: user, ReplyType: ttfm.MessageTypePm, Err: fmt.Errorf("I can't find the user you want to escort: @%s", escortedUser.Name)}
 	}
 
-	if err := b.Users.EscortDj(escortedUser.Id); err != nil {
+	if err := b.Actions.EscortDj(escortedUser.Id); err != nil {
 		return &ttfm.CommandOutput{User: user, ReplyType: ttfm.MessageTypePm, Err: fmt.Errorf("I was unable to escort @%s", escortedUser.Name)}
 
 	}

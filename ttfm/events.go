@@ -16,7 +16,7 @@ func onReady(b *Bot) {
 func onRoomChanged(b *Bot, e ttapi.RoomInfoRes) {
 	b.Actions.UpdateRoom(e)
 	b.Actions.AutoBop()
-	b.Actions.AutoDj()
+	b.Actions.ConsiderStartAutoDj()
 
 	logrus.WithFields(logrus.Fields{
 		"moderators": e.Room.Metadata.ModeratorID,
@@ -51,7 +51,7 @@ func onNewSong(b *Bot, e ttapi.NewSongEvt) {
 	b.Actions.EnforceSongDuration()
 	b.Actions.AutoBop()
 	b.Actions.AutoSnag()
-	b.Actions.AutoDj()
+	b.Actions.ConsiderStartAutoDj()
 
 	logrus.WithFields(logrus.Fields{
 		"djName": b.Room.Song.DjName,
@@ -83,7 +83,7 @@ func onSnagged(b *Bot, e ttapi.SnaggedEvt) {
 func onRegistered(b *Bot, e ttapi.RegisteredEvt) {
 	u := e.User[0]
 	b.Actions.RegisterUser(u.ID, u.Name)
-	b.Actions.AutoDj()
+	b.Actions.ConsiderStartAutoDj()
 
 	logrus.WithFields(logrus.Fields{
 		"userId":   u.ID,
@@ -96,7 +96,7 @@ func onRegistered(b *Bot, e ttapi.RegisteredEvt) {
 func onDeregistered(b *Bot, e ttapi.DeregisteredEvt) {
 	u := e.User[0]
 	b.Actions.UnregisterUser(u.ID)
-	b.Actions.AutoDj()
+	b.Actions.ConsiderStartAutoDj()
 
 	logrus.WithFields(logrus.Fields{
 		"userId":   u.ID,
@@ -110,7 +110,7 @@ func onAddDj(b *Bot, e ttapi.AddDJEvt) {
 	u := e.User[0]
 	b.Actions.AddDj(u.Userid)
 	b.Actions.EnforceQueueStageReservation(u.ID)
-	b.Actions.ConsiderQueueActivation()
+	b.Actions.ConsiderQueueStart()
 
 	logrus.WithFields(logrus.Fields{
 		"userId":   u.Userid,
@@ -123,9 +123,9 @@ func onAddDj(b *Bot, e ttapi.AddDJEvt) {
 func onRemDj(b *Bot, e ttapi.RemDJEvt) {
 	u := e.User[0]
 	b.Actions.RemoveDj(u.Userid, e.Modid)
-	b.Actions.ConsiderQueueDeactivation()
+	b.Actions.ConsiderQueueStop()
 	b.Actions.ForwardQueue()
-	b.Actions.AutoDj()
+	b.Actions.ConsiderStartAutoDj()
 
 	logrus.WithFields(logrus.Fields{
 		"userId":    u.Userid,

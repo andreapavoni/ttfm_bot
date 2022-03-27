@@ -150,10 +150,8 @@ func (p *Playlists) Remove(playlistName string) error {
 		if err := p.bot.api.PlaylistDelete(playlistName); err != nil {
 			return err
 		}
-		p.SmartList.Remove(playlistName)
-		return nil
+		return p.LoadPlaylists()
 	}
-
 	return errors.New("Playlist not found")
 }
 
