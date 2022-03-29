@@ -85,7 +85,7 @@ func (p *Playlist) PushSongBottom() error {
 
 // Snag current playing song into the current playlist
 func (p *Playlist) Snag() error {
-	if p.bot.Room.Song.DjId == p.bot.Identity.Id {
+	if p.bot.Room.CurrentSong.DjId == p.bot.Identity.Id {
 		return errors.New("I'm the current DJ and I already have this song in my playlist...")
 	}
 
@@ -95,15 +95,15 @@ func (p *Playlist) Snag() error {
 	}
 
 	p.bot.api.Snag()
-	if err = p.bot.api.PlaylistAdd(p.bot.Room.Song.Id, p.bot.Config.CurrentPlaylist, len(playlist.List)); err != nil {
+	if err = p.bot.api.PlaylistAdd(p.bot.Room.CurrentSong.Id, p.bot.Config.CurrentPlaylist, len(playlist.List)); err != nil {
 		return nil
 	}
 
 	p.AddSong(&SongItem{
-		id:     p.bot.Room.Song.Id,
-		title:  p.bot.Room.Song.Title,
-		artist: p.bot.Room.Song.Artist,
-		length: p.bot.Room.Song.Length,
+		id:     p.bot.Room.CurrentSong.Id,
+		title:  p.bot.Room.CurrentSong.Title,
+		artist: p.bot.Room.CurrentSong.Artist,
+		length: p.bot.Room.CurrentSong.Length,
 	})
 
 	return nil

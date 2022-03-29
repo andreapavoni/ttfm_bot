@@ -20,25 +20,34 @@ func NewDj(userId string) *Dj {
 	return &Dj{userId, 0, 0, 0, 0}
 }
 
+func (d *Dj) UpdateStats(up, down, snag, play int) {
+	d.up += up
+	d.down += down
+	d.snag += snag
+	d.plays += play
+}
+
 type Room struct {
-	Name       string
-	Id         string
-	Shortcut   string
-	moderators *collections.SmartList[string]
-	Djs        *collections.SmartMap[*Dj]
-	MaxDjs     int
-	Song       *Song
-	escorting  *collections.SmartList[string]
-	bot        *Bot
+	Name        string
+	Id          string
+	Shortcut    string
+	moderators  *collections.SmartList[string]
+	Djs         *collections.SmartMap[*Dj]
+	MaxDjs      int
+	CurrentSong *Song
+	CurrentDj   *Dj
+	escorting   *collections.SmartList[string]
+	bot         *Bot
 }
 
 func NewRoom(bot *Bot) *Room {
 	return &Room{
-		bot:        bot,
-		moderators: collections.NewSmartList[string](),
-		Djs:        collections.NewSmartMap[*Dj](),
-		Song:       NewSong(bot),
-		escorting:  collections.NewSmartList[string](),
+		bot:         bot,
+		moderators:  collections.NewSmartList[string](),
+		Djs:         collections.NewSmartMap[*Dj](),
+		CurrentSong: NewSong(bot),
+		CurrentDj:   &Dj{"", 0, 0, 0, 0},
+		escorting:   collections.NewSmartList[string](),
 	}
 }
 
@@ -49,7 +58,7 @@ func (r *Room) Update(ri ttapi.RoomInfoRes) error {
 	r.MaxDjs = ri.Room.Metadata.MaxDjs
 
 	song := ri.Room.Metadata.CurrentSong
-	r.Song.Reset(song.ID, song.Metadata.Song, song.Metadata.Artist, song.Metadata.Length, song.Djname, song.Djid)
+	r.CurrentSong.Reset(song.ID, song.Metadata.Song, song.Metadata.Artist, song.Metadata.Length, song.Djname, song.Djid)
 
 	users := []User{}
 	for _, u := range ri.Users {
@@ -59,8 +68,17 @@ func (r *Room) Update(ri ttapi.RoomInfoRes) error {
 	r.bot.Users.Update(users)
 	r.UpdateModerators(ri.Room.Metadata.ModeratorID)
 	r.UpdateDjs(ri.Room.Metadata.Djs)
+	r.ResetDj()
 
 	return nil
+}
+
+func (r *Room) ResetDj() {
+	d, ok := r.Djs.Get(r.CurrentSong.DjId)
+	if !ok {
+		panic("Can't reset current Dj")
+	}
+	r.CurrentDj = d
 }
 
 func (r *Room) AddDj(id string) {
@@ -72,24 +90,15 @@ func (r *Room) RemoveDj(id string) {
 }
 
 func (r *Room) UpdateDjs(djs []string) {
-	r.Djs = collections.NewSmartMap[*Dj]()
+	newDjs := collections.NewSmartMap[*Dj]()
 	for _, djId := range djs {
-		r.AddDj(djId)
+		if dj, ok := r.Djs.Get(djId); ok {
+			newDjs.Set(djId, dj)
+		} else {
+			newDjs.Set(djId, NewDj(djId))
+		}
 	}
-}
-
-func (r *Room) UpdateDjStats(userId string, up, down, snag int) error {
-	d, ok := r.Djs.Get(userId)
-
-	if !ok {
-		return errors.New("Dj not found")
-	}
-
-	d.up += up
-	d.down += down
-	d.snag += snag
-	d.plays += 1
-	return nil
+	r.Djs = newDjs
 }
 
 func (r *Room) UpdateModerators(moderators []string) {
@@ -109,24 +118,23 @@ func (r *Room) UpdateDataFromApi() {
 }
 
 // SongStats
-func (r *Room) SongStats() (header, data string) {
-	song := r.Song
-	header = fmt.Sprintf("Stats for `%s` by `%s` played by @%s:", song.Title, song.Artist, song.DjName)
-	data = fmt.Sprintf("👍 %d | 👎 %d | ❤️ %d", song.up, song.down, song.snag)
-	return header, data
+func (r *Room) SongStats() (data string) {
+	song := r.CurrentSong
+	data = fmt.Sprintf("Stats for `%s` by `%s` played by @%s: 👍 %d | 👎 %d | ❤️ %d", song.Title, song.Artist, song.DjName, song.up, song.down, song.snag)
+	return data
 }
 
 // DjStats
-func (r *Room) DjStats(userId string) (header, data string, err error) {
+func (r *Room) DjStats(userId string) (data string, err error) {
 	dj, ok := r.Djs.Get(userId)
+	user, err := r.bot.Users.UserFromId(userId)
 
-	if !ok {
-		return "", "", errors.New("Dj not found")
+	if !ok || err != nil {
+		return "", errors.New("Dj not found")
 	}
 
-	header = fmt.Sprintf("Stats for @%s", r.Song.DjName)
-	data = fmt.Sprintf("👍 %d | 👎 %d | ❤️ %d | 🎧 %d", dj.up, dj.down, dj.snag, dj.plays)
-	return header, data, nil
+	data = fmt.Sprintf("Stats for @%s: 👍 %d | 👎 %d | ❤️ %d | 🎧 %d", user.Name, dj.up, dj.down, dj.snag, dj.plays)
+	return data, nil
 }
 
 // AddDjEscorting the dj will be escorted after the current song is played

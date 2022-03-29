@@ -18,12 +18,12 @@ func NewActions(b *Bot) *Actions {
 
 func (a *Actions) AutoBop() {
 	if a.bot.Config.AutoBopEnabled {
-		utils.ExecuteDelayedRandom(30, a.bot.Room.Song.Bop)
+		utils.ExecuteDelayedRandom(30, a.bot.Room.CurrentSong.Bop)
 	}
 }
 
 func (a *Actions) Bop() {
-	a.bot.Room.Song.Bop()
+	a.bot.Room.CurrentSong.Bop()
 }
 
 func (a *Actions) AutoSnag() {
@@ -66,11 +66,11 @@ func (a *Actions) ForwardQueue() {
 	availableSlots := a.bot.Room.MaxDjs - a.bot.Room.Djs.Size()
 
 	// stage is full, escort last dj if it's not djing (ex. true on newSong, but false on remDj or deregisterUser)
-	if availableSlots == 0 && !a.bot.Users.UserIsCurrentDj(a.bot.Room.Song.DjId) {
-		if err := a.bot.Room.EscortDj(a.bot.Room.Song.DjId); err == nil {
+	if availableSlots == 0 && !a.bot.Users.UserIsCurrentDj(a.bot.Room.CurrentSong.DjId) {
+		if err := a.bot.Room.EscortDj(a.bot.Room.CurrentSong.DjId); err == nil {
 			// put the escorted dj into queue
-			a.bot.Queue.Push(a.bot.Room.Song.DjId)
-			a.bot.PrivateMessage(a.bot.Room.Song.DjId, "Thank you for your awesome set. You've been temporarily removed from the stage and automatically added to the queue. I'll let you know when it'll be your turn again. If you want to opt-out, just type `!q rm` and you'll be removed.")
+			a.bot.Queue.Push(a.bot.Room.CurrentSong.DjId)
+			a.bot.PrivateMessage(a.bot.Room.CurrentSong.DjId, "Thank you for your awesome set. You've been temporarily removed from the stage and automatically added to the queue. I'll let you know when it'll be your turn again. If you want to opt-out, just type `!q rm` and you'll be removed.")
 		}
 	}
 
@@ -155,16 +155,14 @@ func (a *Actions) InitPlaylists() {
 }
 
 func (a *Actions) ShiftPlaylistSong() {
-	if a.bot.Room.Song.DjId == a.bot.Identity.Id {
+	if a.bot.Room.CurrentSong.DjId == a.bot.Identity.Id {
 		a.bot.CurrentPlaylist.PushSongBottom()
 	}
 }
 
 func (a *Actions) ShowSongStats() {
-	if a.bot.Config.AutoShowSongStatsEnabled && a.bot.Room.Song.Title != "" {
-		header, data := a.bot.Room.SongStats()
-		a.bot.RoomMessage(header)
-		utils.ExecuteDelayed(time.Duration(5)*time.Millisecond, func() {
+	if a.bot.Config.AutoShowSongStatsEnabled && a.bot.Room.CurrentSong.Title != "" {
+		data := a.bot.Room.SongStats()
 			a.bot.RoomMessage(data)
 		})
 	}
@@ -184,18 +182,54 @@ func (a *Actions) UpdateRoomFromApi() {
 
 func (a *Actions) EnforceSongDuration() {
 	maxDurationSeconds := int(a.bot.Config.MaxSongDuration) * 60
-	durationDiff := maxDurationSeconds - a.bot.Room.Song.Length
+	durationDiff := maxDurationSeconds - a.bot.Room.CurrentSong.Length
 
 	if a.bot.Users.UserIsModerator(a.bot.Identity.Id) && maxDurationSeconds > 0 && durationDiff < 0 {
-		msg := fmt.Sprintf("@%s this song exceeds the duration limit of %s minutes: remaning %s will be skipped", a.bot.Room.Song.DjName, utils.FormatSecondsToMinutes(maxDurationSeconds), utils.FormatSecondsToMinutes(-durationDiff))
+		msg := fmt.Sprintf("@%s this song exceeds the duration limit of %s minutes: remaning %s will be skipped", a.bot.Room.CurrentSong.DjName, utils.FormatSecondsToMinutes(maxDurationSeconds), utils.FormatSecondsToMinutes(-durationDiff))
 		a.bot.RoomMessage(msg)
 	} else {
-		a.bot.Room.Song.StopSkipTimer()
+		a.bot.Room.CurrentSong.StopSkipTimer()
 	}
 }
 
 func (a *Actions) UpdateSongStats(ups, downs, snags int) {
-	a.bot.Room.Song.UpdateStats(ups, downs, snags)
+	a.bot.Room.CurrentSong.UpdateStats(ups, downs, snags)
+}
+
+func (a *Actions) UnpackVotelog(votelog [][]string) (string, string) {
+	return a.bot.Room.CurrentSong.UnpackVotelog(votelog)
+}
+
+func (a *Actions) UpdateDjStatsVote(vote string) {
+	switch vote {
+	case "up":
+		a.bot.Room.CurrentDj.UpdateStats(1, 0, 0, 0)
+	case "down":
+		a.bot.Room.CurrentDj.UpdateStats(0, 1, 0, 0)
+	}
+}
+
+func (a *Actions) UpdateDjStatsSnag() {
+	a.bot.Room.CurrentDj.UpdateStats(0, 0, 1, 0)
+}
+
+func (a *Actions) UpdateDjStatsPlays() {
+	a.bot.Room.CurrentDj.UpdateStats(0, 0, 0, 1)
+}
+
+func (a *Actions) ShowDjStats(userId string) {
+	if !a.bot.Config.AutoShowDjStatsEnabled {
+		return
+	}
+
+	data, err := a.bot.Room.DjStats(userId)
+	if err != nil {
+		return
+	}
+	a.bot.RoomMessage(header)
+	utils.ExecuteDelayed(time.Duration(5)*time.Millisecond, func() {
+		a.bot.RoomMessage(data)
+	})
 }
 
 func (a *Actions) SetBot() {
@@ -257,28 +291,6 @@ func (a *Actions) RemoveDj(userId, modId string) {
 		}
 		return
 	}
-}
-
-func (a *Actions) UpdateDjStats(userId string, ups, downs, snags int) {
-	a.bot.Room.UpdateDjStats(userId, ups, downs, snags)
-}
-
-func (a *Actions) ShowDjStats(userId string) {
-	if !a.bot.Config.AutoShowDjStatsEnabled {
-		return
-	}
-
-	header, data, err := a.bot.Room.DjStats(userId)
-
-	if err != nil {
-		return
-	}
-
-	a.bot.RoomMessage(header)
-	utils.ExecuteDelayed(time.Duration(5)*time.Millisecond, func() {
-		a.bot.RoomMessage(data)
-	})
-
 }
 
 func (a *Actions) BootUser(userId, reason string) error {

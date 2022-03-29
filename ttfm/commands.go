@@ -98,7 +98,8 @@ func (i *MessageInput) HandleCommand(b *Bot) {
 
 	cmd, args, ok := i.parseCommand()
 	if !ok {
-		logrus.WithFields(logrus.Fields{"text": i.Text, "userId": i.UserId}).Info(logTag)
+		user, _ := b.Users.UserFromId(i.UserId)
+		logrus.WithFields(logrus.Fields{"text": i.Text, "userId": i.UserId, "userName": user.Name}).Info(logTag)
 		return
 	}
 

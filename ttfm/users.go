@@ -74,7 +74,7 @@ func (u *Users) UserIsDj(userId string) bool {
 
 // UserIsCurrentDj
 func (u *Users) UserIsCurrentDj(userId string) bool {
-	return u.bot.Room.Song.DjId == userId
+	return u.bot.Room.CurrentSong.DjId == userId
 }
 
 // UserIsModerator

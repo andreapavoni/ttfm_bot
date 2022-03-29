@@ -14,6 +14,6 @@ func SkipCommand() *ttfm.Command {
 
 func skipCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandOutput {
 	user, _ := b.Users.UserFromId(cmd.UserId)
-	b.Room.Song.Skip()
+	b.Room.CurrentSong.Skip()
 	return &ttfm.CommandOutput{Msg: "/me skipped song", User: user, ReplyType: cmd.Source}
 }

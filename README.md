@@ -45,6 +45,7 @@ Features are inspired by [chillybot](https://github.com/jaycammarano/chillybot),
 - [ ] Room music current theme (default "free play")
 - [ ] Bot info (by command: print version, uptime, ...)
 - [ ] custom prefix for commands (actual is `!`)
+- [ ] kill switch command (kills/disconnects bot, useful when it turns unresponsive/misbehaved)
 
 ## Installation and setup
 

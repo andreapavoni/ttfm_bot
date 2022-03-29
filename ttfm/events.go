@@ -30,17 +30,17 @@ func onRoomChanged(b *Bot, e ttapi.RoomInfoRes) {
 }
 
 func onNewSong(b *Bot, e ttapi.NewSongEvt) {
+	b.Actions.UpdateDjStatsPlays()
 	b.Actions.ShowSongStats()
-	b.Actions.UpdateDjStats(b.Room.Song.DjId, b.Room.Song.up, b.Room.Song.down, b.Room.Song.snag)
 	logrus.WithFields(logrus.Fields{
-		"djName": b.Room.Song.DjName,
-		"djId":   b.Room.Song.DjId,
-		"title":  b.Room.Song.Title,
-		"artist": b.Room.Song.Artist,
-		"length": b.Room.Song.Length,
-		"up":     b.Room.Song.up,
-		"down":   b.Room.Song.down,
-		"snag":   b.Room.Song.snag,
+		"djName": b.Room.CurrentSong.DjName,
+		"djId":   b.Room.CurrentSong.DjId,
+		"title":  b.Room.CurrentSong.Title,
+		"artist": b.Room.CurrentSong.Artist,
+		"length": b.Room.CurrentSong.Length,
+		"up":     b.Room.CurrentSong.up,
+		"down":   b.Room.CurrentSong.down,
+		"snag":   b.Room.CurrentSong.snag,
 	}).Info("ROOM:LAST_SONG_STATS")
 
 	b.Actions.EscortDjs()
@@ -58,25 +58,31 @@ func onNewSong(b *Bot, e ttapi.NewSongEvt) {
 		"songSourceId": e.Room.Metadata.CurrentSong.Sourceid,
 		"songSource":   e.Room.Metadata.CurrentSong.Source,
 		"songId":       e.Room.Metadata.CurrentSong.ID,
-		"djName":       b.Room.Song.DjName,
-		"djId":         b.Room.Song.DjId,
-		"title":        b.Room.Song.Title,
-		"artist":       b.Room.Song.Artist,
-		"length":       b.Room.Song.Length,
+		"djName":       b.Room.CurrentSong.DjName,
+		"djId":         b.Room.CurrentSong.DjId,
+		"title":        b.Room.CurrentSong.Title,
+		"artist":       b.Room.CurrentSong.Artist,
+		"length":       b.Room.CurrentSong.Length,
 	}).Info("ROOM:NEW_SONG")
 }
 
 func onUpdateVotes(b *Bot, e ttapi.UpdateVotesEvt) {
-	b.Actions.UpdateSongStats(e.Room.Metadata.Upvotes, e.Room.Metadata.Downvotes, b.Room.Song.snag)
+	b.Actions.UpdateSongStats(e.Room.Metadata.Upvotes, e.Room.Metadata.Downvotes, b.Room.CurrentSong.snag)
+	userId, vote := b.Actions.UnpackVotelog(e.Room.Metadata.Votelog)
+	b.Actions.UpdateDjStatsVote(vote)
+
 	logrus.WithFields(logrus.Fields{
 		"up":        e.Room.Metadata.Upvotes,
 		"down":      e.Room.Metadata.Downvotes,
 		"listeners": e.Room.Metadata.Listeners,
+		"vote":      vote,
+		"userId":    userId,
 	}).Info("SONG:VOTE")
 }
 
 func onSnagged(b *Bot, e ttapi.SnaggedEvt) {
-	b.Actions.UpdateSongStats(b.Room.Song.up, b.Room.Song.down, b.Room.Song.snag+1)
+	b.Actions.UpdateSongStats(b.Room.CurrentSong.up, b.Room.CurrentSong.down, b.Room.CurrentSong.snag+1)
+	b.Actions.UpdateDjStatsSnag()
 
 	logrus.WithFields(logrus.Fields{
 		"userId": e.UserID,

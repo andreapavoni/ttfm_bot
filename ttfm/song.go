@@ -48,22 +48,22 @@ func (s *Song) Reset(id, title, artist string, length int, djName, djId string) 
 
 func (s *Song) UnpackVotelog(votelog [][]string) (userId, vote string) {
 	if len(votelog) >= 1 && len(votelog[0]) >= 2 {
-		logrus.WithField("votelog", votelog).Warn("Cannot parse Votelog")
-		return "", ""
+		return votelog[0][0], votelog[0][1]
 	}
-	return votelog[0][0], votelog[0][1]
+	logrus.WithField("votelog", votelog).Warn("Cannot parse Votelog")
+	return "", ""
 }
 
 // Bop
 func (s *Song) Bop() {
-	if s.bot.Room.Song.DjId != s.bot.Identity.Id {
+	if s.bot.Room.CurrentSong.DjId != s.bot.Identity.Id {
 		s.bot.api.Bop()
 	}
 }
 
 // Downvote
 func (s *Song) Downvote() {
-	if s.bot.Room.Song.DjId != s.bot.Identity.Id {
+	if s.bot.Room.CurrentSong.DjId != s.bot.Identity.Id {
 		s.bot.api.VoteDown()
 	}
 }
