@@ -16,7 +16,6 @@ Features are inspired by [chillybot](https://github.com/jaycammarano/chillybot),
   - [ ] Rest time for DJ who has reached max songs limit and has been escorted (eg: default 5 mins)
 - [x] Enforce song length limit (10 minutes by default)
 - [x] Show song stats when song finishes (only when enabled, and bot is moderator)
-- [ ] Show DJ stats when DJ leaves the stage (only when enabled, and bot is moderator)
 - [x] Room greeting (only when enabled, and bot is moderator)
   - [ ] Greeting message configurable
 - [x] Playlists
@@ -28,7 +27,7 @@ Features are inspired by [chillybot](https://github.com/jaycammarano/chillybot),
 - [x] Favorite rooms
   - [x] Manage the list of favorite rooms
   - [x] Join another room
-- [x] Auto DJ when there are `1` or less djs
+- [x] Auto DJ when there are `1` (default) or less djs
 - [x] GIF reactions
   - [x] Use as many reactions you want
   - [x] Add new reactions or new GIFs to an existing one
@@ -42,7 +41,7 @@ Features are inspired by [chillybot](https://github.com/jaycammarano/chillybot),
 - [ ] afk audience limit(separate from afk limit, both can be toggled on and off)
 - [x] DJ stats (shown when dj goes off the stage)
 - [ ] Print room rules (by command and/or when user joins)
-- [ ] Room music current theme (default "free play")
+- [x] Room music current theme (default "free play")
 - [ ] Bot info (by command: print version, uptime, ...)
 - [ ] custom prefix for commands (actual is `!`)
 - [x] kill switch command (kills/disconnects bot, useful when it turns unresponsive/misbehaved)

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/andreapavoni/ttfm_bot/ttfm"
 )
@@ -57,6 +58,8 @@ func setConfigCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandO
 			out = handleConfigValue(user, cmd, &b.Config.QueueEnabled)
 		case "songstats":
 			out = handleConfigValue(user, cmd, &b.Config.AutoShowSongStatsEnabled)
+		case "theme":
+			out = handleConfigStringValue(user, cmd, &b.Config.MusicTheme)
 		default:
 			return &ttfm.CommandOutput{User: user, ReplyType: cmd.Source, Err: errors.New("I can't find the setting you specified")}
 		}
@@ -65,6 +68,21 @@ func setConfigCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandO
 	}
 	msg := fmt.Sprintf("Availble configs: autobop, autodj, autodjslots, autosnag, autowelcome, bot, djstats, maxduration, maxsongs, qinviteduration, queue, songstats")
 	return &ttfm.CommandOutput{Msg: msg, User: user, ReplyType: cmd.Source}
+}
+
+func handleConfigStringValue(user *ttfm.User, cmd *ttfm.CommandInput, configKey *string) *ttfm.CommandOutput {
+	if len(cmd.Args) == 1 {
+		msg := fmt.Sprintf("Current setting for `%s` is: %s", cmd.Args[0], *configKey)
+		return &ttfm.CommandOutput{Msg: msg, User: user, ReplyType: cmd.Source}
+	}
+
+	if len(cmd.Args) >= 2 {
+		key := cmd.Args[0]
+		*configKey = strings.Join(cmd.Args[1:], " ")
+		msg := fmt.Sprintf("/me has set `%s` to: %v", key, *configKey)
+		return &ttfm.CommandOutput{Msg: msg, User: user, ReplyType: cmd.Source}
+	}
+	return &ttfm.CommandOutput{ReplyType: ttfm.MessageTypeNone}
 }
 
 func handleConfigValue[T any](user *ttfm.User, cmd *ttfm.CommandInput, configKey *T) *ttfm.CommandOutput {

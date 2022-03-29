@@ -25,6 +25,7 @@ type Config struct {
 	CurrentPlaylist          string
 	SetBot                   bool
 	brain                    *Brain
+	MusicTheme               string
 }
 
 func NewConfig(b *Brain) *Config {
@@ -93,4 +94,5 @@ func (c *Config) loadDefaultConfig() {
 	c.MaxSongsPerDj = 0
 	c.CurrentPlaylist = "default"
 	c.SetBot = false
+	c.MusicTheme = "FREE PLAY"
 }
