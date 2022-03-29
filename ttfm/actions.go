@@ -163,8 +163,7 @@ func (a *Actions) ShiftPlaylistSong() {
 func (a *Actions) ShowSongStats() {
 	if a.bot.Config.AutoShowSongStatsEnabled && a.bot.Room.CurrentSong.Title != "" {
 		data := a.bot.Room.SongStats()
-			a.bot.RoomMessage(data)
-		})
+		a.bot.RoomMessage(data)
 	}
 }
 
@@ -226,10 +225,7 @@ func (a *Actions) ShowDjStats(userId string) {
 	if err != nil {
 		return
 	}
-	a.bot.RoomMessage(header)
-	utils.ExecuteDelayed(time.Duration(5)*time.Millisecond, func() {
-		a.bot.RoomMessage(data)
-	})
+	a.bot.RoomMessage(data)
 }
 
 func (a *Actions) SetBot() {
@@ -303,4 +299,9 @@ func (a *Actions) EscortDj(userId string) error {
 
 func (a *Actions) AddDjEscorting(userId string) error {
 	return a.bot.Room.AddDjEscorting(userId)
+}
+
+func (a *Actions) KillSwitch() {
+	a.bot.RoomMessage("I'll be back™ 🤖")
+	a.bot.api.Stop()
 }

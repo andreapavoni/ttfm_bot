@@ -40,12 +40,12 @@ Features are inspired by [chillybot](https://github.com/jaycammarano/chillybot),
 - [ ] Configure a path where to write bot's saved data and logs
 - [ ] afk limit
 - [ ] afk audience limit(separate from afk limit, both can be toggled on and off)
-- [x] DJ stats (when goes off the stage)
+- [x] DJ stats (shown when dj goes off the stage)
 - [ ] Print room rules (by command and/or when user joins)
 - [ ] Room music current theme (default "free play")
 - [ ] Bot info (by command: print version, uptime, ...)
 - [ ] custom prefix for commands (actual is `!`)
-- [ ] kill switch command (kills/disconnects bot, useful when it turns unresponsive/misbehaved)
+- [x] kill switch command (kills/disconnects bot, useful when it turns unresponsive/misbehaved)
 
 ## Installation and setup
 
@@ -96,6 +96,7 @@ Admins are users which can run commands on bot
 - `!say <something>` say something in the room
 - `!cfg <config_key> [<config_value>]` sets config key and value. Without `config_value`, it replies with current configuration for `<config_key>`
 - `!room [list | <sub_command> <room_slug>]` handles favorite rooms
+- `!die` kills the bot (useful if/when it becomes unresponsive due to some bug)
 
 These ones require the bot to be moderator of the room to be executed
 

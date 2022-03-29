@@ -27,5 +27,6 @@ func main() {
 	b.Commands.Add("r", commands.ReactionCommand())
 	b.Commands.Add("pl", commands.PlaylistCommand())
 	b.Commands.Add("room", commands.FavRoomCommand())
+	b.Commands.Add("die", commands.KillSwitchCommand())
 	b.Start()
 }
