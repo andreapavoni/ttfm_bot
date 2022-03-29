@@ -1,3 +1,4 @@
-ttfm_rpi
-ttfm_bot
 deploy_rpi.sh
+build/
+
+dist/

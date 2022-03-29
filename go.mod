@@ -5,9 +5,8 @@ go 1.18
 require github.com/alaingilbert/ttapi v0.0.0-20220201102012-b92df5ba0123
 
 require (
-	github.com/hashicorp/go-version v1.0.0 // indirect
-	github.com/mitchellh/gox v1.0.1 // indirect
-	github.com/mitchellh/iochan v1.0.0 // indirect
+	github.com/BurntSushi/toml v1.0.0 // indirect
+	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
 
 require (
