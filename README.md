@@ -60,7 +60,7 @@ These environment variables are required to make the bot work
 - `TTFM_API_AUTH`: the API key to connect to Turntables.fm
 - `TTFM_API_USER_ID`: User ID for the user
 - `TTFM_API_ROOM_ID`: ID of the room to join
-- `TTFM_ADMIN_MAIN_ID`: the ID of the user that will be the first and main admin
+- `TTFM_MAIN_ADMIN_ID`: the ID of the user that will be the first and main admin
 
 ## Commands
 
@@ -78,6 +78,7 @@ Users are the lowest role, basically anyone who isn't bot's admin or room modera
 - `!qadd` adds user into queue
 - `!qrm` removes user from queue
 - `!r <reaction>` shows a funny gif reaction. Without `reaction` shows available ones
+- `!r add <reaction> <url>` shows a funny gif reaction. Without `reaction` shows available ones
 
 ### DJs
 
