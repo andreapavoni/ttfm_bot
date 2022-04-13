@@ -167,16 +167,25 @@ func (a *Actions) ShowSongStats() {
 	}
 }
 
-func (a *Actions) ReloadFavRooms() {
-	a.bot.FavRooms.LoadFavRoomsFromDb()
+func (a *Actions) ReloadFavRooms() error {
+	if err := a.bot.FavRooms.LoadFavRoomsFromDb(); err != nil {
+		return err
+	}
+	return nil
 }
 
-func (a *Actions) UpdateRoom(e ttapi.RoomInfoRes) {
-	a.bot.Room.Update(e)
+func (a *Actions) UpdateRoom(e ttapi.RoomInfoRes) error {
+	if err := a.bot.Room.Update(e); err != nil {
+		return err
+	}
+	return nil
 }
 
-func (a *Actions) UpdateRoomFromApi() {
-	a.bot.Room.UpdateDataFromApi()
+func (a *Actions) UpdateRoomFromApi() error {
+	if err := a.bot.Room.UpdateDataFromApi(); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (a *Actions) EnforceSongDuration() {

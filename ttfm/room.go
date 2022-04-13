@@ -68,17 +68,20 @@ func (r *Room) Update(ri ttapi.RoomInfoRes) error {
 	r.bot.Users.Update(users)
 	r.UpdateModerators(ri.Room.Metadata.ModeratorID)
 	r.UpdateDjs(ri.Room.Metadata.Djs)
-	r.ResetDj()
+	if err := r.ResetDj(); err != nil {
+		return err
+	}
 
 	return nil
 }
 
-func (r *Room) ResetDj() {
+func (r *Room) ResetDj() error {
 	d, ok := r.Djs.Get(r.CurrentSong.DjId)
 	if !ok {
-		panic("Can't reset current Dj")
+		return errors.New("Can't reset current Dj")
 	}
 	r.CurrentDj = d
+	return nil
 }
 
 func (r *Room) AddDj(id string) {
@@ -109,12 +112,15 @@ func (r *Room) HasModerator(userId string) bool {
 	return r.moderators.HasElement(userId)
 }
 
-func (r *Room) UpdateDataFromApi() {
-	if roomInfo, err := r.bot.api.RoomInfo(); err == nil {
-		r.Update(roomInfo)
+func (r *Room) UpdateDataFromApi() error {
+	if roomInfo, err := r.bot.api.RoomInfo(); err != nil {
+		return err
 	} else {
-		panic(err)
+		if err := r.Update(roomInfo); err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
 // SongStats

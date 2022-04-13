@@ -5,6 +5,8 @@ import (
 	"math/rand"
 	"os"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
 // ENVs
@@ -19,6 +21,9 @@ func GetEnvOrPanic(key string) string {
 
 // Rand numbers
 func RandomInteger(min, max int) int {
+	if min == max {
+		return min
+	}
 	rand.Seed(time.Now().UnixNano())
 	return rand.Intn(max-min) + min
 }
@@ -62,4 +67,11 @@ func IndexOf[T comparable](value T, collection []T) int {
 		}
 	}
 	return -1
+}
+
+// Errors
+func MaybeLogError(topic string, f func() error) {
+	if err := f(); err != nil {
+		logrus.WithFields(logrus.Fields{"err": err.Error()}).Error(topic)
+	}
 }

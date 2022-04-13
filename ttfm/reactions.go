@@ -29,7 +29,6 @@ func (r *Reactions) Put(reactionName, imgUrl string) error {
 	imgs, ok := r.SmartMap.Get(reactionName)
 	if !ok {
 		r.SmartMap.Set(reactionName, []string{imgUrl})
-		return nil
 	}
 
 	if utils.IndexOf(imgUrl, imgs) >= 0 {
@@ -46,7 +45,7 @@ func (r *Reactions) Put(reactionName, imgUrl string) error {
 }
 
 func (r *Reactions) Get(reactionName string) string {
-	if imgs, ok := r.SmartMap.Get(reactionName); ok {
+	if imgs, ok := r.SmartMap.Get(reactionName); ok && len(imgs) > 0 {
 		i := utils.RandomInteger(0, len(imgs)-1)
 		return imgs[i]
 	}
@@ -63,7 +62,7 @@ func (r *Reactions) Availables() []string {
 
 func (r *Reactions) Save() error {
 	reactions := []reaction{}
-	for i := range r.Iter() {
+	for i := range r.SmartMap.Iter() {
 		reactions = append(reactions, reaction{Name: i.Key, Imgs: i.Value})
 	}
 	return r.brain.Put("reactions", &reactions)

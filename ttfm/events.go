@@ -2,6 +2,7 @@ package ttfm
 
 import (
 	"github.com/alaingilbert/ttapi"
+	"github.com/andreapavoni/ttfm_bot/utils"
 	"github.com/sirupsen/logrus"
 )
 
@@ -14,7 +15,7 @@ func onReady(b *Bot) {
 }
 
 func onRoomChanged(b *Bot, e ttapi.RoomInfoRes) {
-	b.Actions.UpdateRoom(e)
+	utils.MaybeLogError("BOT:ROOM:UPDATE", func () error {return b.Actions.UpdateRoom(e)})
 	b.Actions.AutoBop()
 	b.Actions.ConsiderStartAutoDj()
 
