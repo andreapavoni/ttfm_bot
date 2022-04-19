@@ -64,6 +64,18 @@ func (sm *SmartMap[T]) Keys() (keys []string) {
 	return keys
 }
 
+// Values returns a list of T values in the map
+func (sm *SmartMap[T]) Values() (values []T) {
+	sm.Lock()
+	defer sm.Unlock()
+
+	for _, v := range sm.items {
+		values = append(values, v)
+	}
+
+	return values
+}
+
 // Get gets a key from a concurrent map
 func (sm *SmartMap[T]) Get(key string) (T, bool) {
 	sm.Lock()

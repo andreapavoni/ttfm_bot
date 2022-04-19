@@ -96,6 +96,7 @@ Admins are users which can run commands on bot
 - `!cfg <config_key> [<config_value>]` sets config key and value. Without `config_value`, it replies with current configuration for `<config_key>`
 - `!room [list | <sub_command> <room_slug>]` handles favorite rooms
 - `!die` kills the bot (useful if/when it becomes unresponsive due to some bug)
+- `!admin [add | remove <user_name>]`. Without args shows the current admins
 
 These ones require the bot to be moderator of the room to be executed
 
@@ -108,13 +109,13 @@ These ones require the bot to be moderator of the room to be executed
 - [turntable.fm](https://turntable.fm) for the awesome platform
 - [alaingilbert/ttapi](https://github.com/alaingilbert/ttapi) because without it I should have to hack a lot more to get here
 - [nugget/cowgod](https://github.com/nugget/cowgod) another Golang bot for Turntable.fm, I did a look at it to learn
-- [jaycammarano/chillybot](https://github.com/jaycammarano/chillybot)
+- [jaycammarano/chillybot](https://github.com/jaycammarano/chillybot) a JS bot, maybe the most used, I got some inspiration for features from there
 - [I ❤️ The 80's](https://turntable.fm/i_the_80s) the best room I've found, full of friendly people
 
 ## Rooms
 
 An instance of this bot is called `Mrs.Beats` and can be found in one of these channells. Author username is `pavonz` both on turntable.fm and on Discord servers.
 
+- [Disco Clubbing](https://turntable.fm/disco_clubbing) (its main room, here it's moderator)
 - [I ❤️ The 80's](https://turntable.fm/i_the_80s)
-- [Disco Clubbing](https://turntable.fm/disco_clubbing) (here is moderator)
 - [Aunt Jackie](https://turntable.fm/aunt_jackie)

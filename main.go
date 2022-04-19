@@ -28,5 +28,6 @@ func main() {
 	b.Commands.Add("pl", commands.PlaylistCommand())
 	b.Commands.Add("room", commands.FavRoomCommand())
 	b.Commands.Add("die", commands.KillSwitchCommand())
+	b.Commands.Add("admin", commands.AdminCommand())
 	b.Start()
 }

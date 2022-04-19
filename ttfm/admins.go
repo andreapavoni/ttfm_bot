@@ -23,7 +23,16 @@ func (a *Admins) Put(userId, userName string) error {
 		a.SmartMap.Set(userId, userName)
 		return a.Save()
 	}
-	return nil
+	return errors.New("Already present in my admins list")
+}
+
+
+func (a *Admins) Delete(userId string) error {
+	if a.SmartMap.HasKey(userId) {
+		a.SmartMap.Delete(userId)
+		return a.Save()
+	}
+	return errors.New("Unable to find Id in admins list")
 }
 
 func (a *Admins) Get(userId string) (*User, error) {
