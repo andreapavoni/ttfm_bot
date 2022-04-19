@@ -41,13 +41,18 @@ func (a *Actions) AutoDj() {
 }
 
 func (a *Actions) ConsiderStartAutoDj() {
-	if a.bot.Config.AutoDjEnabled && a.bot.Room.Djs.Size() <= int(a.bot.Config.AutoDjMinDjs) {
+	// adding a small delay to avoid overlapping with Stop Dj checks
+    time.Sleep(2 * time.Second)
+	if a.bot.Config.AutoDjEnabled && !a.bot.Users.UserIsDj(a.bot.Identity.Id) && a.bot.Room.Djs.Size() <= int(a.bot.Config.AutoDjMinDjs) {
 		a.AutoDj()
 	}
 }
 
 func (a *Actions) ConsiderStopAutoDj() {
-	if a.bot.Users.UserIsDj(a.bot.Identity.Id) && a.bot.Room.Djs.Size() > int(a.bot.Config.AutoDjMinDjs) {
+	// adding a small delay to avoid overlapping with Start Dj checks
+    time.Sleep(2 * time.Second)
+
+	if a.bot.Users.UserIsDj(a.bot.Identity.Id) && (a.bot.Room.Djs.Size() - 1) > int(a.bot.Config.AutoDjMinDjs) {
 		if a.bot.Users.UserIsCurrentDj(a.bot.Identity.Id) {
 			utils.MaybeLogError("BOT:ADD_DJ_ESCORTING", func() error { return a.bot.Room.AddDjEscorting(a.bot.Identity.Id) })
 			a.bot.RoomMessage("/me will leave the stage at the end of this song to free a slot for humans")

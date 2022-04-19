@@ -54,6 +54,7 @@ func onNewSong(b *Bot, e ttapi.NewSongEvt) {
 	b.Actions.AutoBop()
 	b.Actions.AutoSnag()
 	b.Actions.ConsiderStartAutoDj()
+	b.Actions.ConsiderStopAutoDj()
 
 	logrus.WithFields(logrus.Fields{
 		"songSourceId": e.Room.Metadata.CurrentSong.Sourceid,
@@ -135,6 +136,7 @@ func onAddDj(b *Bot, e ttapi.AddDJEvt) {
 	b.Actions.AddDj(u.Userid)
 	b.Actions.EnforceQueueStageReservation(u.ID)
 	b.Actions.ConsiderQueueStart()
+	b.Actions.ConsiderStopAutoDj()
 
 	logrus.WithFields(logrus.Fields{
 		"userId":   u.Userid,
