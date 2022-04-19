@@ -26,7 +26,6 @@ func (a *Admins) Put(userId, userName string) error {
 	return errors.New("Already present in my admins list")
 }
 
-
 func (a *Admins) Delete(userId string) error {
 	if a.SmartMap.HasKey(userId) {
 		a.SmartMap.Delete(userId)
@@ -59,7 +58,9 @@ func (a *Admins) loadAdmins() error {
 	}
 
 	for _, u := range admins {
-		a.Put(u.Id, u.Name)
+		if err := a.Put(u.Id, u.Name); err != nil {
+			continue
+		}
 	}
 	return nil
 }

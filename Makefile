@@ -1,5 +1,5 @@
 BINARY_NAME=build/ttfm
-LATEST_TAG="v0.4.0"
+LATEST_TAG="v0.0.7"
 COMMON_BUILD_OPTS=-ldflags="-X 'main.Version=${LATEST_TAG}' -s -w"
 
 all: build test

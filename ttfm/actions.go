@@ -145,8 +145,7 @@ func (a *Actions) LoadMainAdmin() {
 		if err != nil {
 			panic("can't find main admin user on server")
 		}
-		utils.MaybeLogError("BOT:ADD_ADMIN", func() error { return a.bot.Admins.Put(admin.Id, admin.Name) })
-		utils.MaybeLogError("BOT:SAVE_ADMINS", a.bot.Admins.Save)
+		utils.MaybeLogError("BOT:ADD_MAIN_ADMIN", func() error { return a.bot.Admins.Put(admin.Id, admin.Name) })
 	}
 }
 

@@ -10,7 +10,7 @@ import (
 
 func QueueCommand() *ttfm.Command {
 	return &ttfm.Command{
-		AuthorizationRoles: []ttfm.UserRole{ttfm.UserRoleAdmin, ttfm.UserRoleBotModerator},
+		AuthorizationRoles: []ttfm.UserRole{ttfm.UserRoleBotModerator},
 		Help:               "Add, remove yourself from queue, or just check the current status",
 		Handler:            queueCommandHandler,
 	}
