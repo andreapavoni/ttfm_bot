@@ -21,7 +21,7 @@ type Reactions struct {
 
 func NewReactions(brain *Brain) *Reactions {
 	r := &Reactions{SmartMap: collections.NewSmartMap[[]string](), brain: brain, availables: collections.NewSmartList[string]()}
-	r.loadReactions()
+	utils.MaybeLogError("BOT:LOAD_REACTIONS", r.loadReactions)
 	return r
 }
 
@@ -46,7 +46,7 @@ func (r *Reactions) Put(reactionName, imgUrl string) error {
 
 func (r *Reactions) Get(reactionName string) string {
 	if imgs, ok := r.SmartMap.Get(reactionName); ok && len(imgs) > 0 {
-		i := utils.RandomInteger(0, len(imgs)-1)
+		i := utils.RandomInteger(0, len(imgs))
 		return imgs[i]
 	}
 	return ""

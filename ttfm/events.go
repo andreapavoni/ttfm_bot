@@ -8,7 +8,7 @@ import (
 
 func onReady(b *Bot) {
 	b.Actions.SetBot()
-	b.Actions.LoadBotIdentity()
+	utils.MaybeLogError("BOT:LOAD_IDENTITY", b.Actions.LoadBotIdentity)
 	b.Actions.LoadMainAdmin()
 	b.Actions.InitPlaylists()
 	logrus.Info("BOT:READY")
@@ -48,7 +48,7 @@ func onNewSong(b *Bot, e ttapi.NewSongEvt) {
 	b.Actions.ForwardQueue()
 	// when bot is djing, push the last played song to bottom of its playlist
 	b.Actions.ShiftPlaylistSong()
-	b.Actions.UpdateRoomFromApi()
+	utils.MaybeLogError("API:UPDATE_ROOM", b.Actions.UpdateRoomFromApi)
 	// enforce song duration to avoid trolls with 2hours tracks
 	b.Actions.EnforceSongDuration()
 	b.Actions.AutoBop()

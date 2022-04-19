@@ -28,7 +28,7 @@ func (a *Actions) Bop() {
 
 func (a *Actions) AutoSnag() {
 	if a.bot.Config.AutoSnagEnabled {
-		utils.ExecuteDelayedRandom(30, func() { a.bot.CurrentPlaylist.Snag() })
+		utils.ExecuteDelayedRandom(30, func() { utils.MaybeLogError("BOT:SNAG", a.bot.CurrentPlaylist.Snag) })
 	}
 }
 
@@ -49,10 +49,10 @@ func (a *Actions) ConsiderStartAutoDj() {
 func (a *Actions) ConsiderStopAutoDj() {
 	if a.bot.Users.UserIsDj(a.bot.Identity.Id) && a.bot.Room.Djs.Size() > int(a.bot.Config.AutoDjMinDjs) {
 		if a.bot.Users.UserIsCurrentDj(a.bot.Identity.Id) {
-			a.bot.Room.AddDjEscorting(a.bot.Identity.Id)
+			utils.MaybeLogError("BOT:ADD_DJ_ESCORTING", func() error { return a.bot.Room.AddDjEscorting(a.bot.Identity.Id) })
 			a.bot.RoomMessage("/me will leave the stage at the end of this song to free a slot for humans")
 		} else {
-			a.bot.Room.EscortDj(a.bot.Identity.Id)
+			utils.MaybeLogError("BOT:ESCORT_DJ", func() error { return a.bot.Room.EscortDj(a.bot.Identity.Id) })
 			a.bot.RoomMessage("/me leaves the stage to free a slot for humans")
 		}
 	}
@@ -88,7 +88,7 @@ func (a *Actions) ForwardQueue() {
 func (a *Actions) EnforceQueueStageReservation(userId string) {
 	user, _ := a.bot.Users.UserFromId(userId)
 	if a.bot.Users.UserIsModerator(a.bot.Identity.Id) && a.bot.Config.QueueEnabled && !a.bot.Queue.CheckReservation(userId) {
-		a.bot.Room.EscortDj(userId)
+		utils.MaybeLogError("BOT:ESCORT_DJ", func() error { return a.bot.Room.EscortDj(userId) })
 		msg := fmt.Sprintf("Sorry to remove you, @%s. But queue is active and the available slot is reserved. You can join the queue by typing !q+", user.Name)
 		a.bot.RoomMessage(msg)
 		return
@@ -120,8 +120,8 @@ func (a *Actions) EscortDjs() {
 		utils.ExecuteDelayed(time.Duration(10)*time.Millisecond, func() {
 			for _, userId := range a.bot.Room.escorting.List() {
 				if a.bot.Room.Djs.HasKey(userId) {
-					a.bot.Room.EscortDj(userId)
-					a.bot.Room.RemoveDjEscorting(userId)
+					utils.MaybeLogError("BOT:ESCORT_DJ", func() error { return a.bot.Room.EscortDj(userId) })
+					utils.MaybeLogError("BOT:REMOVE_DJ_ESCORTING", func() error { return a.bot.Room.RemoveDjEscorting(userId) })
 				}
 			}
 		})
@@ -144,19 +144,19 @@ func (a *Actions) LoadMainAdmin() {
 		if err != nil {
 			panic("can't find main admin user on server")
 		}
-		a.bot.Admins.Put(admin.Id, admin.Name)
-		a.bot.Admins.Save()
+		utils.MaybeLogError("BOT:ADD_ADMIN", func() error { return a.bot.Admins.Put(admin.Id, admin.Name) })
+		utils.MaybeLogError("BOT:SAVE_ADMINS", a.bot.Admins.Save)
 	}
 }
 
 func (a *Actions) InitPlaylists() {
-	a.bot.Playlists.LoadPlaylists()
-	a.bot.Playlists.Switch(a.bot.Config.CurrentPlaylist)
+	utils.MaybeLogError("BOT:LOAD_PLAYLISTS", a.bot.Playlists.LoadPlaylists)
+	utils.MaybeLogError("BOT:SWITCH:PLAYLIST", func() error { return a.bot.Playlists.Switch(a.bot.Config.CurrentPlaylist) })
 }
 
 func (a *Actions) ShiftPlaylistSong() {
 	if a.bot.Room.CurrentSong.DjId == a.bot.Identity.Id {
-		a.bot.CurrentPlaylist.PushSongBottom()
+		utils.MaybeLogError("BOT:PLAYLIST_SONG_BOTTOM", a.bot.CurrentPlaylist.PushSongBottom)
 	}
 }
 
@@ -239,7 +239,7 @@ func (a *Actions) ShowDjStats(userId string) {
 
 func (a *Actions) SetBot() {
 	if a.bot.Config.SetBot {
-		a.bot.api.SetBot()
+		utils.MaybeLogError("API:SET_BOT", a.bot.api.SetBot)
 	}
 }
 
@@ -264,7 +264,7 @@ func (a *Actions) UnregisterUser(userId string) {
 
 	if a.bot.Users.UserIsModerator(a.bot.Identity.Id) && a.bot.Room.escorting.Size() > 0 {
 		if a.bot.Room.Djs.HasKey(userId) {
-			a.bot.Room.RemoveDjEscorting(userId)
+			utils.MaybeLogError("BOT:REMOVE_DJ_ESCORTING", func() error { return a.bot.Room.RemoveDjEscorting(userId) })
 		}
 	}
 
@@ -281,7 +281,7 @@ func (a *Actions) RemoveDj(userId, modId string) {
 	a.bot.Room.RemoveDj(userId)
 	if a.bot.Users.UserIsModerator(a.bot.Identity.Id) && a.bot.Room.escorting.Size() > 0 {
 		if a.bot.Room.Djs.HasKey(userId) {
-			a.bot.Room.RemoveDjEscorting(userId)
+			utils.MaybeLogError("BOT:REMOVE_DJ_ESCORTING", func() error { return a.bot.Room.RemoveDjEscorting(userId) })
 		}
 	}
 
