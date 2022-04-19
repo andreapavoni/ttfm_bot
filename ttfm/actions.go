@@ -42,7 +42,7 @@ func (a *Actions) AutoDj() {
 
 func (a *Actions) ConsiderStartAutoDj() {
 	// adding a small delay to avoid overlapping with Stop Dj checks
-    time.Sleep(2 * time.Second)
+	time.Sleep(2 * time.Second)
 	if a.bot.Config.AutoDjEnabled && !a.bot.Users.UserIsDj(a.bot.Identity.Id) && a.bot.Room.Djs.Size() <= int(a.bot.Config.AutoDjMinDjs) {
 		a.AutoDj()
 	}
@@ -50,9 +50,9 @@ func (a *Actions) ConsiderStartAutoDj() {
 
 func (a *Actions) ConsiderStopAutoDj() {
 	// adding a small delay to avoid overlapping with Start Dj checks
-    time.Sleep(2 * time.Second)
+	time.Sleep(2 * time.Second)
 
-	if a.bot.Users.UserIsDj(a.bot.Identity.Id) && (a.bot.Room.Djs.Size() - 1) > int(a.bot.Config.AutoDjMinDjs) {
+	if a.bot.Users.UserIsDj(a.bot.Identity.Id) && (a.bot.Room.Djs.Size()-1) > int(a.bot.Config.AutoDjMinDjs) {
 		if a.bot.Users.UserIsCurrentDj(a.bot.Identity.Id) {
 			utils.MaybeLogError("BOT:ADD_DJ_ESCORTING", func() error { return a.bot.Room.AddDjEscorting(a.bot.Identity.Id) })
 			a.bot.RoomMessage("/me will leave the stage at the end of this song to free a slot for humans")
@@ -120,15 +120,11 @@ func (a *Actions) ConsiderQueueStop() {
 	}
 }
 
-func (a *Actions) EscortDjs() {
-	if a.bot.Users.UserIsModerator(a.bot.Identity.Id) && a.bot.Room.escorting.Size() > 0 {
+func (a *Actions) EscortEscortingDj(djId string) {
+	if a.bot.Users.UserIsModerator(a.bot.Identity.Id) && a.bot.Room.escorting.HasElement(djId) {
 		utils.ExecuteDelayed(time.Duration(10)*time.Millisecond, func() {
-			for _, userId := range a.bot.Room.escorting.List() {
-				if a.bot.Room.Djs.HasKey(userId) {
-					utils.MaybeLogError("BOT:ESCORT_DJ", func() error { return a.bot.Room.EscortDj(userId) })
-					utils.MaybeLogError("BOT:REMOVE_DJ_ESCORTING", func() error { return a.bot.Room.RemoveDjEscorting(userId) })
-				}
-			}
+			utils.MaybeLogError("BOT:ESCORT_DJ", func() error { return a.bot.Room.EscortDj(djId) })
+			utils.MaybeLogError("BOT:REMOVE_DJ_ESCORTING", func() error { return a.bot.Room.RemoveDjEscorting(djId) })
 		})
 	}
 }

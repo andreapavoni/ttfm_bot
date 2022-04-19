@@ -44,7 +44,7 @@ func onNewSong(b *Bot, e ttapi.NewSongEvt) {
 		"snag":   b.Room.CurrentSong.snag,
 	}).Info("ROOM:LAST_SONG_STATS")
 
-	b.Actions.EscortDjs()
+	b.Actions.EscortEscortingDj(b.Room.CurrentSong.DjId)
 	b.Actions.ForwardQueue()
 	// when bot is djing, push the last played song to bottom of its playlist
 	b.Actions.ShiftPlaylistSong()
