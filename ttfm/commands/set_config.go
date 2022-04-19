@@ -106,7 +106,7 @@ func handleConfigValue[T any](user *ttfm.User, cmd *ttfm.CommandInput, configKey
 
 func parseConfigValueFromString(configValue interface{}, value string) (parsed interface{}, err error) {
 	switch configValue.(type) {
-	case int:
+	case int64:
 		parsed, err = parseInt(value)
 	case bool:
 		parsed, err = parseBool(value)
@@ -118,8 +118,8 @@ func parseConfigValueFromString(configValue interface{}, value string) (parsed i
 
 func configValueToString(value interface{}) string {
 	switch value.(type) {
-	case int:
-		return fmt.Sprintf("`%d`", value.(int))
+	case int64:
+		return fmt.Sprintf("`%d`", value.(int64))
 	case bool:
 		return fmt.Sprintf("`%s`", printBool(value.(bool)))
 	default:
