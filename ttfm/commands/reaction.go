@@ -10,7 +10,7 @@ import (
 func ReactionCommand() *ttfm.Command {
 	return &ttfm.Command{
 		AuthorizationRoles: []ttfm.UserRole{ttfm.UserRoleNone},
-		Help:               "React with a gif. Without args shows available reactions. Type `!r add <img url> <reaction name>` to add a reaction",
+		Help:               "React with a gif. Without args shows available reactions. Use `r add <img url> <reaction name>` to add a reaction",
 		Handler:            reactionCommandHandler,
 	}
 }
@@ -35,6 +35,6 @@ func reactionCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandOu
 		return &ttfm.CommandOutput{Msg: reaction, User: user, ReplyType: ttfm.MessageTypeRoom}
 	}
 
-	err := fmt.Errorf("I can't find any reaction for `%s`. Type !r to know the available reactions", cmd.Args[0])
+	err := fmt.Errorf("I can't find any reaction for `%s`. Type `%sr` to know the available reactions", cmd.Args[0], b.Config.CmdPrefix)
 	return &ttfm.CommandOutput{User: user, ReplyType: cmd.Source, Err: err}
 }

@@ -2,6 +2,7 @@ package ttfm
 
 import (
 	"errors"
+	"fmt"
 	"regexp"
 	"strings"
 
@@ -96,7 +97,7 @@ type MessageInput struct {
 func (i *MessageInput) HandleCommand(b *Bot) {
 	logTag := i.commandLogTag()
 
-	cmd, args, ok := i.parseCommand()
+	cmd, args, ok := i.parseCommand(b.Config.CmdPrefix)
 	if !ok {
 		user, _ := b.Users.UserFromId(i.UserId)
 		logrus.WithFields(logrus.Fields{"text": i.Text, "userId": i.UserId, "userName": user.Name}).Info(logTag)
@@ -142,8 +143,9 @@ func (i *MessageInput) HandleCommand(b *Bot) {
 	out.SendReply(b, user.Id)
 }
 
-func (i *MessageInput) parseCommand() (string, []string, bool) {
-	re := regexp.MustCompile(`^!(?P<cmd>[a-zA-Z+\-!?]+)(?P<args>\s?(.*)?)`)
+func (i *MessageInput) parseCommand(cmdPrefix string) (string, []string, bool) {
+	pattern := fmt.Sprintf(`^\%s(?P<cmd>[a-zA-Z+\-!?]+)(?P<args>\s?(.*)?)`, cmdPrefix)
+	re := regexp.MustCompile(pattern)
 	matches := re.FindStringSubmatch(i.Text)
 
 	cmdIndex := re.SubexpIndex("cmd")
@@ -191,7 +193,7 @@ func (c *Commands) RecognizeCommand(cmd string) (*Command, error) {
 	if command, ok := c.SmartMap.Get(cmd); ok {
 		return command, nil
 	}
-	return nil, errors.New("command not recognized. Type !help to know available commands")
+	return nil, errors.New("command not recognized. Use help command to know available commands")
 }
 
 // ListCommands available

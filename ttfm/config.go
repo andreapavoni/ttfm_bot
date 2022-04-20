@@ -26,13 +26,20 @@ type Config struct {
 	SetBot                   bool
 	brain                    *Brain
 	MusicTheme               string
+	CmdPrefix                string
 }
 
 func NewConfig(b *Brain) *Config {
 	c := &Config{brain: b}
+	defaultConfig := &Config{brain: b}
+	defaultConfig.loadDefaultConfig()
+
 	if err := c.loadConfigFromDb(); err != nil {
-		c.loadDefaultConfig()
+		c = defaultConfig
+	} else {
+		c.integrateNewConfigs(defaultConfig)
 	}
+	c.Save()
 	return c
 }
 
@@ -72,7 +79,6 @@ func (c *Config) loadConfigFromDb() error {
 	if err := c.brain.Get("config", &c); err != nil {
 		return errors.New("config not found")
 	}
-
 	return nil
 }
 
@@ -95,4 +101,12 @@ func (c *Config) loadDefaultConfig() {
 	c.CurrentPlaylist = "default"
 	c.SetBot = false
 	c.MusicTheme = "FREE PLAY"
+	c.CmdPrefix = "!"
+}
+
+// starting from v0.0.8 we need to handle upgrades to Config and make sure they're integrated automatically
+func (c *Config) integrateNewConfigs(defaults *Config) {
+	if c.CmdPrefix == "" {
+		c.CmdPrefix = defaults.CmdPrefix
+	}
 }

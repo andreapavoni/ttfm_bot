@@ -34,16 +34,16 @@ Features are inspired by [chillybot](https://github.com/jaycammarano/chillybot),
   - [ ] Remove reactions or GIFs
 - [x] Escorting: a DJ can ask to be escorted immediately or after the current song has been played
 - [x] Logging
-  - [ ] More details for some events/actions
+  - [x] More details for some events/actions
   - [x] Logs rotation
 - [ ] Configure a path where to write bot's saved data and logs
 - [ ] afk limit
 - [ ] afk audience limit(separate from afk limit, both can be toggled on and off)
 - [x] DJ stats (shown when dj goes off the stage)
-- [ ] Print room rules (by command and/or when user joins)
+- [x] Print room rules (by command and/or when user joins)
 - [x] Room music current theme (default "free play")
 - [ ] Bot info (by command: print version, uptime, ...)
-- [ ] custom prefix for commands (actual is `!`)
+- [x] custom prefix for commands (actual is `!`)
 - [x] kill switch command (kills/disconnects bot, useful when it turns unresponsive/misbehaved)
 
 ## Installation and setup
@@ -67,6 +67,12 @@ These environment variables are required to make the bot work
 Each command can be either issued on the chat room or by private message. Bot _might_ reply (or not) in the proper place.
 
 A command might require a certain user (and sometimes bot's) role to execute a command.
+
+### Command prefix customization
+
+By default, the bot has `!` as command prefix (eg: `!command`). It's possible to customize it with `!cfg cmdprefix <new_prefix>`. You can use whatever ASCII character or string.
+
+**NOTE:** when you change prefix, the new one will be the effective prefix to use to run commands. 
 
 ### Users
 
@@ -104,6 +110,17 @@ These ones require the bot to be moderator of the room to be executed
 - `!skip` tells the bot to skip the current playing song
 - `!escort <user_name>` tells the bot to escort the specified `user_name` off the stage
 - `!boot <user_name>` tells the bot to kick the specified `user_name` off the room
+
+### Upgrading to newer versions
+
+Except if it has been specified differently in a new release notes, it should suffice to:
+
+- Download the new release
+- Stop the currently running bot
+- Replace old binary with the one from the new release
+- Restart the bot
+
+
 
 ## Credits
 

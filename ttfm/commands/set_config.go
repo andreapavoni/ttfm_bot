@@ -45,6 +45,8 @@ func setConfigCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandO
 			if b.Config.SetBot {
 				b.Actions.SetBot()
 			}
+		case "cmdprefix":
+			out = handleConfigStringValue(user, cmd, &b.Config.CmdPrefix)
 		case "djstats":
 			out = handleConfigValue(user, cmd, &b.Config.AutoShowDjStatsEnabled)
 		case "maxduration":
@@ -63,10 +65,12 @@ func setConfigCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandO
 		default:
 			return &ttfm.CommandOutput{User: user, ReplyType: cmd.Source, Err: errors.New("I can't find the setting you specified")}
 		}
-		b.Config.Save()
+		if err := b.Config.Save(); err != nil {
+			return &ttfm.CommandOutput{User: user, ReplyType: cmd.Source, Err: err}
+		}
 		return out
 	}
-	msg := fmt.Sprintf("Availble configs: autobop, autodj, autodjslots, autosnag, autowelcome, bot, djstats, maxduration, maxsongs, qinviteduration, queue, songstats")
+	msg := fmt.Sprintf("Availble configs: autobop, autodj, autodjslots, autosnag, autowelcome, bot, cmdprefix, djstats, maxduration, maxsongs, qinviteduration, queue, songstats, theme")
 	return &ttfm.CommandOutput{Msg: msg, User: user, ReplyType: cmd.Source}
 }
 

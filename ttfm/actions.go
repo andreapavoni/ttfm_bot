@@ -252,7 +252,7 @@ func (a *Actions) RegisterUser(userId, userName string) {
 	// using a small delay to ensure the user sees the welcome message
 	utils.ExecuteDelayed(time.Duration(300)*time.Millisecond, func() {
 		if a.bot.Config.AutoWelcomeEnabled && a.bot.Users.UserIsModerator(a.bot.Identity.Id) {
-			msg := fmt.Sprintf("Hey @%s, welcome to `%s`! Current theme is [%s]. Type `!help` to know how to interact with me 🤖", userName, a.bot.Room.Name, a.bot.Config.MusicTheme)
+			msg := fmt.Sprintf("Hey @%s, welcome to `%s`! Current theme is [%s]. Use `%shelp` to know how to interact with me 🤖", userName, a.bot.Room.Name, a.bot.Config.MusicTheme, a.bot.Config.CmdPrefix)
 			a.bot.RoomMessage(msg)
 		}
 	})
