@@ -10,7 +10,7 @@ import (
 func SayCommand() *ttfm.Command {
 	return &ttfm.Command{
 		AuthorizationRoles: []ttfm.UserRole{ttfm.UserRoleAdmin},
-		Help:               "Say something in the room",
+		Help:               "Say something in the room. Usage: `say <some message>`",
 		Handler:            sayCommandHandler,
 	}
 }

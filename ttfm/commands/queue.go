@@ -11,7 +11,7 @@ import (
 func QueueCommand() *ttfm.Command {
 	return &ttfm.Command{
 		AuthorizationRoles: []ttfm.UserRole{ttfm.UserRoleBotModerator},
-		Help:               "Add, remove yourself from queue, or just check the current status",
+		Help:               "Add, remove yourself from queue, or just check the current status. Usage: `q [add|rm]`. Without arguments shows the actual queue",
 		Handler:            queueCommandHandler,
 	}
 }

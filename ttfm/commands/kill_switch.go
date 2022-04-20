@@ -7,7 +7,7 @@ import (
 func KillSwitchCommand() *ttfm.Command {
 	return &ttfm.Command{
 		AuthorizationRoles: []ttfm.UserRole{ttfm.UserRoleAdmin},
-		Help:               "Kill switch the bot",
+		Help:               "Kills the bot",
 		Handler:            killSwitchCommandHandler}
 }
 

@@ -10,7 +10,7 @@ import (
 func ReactionCommand() *ttfm.Command {
 	return &ttfm.Command{
 		AuthorizationRoles: []ttfm.UserRole{ttfm.UserRoleNone},
-		Help:               "React with a gif. Without args shows available reactions. Use `r add <img url> <reaction name>` to add a reaction",
+		Help:               "React with a gif. Without args shows available reactions. Usage: `r add <img url> <reaction name>` to add a reaction",
 		Handler:            reactionCommandHandler,
 	}
 }

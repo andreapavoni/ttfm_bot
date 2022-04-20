@@ -11,7 +11,7 @@ import (
 func PlaylistCommand() *ttfm.Command {
 	return &ttfm.Command{
 		AuthorizationRoles: []ttfm.UserRole{ttfm.UserRoleAdmin},
-		Help:               "Handle playlists",
+		Help:               "Handle playlists. Usage: `pl <list|add playlist_name|rm playlist_name|rmsong>`",
 		Handler:            playlistCommandHandler,
 	}
 }

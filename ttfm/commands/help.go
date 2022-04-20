@@ -11,7 +11,7 @@ import (
 func HelpCommand() *ttfm.Command {
 	return &ttfm.Command{
 		AuthorizationRoles: []ttfm.UserRole{ttfm.UserRoleNone},
-		Help:               "Show available commands for asking user, or the description of a specific command",
+		Help:               "Show commands help. Usage `help [command]`. Without arguments show the available commands to user",
 		Handler:            helpCommandHandler,
 	}
 }

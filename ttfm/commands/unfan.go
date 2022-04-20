@@ -9,7 +9,7 @@ import (
 )
 
 func UnfanCommand() *ttfm.Command {
-	return &ttfm.Command{AuthorizationRoles: []ttfm.UserRole{ttfm.UserRoleAdmin}, Help: "Unfan user", Handler: unfanCommandHandler}
+	return &ttfm.Command{AuthorizationRoles: []ttfm.UserRole{ttfm.UserRoleAdmin}, Help: "Unfan user. Usage: `unfan <username>`", Handler: unfanCommandHandler}
 }
 
 func unfanCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandOutput {

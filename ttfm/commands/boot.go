@@ -11,7 +11,7 @@ import (
 func BootCommand() *ttfm.Command {
 	return &ttfm.Command{
 		AuthorizationRoles: []ttfm.UserRole{ttfm.UserRoleAdmin, ttfm.UserRoleBotModerator},
-		Help:               "Boots a user out of the room",
+		Help:               "Boots a user out of the room. Usage `boot <username>`",
 		Handler:            bootCommandHandler,
 	}
 }

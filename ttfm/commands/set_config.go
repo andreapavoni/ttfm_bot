@@ -12,7 +12,7 @@ import (
 func SetConfigCommand() *ttfm.Command {
 	return &ttfm.Command{
 		AuthorizationRoles: []ttfm.UserRole{ttfm.UserRoleAdmin},
-		Help:               "Set config values at runtime",
+		Help:               "Set config values at runtime. Usage: `cfg [<config_key> [config_value]]`",
 		Handler:            setConfigCommandHandler,
 	}
 }

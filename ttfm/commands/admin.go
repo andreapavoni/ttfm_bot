@@ -11,7 +11,7 @@ import (
 func AdminCommand() *ttfm.Command {
 	return &ttfm.Command{
 		AuthorizationRoles: []ttfm.UserRole{ttfm.UserRoleAdmin, ttfm.UserRoleBotModerator},
-		Help:               "Add or remove bot admin. Without arguments it shows the current admins",
+		Help:               "Add or remove bot admin. Usage: `admin [<add|remove> <username>]`. Without arguments it shows the current admins",
 		Handler:            adminCommandHandler,
 	}
 }

@@ -11,7 +11,7 @@ import (
 func FanCommand() *ttfm.Command {
 	return &ttfm.Command{
 		AuthorizationRoles: []ttfm.UserRole{ttfm.UserRoleAdmin},
-		Help:               "Fan user",
+		Help:               "Fan user. Usage: `fan <username>`",
 		Handler:            fanCommandHandler,
 	}
 }

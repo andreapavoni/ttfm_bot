@@ -11,7 +11,7 @@ import (
 func EscortCommand() *ttfm.Command {
 	return &ttfm.Command{
 		AuthorizationRoles: []ttfm.UserRole{ttfm.UserRoleAdmin, ttfm.UserRoleBotModerator},
-		Help:               "Escort dj off the stage",
+		Help:               "Escort dj off the stage. Usage: `escort <username>`",
 		Handler:            escortCommandHandler,
 	}
 }

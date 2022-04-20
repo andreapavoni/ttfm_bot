@@ -11,7 +11,7 @@ import (
 func FavRoomCommand() *ttfm.Command {
 	return &ttfm.Command{
 		AuthorizationRoles: []ttfm.UserRole{ttfm.UserRoleAdmin},
-		Help:               "Handle favourite rooms and join one",
+		Help:               "Handle favourite rooms and join one. Usage: `room <list | current | join slug | add slug room_id>`",
 		Handler:            favRoomCommandHandler,
 	}
 }
@@ -34,7 +34,7 @@ func favRoomCommandHandler(b *ttfm.Bot, cmd *ttfm.CommandInput) *ttfm.CommandOut
 	}
 
 	user, _ := b.Users.UserFromId(cmd.UserId)
-	msg := "Available favorite room commands: add, remove, list, join"
+	msg := "Available favorite room commands: add, list, join"
 	return &ttfm.CommandOutput{Msg: msg, User: user, ReplyType: cmd.Source}
 }
 
